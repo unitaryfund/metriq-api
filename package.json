@@ -1,0 +1,22 @@
+{
+  "name": "metriq-api",
+  "version": "0.1.0",
+  "description": "RESTful API for Metriq quantum computer benchmark state-of-the-art web app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "api",
+    "restful",
+    "json",
+    "quantum"
+  ],
+  "author": "Unitary Fund",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.12.12"
+  }
+}
