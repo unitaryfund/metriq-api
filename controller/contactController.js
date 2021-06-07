@@ -77,9 +77,10 @@ exports.delete = function (req, res) {
         _id: req.params.contact_id
     }, function (err, contact) {
         if (err)
-            res.send(err);res.json({
-            status: "success",
-            message: 'Contact deleted'
-        });
+            res.send(err);
+            res.json({
+                status: "success",
+                message: 'Contact deleted'
+            });
     });
 };
