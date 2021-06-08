@@ -1,11 +1,11 @@
-// Import express
-let express = require('express');
 // Import Mongoose
 let mongoose = require('mongoose');
-// Initialise the app
-let app = express();
+// Import express
+let express = require('express');
 // Import CORS
 var cors = require('cors');
+// Initialise the app
+let app = express();
 // Use CORS for cross-origin API consumption.
 app.use(cors());
 
