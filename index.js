@@ -4,6 +4,10 @@ let express = require('express');
 let mongoose = require('mongoose');
 // Initialise the app
 let app = express();
+// Import CORS
+var cors = require('cors');
+// Use CORS for cross-origin API consumption.
+app.use(cors());
 
 // Import routes
 let apiRoutes = require("./api-routes");
