@@ -12,9 +12,9 @@ function validateEmail(email) {
     return re.test(String(email).toLowerCase());
 }
 
-function sendBaqRequest(res, m) {
+function sendResponse(res, code, m) {
     body = { message: m };
-    res.writeHead(400, {
+    res.writeHead(code, {
         'Content-Length': Buffer.byteLength(body),
         'Content-Type': 'text/plain'
         })
@@ -22,31 +22,55 @@ function sendBaqRequest(res, m) {
 }
 
 // Handle create contact actions
-exports.new = function (req, res) {
+exports.new = async function (req, res) {
+    if (req.body.password.length < 8) {
+        sendResponse(res, 400, 'Password is too short.');
+        return;
+    }
+
     if (req.body.password !== req.body.passwordConfirm) {
-        sendBaqRequest(res, 'Password and confirmation do not match.');
+        sendResponse(res, 400, 'Password and confirmation do not match.');
         return;
     }
 
-    if (!validateEmail(req.body.email)) {
-        sendBaqRequest(res, 'Invalid email format.');
+    var tlEmail = req.body.email.trim().toLowerCase();
+    var tlUsername = req.body.username.trim().toLowerCase();
+
+    if (tlUsername.length == 0) {
+        sendResponse(res, 400, 'Username cannot be blank.');
         return;
     }
 
-    // TODO: Check if username/email already in use.
+    if (!validateEmail(tlEmail)) {
+        sendResponse(res, 400, 'Invalid email format.');
+        return;
+    }
+
+    var usernameMatch = await User.find({ usernameNormal: tlUsername }).limit(1).exec();
+    if (usernameMatch.length > 0) {
+        sendResponse(res, 400, 'Username already in use.');
+        return;
+    }
+
+    var emailMatch = await User.find({ email: tlEmail }).limit(1).exec();
+    if (emailMatch.length > 0) {
+        sendResponse(res, 400, 'Email already in use.');
+        return;
+    }
 
     var user = new User();
-    user.username = req.body.username;
-    user.email = req.body.email;
+    user.username = req.body.username.trim();
+    user.usernameNormal = tlUsername;
+    user.email = tlEmail;
     user.dateJoined = new Date();
-    bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
-        user.passwordHash = hash;
-    });
+    user.passwordHash = await bcrypt.hash(req.body.password, saltRounds);
 
     // save the registration and check for errors
     user.save(function (err) {
         if (err) {
-            res.json(err);
+            sendResponse(res, 500, 'Database insertion failed. Please check fields and try again.');
+        } else {
+            user.passwordHash = "[redacted]";
             res.json({
                 message: 'New account created!',
                 data: user

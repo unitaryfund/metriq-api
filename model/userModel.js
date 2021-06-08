@@ -8,19 +8,26 @@ var userSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    usernameNormal: {
+        type: String,
+        required: true,
+        index: true
+    },
     passwordHash: {
         type: String,
         required: true
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        index: true
     },
     dateJoined: {
         type: Date,
         required: true
     }
-});
+}, { autoIndex: typeof v8debug === 'object' });
+// v8debug exists if debugging with Node.js
 
 // Export Contact model
 var User = module.exports = mongoose.model('user', userSchema);
