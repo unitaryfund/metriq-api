@@ -9,11 +9,11 @@ User = require('../model/userModel');
 
 function validateEmail(email) {
     const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(email).toLowerCase());
+    return re.test(email);
 }
 
 function sendResponse(res, code, m) {
-    body = { message: m };
+    body = JSON.stringify({ message: m });
     res.writeHead(code, {
         'Content-Length': Buffer.byteLength(body),
         'Content-Type': 'text/plain'
@@ -70,11 +70,11 @@ exports.new = async function (req, res) {
         if (err) {
             sendResponse(res, 500, 'Database insertion failed. Please check fields and try again.');
         } else {
-            user.passwordHash = "[redacted]";
+            user.passwordHash = "[REDACTED]";
             res.json({
                 message: 'New account created!',
                 data: user
-            });
+            }).end();
         }
     });
 };
