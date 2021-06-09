@@ -4,7 +4,7 @@
   "description": "RESTful API for Metriq quantum computer benchmark state-of-the-art web app",
   "main": "index.js",
   "scripts": {
-    "test": "tests/register.test.js"
+    "test": "jest --runInBand ./test"
   },
   "keywords": [
     "api",
@@ -19,8 +19,12 @@
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "jest": "^27.0.4",
     "jsonwebtoken": "^8.5.1",
     "mongodb-memory-server": "^6.9.6",
     "mongoose": "^5.12.12"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }

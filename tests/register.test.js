@@ -3,8 +3,8 @@
 const mongoose = require('mongoose');
 
 const dbHandler = require('./db-handler');
-const userService = require('../src/service/user');
-const userModel = require('../src/model/user');
+const UserService = require('../service/userService');
+const UserModel = require('../model/userModel');
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -25,14 +25,58 @@ afterAll(async () => await dbHandler.closeDatabase());
  * Product test suite.
  */
 describe('register', () => {
+    it('returns the expected for a valid request', async () => {
+        // Initialize
+        let userService = new UserService();
 
-    /**
-     * Tests that a valid product can be created through the productService without throwing any errors.
-     */
-    it('can be created correctly', async () => {
-        expect(async () => await userService.register(registration1))
-            .not
-            .toThrow();
+        // Act
+        let result = await userService.register(registration1);
+
+        // Assert
+        expect(result)
+            .toMatchObject({
+                success: true,
+                body: registration1Response
+            });
+    });
+
+    it('will not create a duplicate user', async () => {
+        // Initialize
+        let userService = new UserService();
+
+        // Act
+        let created  = await userService.register(registration1);
+        let blocked  = await userService.register(registration1);
+        let created2 = await userService.register(registration2)
+
+        // Assert
+        expect(created)
+            .toMatchObject({
+                success: true,
+                body: registration1Response
+            });
+        expect(blocked)
+            .toMatchObject({
+                success: false
+            });
+        expect(created2)
+            .toMatchObject({
+                success: true
+            });
+    });
+
+    it('validates email', async () => {
+        // Initialize
+        let userService = new UserService();
+
+        // Act
+        let result = await userService.register(invalidEmail);
+
+        // Assert
+        expect(result)
+            .toMatchObject({
+                success: false,
+            });
     });
 });
 
@@ -41,6 +85,14 @@ const registration1 = {
     email:'test@test.com',
     password:'TestUser1!',
     passwordConfirm: 'TestUser1!'
+};
+
+const registration1Response = {
+    username: 'Test1',
+    usernameNormal: 'test1',
+    passwordHash:'[REDACTED]',
+    email:'test@test.com',
+    dateJoined: expect.any(Date)
 };
 
 const registration2 = {
