@@ -12,6 +12,10 @@ class MongooseService {
     async create(data) {
         return await data.save();
     }
+
+    async find(keyValuePair) {
+        return await this.Collection.find(keyValuePair).exec();
+    }
 }
 
 module.exports = MongooseService;

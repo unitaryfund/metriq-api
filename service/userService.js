@@ -25,11 +25,11 @@ class UserService {
     }
 
     async getByUsername(username) {
-        return await UserModel.find({ usernameNormal: username }).limit(1).exec();
+        return await this.MongooseServiceInstance.find({ usernameNormal: username});
     }
 
     async getByEmail(email) {
-        return await UserModel.find({ email: email }).limit(1).exec();
+        return await this.MongooseServiceInstance.find({ email: email });
     }
 
     async register(reqBody) {
