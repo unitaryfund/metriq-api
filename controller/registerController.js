@@ -25,7 +25,7 @@ exports.new = async function (req, res) {
             }).end();
             return;
         }
-        sendResponse(res, 400, result);
+        sendResponse(res, 400, result.err);
     } catch (err) {
         sendResponse(res, 500, err);
     }

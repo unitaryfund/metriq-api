@@ -1,12 +1,12 @@
 // mongooseService.js
 
 class MongooseService {
-    constructor(Model) {
-        this.Model = Model;
+    constructor(Collection) {
+        this.Collection = Collection;
     }
 
     async create(data) {
-        return await this.Model.save();
+        return await data.save();
     }
 }
 
