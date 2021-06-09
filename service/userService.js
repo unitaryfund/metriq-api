@@ -38,7 +38,7 @@ class UserService {
             return validationResult;
         }
 
-        let user = new UserModel();
+        let user = await this.MongooseServiceInstance.new();
         user.username = reqBody.username.trim();
         user.usernameNormal = reqBody.username.trim().toLowerCase();
         user.email = reqBody.email.trim().toLowerCase();

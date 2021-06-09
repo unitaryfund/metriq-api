@@ -5,6 +5,10 @@ class MongooseService {
         this.Collection = Collection;
     }
 
+    async new() {
+        return new this.Collection();
+    }
+
     async create(data) {
         return await data.save();
     }
