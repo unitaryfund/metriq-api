@@ -1,9 +1,9 @@
 // api-routes.js
 
-// Initialize express router
+// Initialize ExpressJS router.
 let router = require('express').Router();
 
-// Set default API response
+// Set default API response.
 router.get('/', function (req, res) {
     res.json({
         status: 'API Its Working',
@@ -11,17 +11,11 @@ router.get('/', function (req, res) {
     });
 });
 
-// Import contact controller
-var contactController = require('./controller/contactController');
+var registerController = require('./controller/registerController');
 
-// Contact routes
-router.route('/contacts')
-    .get(contactController.index)
-    .post(contactController.new);router.route('/contacts/:contact_id')
-    .get(contactController.view)
-    .patch(contactController.update)
-    .put(contactController.update)
-    .delete(contactController.delete);
-    
-// Export API routes
+// Register routes.
+router.route('/register')
+    .post(registerController.new);
+
+// Export API routes.
 module.exports = router;
