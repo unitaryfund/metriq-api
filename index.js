@@ -7,7 +7,7 @@ let express = require('express');
 // Import CORS
 let cors = require('cors');
 
-// Initialise the app
+// Initialize the app
 let app = express();
 // Use CORS for cross-origin API consumption.
 app.use(cors());
@@ -25,9 +25,9 @@ var db = mongoose.connection;
 
 // Add a check for DB connection.
 if (!db) {
-    console.log("Error connecting db")
+    console.log("Error while connecting to db")
 } else {
-    console.log("Db connected successfully")
+    console.log("Db connection successful")
 }
 
 // Set up the server port.

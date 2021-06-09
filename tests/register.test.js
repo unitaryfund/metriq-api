@@ -22,7 +22,7 @@ afterEach(async () => await dbHandler.clearDatabase());
 afterAll(async () => await dbHandler.closeDatabase());
 
 /**
- * Product test suite.
+ * Register test suite.
  */
 describe('register', () => {
     it('returns the expected for a valid request', async () => {
@@ -47,7 +47,6 @@ describe('register', () => {
         // Act
         let created  = await userService.register(registration1);
         let blocked  = await userService.register(registration1);
-        let created2 = await userService.register(registration2)
 
         // Assert
         expect(created)
@@ -58,6 +57,22 @@ describe('register', () => {
         expect(blocked)
             .toMatchObject({
                 success: false
+            });
+    });
+
+    it('will not block a second unique user creation', async () => {
+        // Initialize
+        let userService = new UserService();
+
+        // Act
+        let created  = await userService.register(registration1);
+        let created2 = await userService.register(registration2);
+
+        // Assert
+        expect(created)
+            .toMatchObject({
+                success: true,
+                body: registration1Response
             });
         expect(created2)
             .toMatchObject({
@@ -71,6 +86,34 @@ describe('register', () => {
 
         // Act
         let result = await userService.register(invalidEmail);
+
+        // Assert
+        expect(result)
+            .toMatchObject({
+                success: false,
+            });
+    });
+
+    it('validates password length', async () => {
+        // Initialize
+        let userService = new UserService();
+
+        // Act
+        let result = await userService.register(invalidPassword);
+
+        // Assert
+        expect(result)
+            .toMatchObject({
+                success: false,
+            });
+    });
+
+    it('validates password/confirm match', async () => {
+        // Initialize
+        let userService = new UserService();
+
+        // Act
+        let result = await userService.register(mismatchedPassword);
 
         // Assert
         expect(result)
@@ -111,14 +154,14 @@ const invalidEmail = {
 
 const invalidPassword = {
     username: 'Test1',
-    email:'test',
+    email:'test@test.com',
     password:'T',
     passwordConfirm: 'T'
 };
 
 const mismatchedPassword = {
     username: 'Test1',
-    email:'test',
+    email:'test@test.com',
     password:'TestUser1!',
     passwordConfirm: 'TestUser1'
 };
