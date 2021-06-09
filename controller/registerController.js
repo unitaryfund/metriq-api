@@ -19,14 +19,13 @@ exports.new = async function (req, res) {
     try {
         let result = await userService.register(req.body);
         if (result.success) {
-            result.body.passwordHash = "[REDACTED]";
             res.json({
                 message: 'New account created!',
                 data: result.body
             }).end();
             return;
         }
-        sendResponse(res, 400, result.err);
+        sendResponse(res, 400, result);
     } catch (err) {
         sendResponse(res, 500, err);
     }

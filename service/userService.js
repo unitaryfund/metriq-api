@@ -3,7 +3,7 @@
 // Data Access Layer
 const MongooseService = require( "./mongooseService" );
 // Database Model
-const User = require( "../model/userModel" );
+const UserModel = require( "../model/userModel" );
 
 // Password hasher
 const bcrypt = require('bcrypt');
@@ -38,14 +38,17 @@ class UserService {
             return validationResult;
         }
 
-        let user = new User();
+        let user = new UserModel();
         user.username = reqBody.username.trim();
-        user.usernameNormal = tlUsername;
-        user.email = tlEmail;
+        user.usernameNormal = reqBody.username.trim().toLowerCase();
+        user.email = reqBody.email.trim().toLowerCase();
         user.dateJoined = new Date();
         user.passwordHash = await bcrypt.hash(reqBody.password, saltRounds);
 
-        return this.create(user);
+        let result = await this.create(user);
+        user.passwordHash = '[REDACTED]';
+
+        return result;
     }
 
     validateEmail(email) {
