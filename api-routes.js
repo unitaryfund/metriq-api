@@ -1,9 +1,9 @@
 // api-routes.js
 
-// Initialize express router
+// Initialize ExpressJS router.
 let router = require('express').Router();
 
-// Set default API response
+// Set default API response.
 router.get('/', function (req, res) {
     res.json({
         status: 'API Its Working',
@@ -13,9 +13,9 @@ router.get('/', function (req, res) {
 
 var registerController = require('./controller/registerController');
 
-// Register routes
+// Register routes.
 router.route('/register')
     .post(registerController.new);
 
-// Export API routes
+// Export API routes.
 module.exports = router;

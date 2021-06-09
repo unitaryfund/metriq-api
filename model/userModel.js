@@ -1,8 +1,9 @@
 // userModel.js
 
+var config = require('./../config');
 var mongoose = require('mongoose');
 
-// Setup schema
+// Set up schema.
 var userSchema = mongoose.Schema({
     username: {
         type: String,
@@ -26,10 +27,9 @@ var userSchema = mongoose.Schema({
         type: Date,
         required: true
     }
-}, { autoIndex: typeof v8debug === 'object' });
-// v8debug exists if debugging with Node.js
+}, { autoIndex: config.isDebug });
 
-// Export Contact model
+// Export User model.
 var User = module.exports = mongoose.model('user', userSchema);
 module.exports.get = function (callback, limit) {
     User.find(callback).limit(limit);

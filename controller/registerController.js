@@ -4,7 +4,7 @@
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
-// Import contact model
+// Import user model.
 User = require('../model/userModel');
 
 function validateEmail(email) {
@@ -21,7 +21,7 @@ function sendResponse(res, code, m) {
         .end(body);
 }
 
-// Handle create contact actions
+// Validate the registration request and create the user model.
 exports.new = async function (req, res) {
     if (req.body.password.length < 8) {
         sendResponse(res, 400, 'Password is too short.');
@@ -65,7 +65,7 @@ exports.new = async function (req, res) {
     user.dateJoined = new Date();
     user.passwordHash = await bcrypt.hash(req.body.password, saltRounds);
 
-    // save the registration and check for errors
+    // Save the registration and check for errors.
     user.save(function (err) {
         if (err) {
             sendResponse(res, 500, 'Database insertion failed. Please check fields and try again.');
