@@ -1,10 +1,10 @@
-// tests/product.test.js
+// tests/register.test.js
 
 const mongoose = require('mongoose');
 
 const dbHandler = require('./db-handler');
-const productService = require('../src/services/product');
-const productModel = require('../src/models/product');
+const userService = require('../src/service/user');
+const userModel = require('../src/model/user');
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -24,13 +24,13 @@ afterAll(async () => await dbHandler.closeDatabase());
 /**
  * Product test suite.
  */
-describe('product ', () => {
+describe('register', () => {
 
     /**
      * Tests that a valid product can be created through the productService without throwing any errors.
      */
     it('can be created correctly', async () => {
-        expect(async () => await productService.create(productComplete))
+        expect(async () => await userService.register(registration1))
             .not
             .toThrow();
     });

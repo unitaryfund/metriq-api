@@ -1,7 +1,3 @@
-// Parse command line arguments.
-let cliArgs = process.argv.slice(2);
-let isMock = ((cliArgs.length > 0) && (cliArgs[0] === '--use-mock-db'));
-
 // Get the connection string.
 let config = require('./config');
 // Import Mongoose
@@ -24,7 +20,7 @@ app.use(express.urlencoded({
 }));
 app.use(express.json());
 // Connect to Mongoose and set the connection variable.
-mongoose.connect(isMock ? config.db.mockUrl : config.db.url, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(config.db.url, { useNewUrlParser: true, useUnifiedTopology: true });
 var db = mongoose.connection;
 
 // Add a check for DB connection.
@@ -49,5 +45,3 @@ app.use('/api', apiRoutes);
 app.listen(port, function () {
     console.log("Running RestHub on port " + port);
 });
-
-export default app;

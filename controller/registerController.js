@@ -1,16 +1,9 @@
 // registerController.js
 
-// Password hasher
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
-
-// Import user model.
-User = require('../model/userModel');
-
-function validateEmail(email) {
-    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email);
-}
+// Service class
+const UserService = require('./../service/userService');
+// Service instance
+const userService = new UserService();
 
 function sendResponse(res, code, m) {
     body = JSON.stringify({ message: m });
@@ -23,58 +16,18 @@ function sendResponse(res, code, m) {
 
 // Validate the registration request and create the user model.
 exports.new = async function (req, res) {
-    if (req.body.password.length < 8) {
-        sendResponse(res, 400, 'Password is too short.');
-        return;
-    }
-
-    if (req.body.password !== req.body.passwordConfirm) {
-        sendResponse(res, 400, 'Password and confirmation do not match.');
-        return;
-    }
-
-    var tlEmail = req.body.email.trim().toLowerCase();
-    var tlUsername = req.body.username.trim().toLowerCase();
-
-    if (tlUsername.length == 0) {
-        sendResponse(res, 400, 'Username cannot be blank.');
-        return;
-    }
-
-    if (!validateEmail(tlEmail)) {
-        sendResponse(res, 400, 'Invalid email format.');
-        return;
-    }
-
-    var usernameMatch = await User.find({ usernameNormal: tlUsername }).limit(1).exec();
-    if (usernameMatch.length > 0) {
-        sendResponse(res, 400, 'Username already in use.');
-        return;
-    }
-
-    var emailMatch = await User.find({ email: tlEmail }).limit(1).exec();
-    if (emailMatch.length > 0) {
-        sendResponse(res, 400, 'Email already in use.');
-        return;
-    }
-
-    var user = new User();
-    user.username = req.body.username.trim();
-    user.usernameNormal = tlUsername;
-    user.email = tlEmail;
-    user.dateJoined = new Date();
-    user.passwordHash = await bcrypt.hash(req.body.password, saltRounds);
-
-    // Save the registration and check for errors.
-    user.save(function (err) {
-        if (err) {
-            sendResponse(res, 500, 'Database insertion failed. Please check fields and try again.');
-        } else {
-            user.passwordHash = "[REDACTED]";
+    try {
+        let result = await userService.register(req.body);
+        if (result.success) {
+            result.body.passwordHash = "[REDACTED]";
             res.json({
                 message: 'New account created!',
-                data: user
+                data: result.body
             }).end();
+            return;
         }
-    });
+        sendResponse(res, 400, result.err);
+    } catch (err) {
+        sendResponse(res, 500, err);
+    }
 };
