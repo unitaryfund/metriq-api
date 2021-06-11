@@ -21,7 +21,8 @@ exports.new = async function (req, res) {
         if (result.success) {
             res.json({
                 message: 'New account created!',
-                data: result.body
+                data: result.body,
+                token: await userService.generateUserJwt(result.body._id)
             }).end();
             return;
         }
