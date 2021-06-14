@@ -1,10 +1,10 @@
 // userModel.js
 
-let config = require('./../config');
-let mongoose = require('mongoose');
+const config = require('./../config');
+const mongoose = require('mongoose');
 
 // Set up schema.
-let userSchema = mongoose.Schema({
+const userSchema = mongoose.Schema({
     username: {
         type: String,
         required: true
@@ -30,7 +30,7 @@ let userSchema = mongoose.Schema({
 }, { autoIndex: config.isDebug });
 
 // Export User model.
-let User = module.exports = mongoose.model('user', userSchema);
+const User = module.exports = mongoose.model('user', userSchema);
 module.exports.get = function (callback, limit) {
     User.find(callback).limit(limit);
 }

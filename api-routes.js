@@ -1,7 +1,7 @@
 // api-routes.js
 
 // Initialize ExpressJS router.
-let router = require('express').Router();
+const router = require('express').Router();
 
 // Set default API response.
 router.get('/', function (req, res) {
@@ -11,7 +11,7 @@ router.get('/', function (req, res) {
     });
 });
 
-var registerController = require('./controller/registerController');
+const registerController = require('./controller/registerController');
 
 // Register routes.
 router.route('/register')
