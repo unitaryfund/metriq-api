@@ -10,6 +10,10 @@ const bcrypt = require('bcrypt');
 const e = require("express");
 const saltRounds = 10;
 
+let jwt = require('jsonwebtoken');
+// Config for JWT secret key
+let config = require('./../config');
+
 class UserService {
     constructor() {
         this.MongooseServiceInstance = new MongooseService(UserModel);
@@ -22,6 +26,10 @@ class UserService {
         } catch ( err ) {
             return { success: false, error: err };
         }
+    }
+
+    async generateUserJwt(userId) {
+        return jwt.sign({ id: userId }, config.api.token.secretKey, { expiresIn: config.api.token.expiresIn });
     }
 
     async getByUsername(username) {

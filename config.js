@@ -13,4 +13,10 @@ config.api.getUriPrefix = () => {
     return config.api.protocol + config.api.url + config.api.endpoint;
 };
 
+config.api.token = {};
+// NEVER store a valid secret key in files that might be checked into source code repositories!!!
+config.api.token.secretKey = config.isDebug ? require('crypto').randomBytes(256).toString('base64') : process.env.METRIQ_SECRET_KEY;
+// Token is valid for 60 minutes (unless refreshed).
+config.api.token.expiresIn = 60;
+
 module.exports = config;

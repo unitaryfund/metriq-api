@@ -25,9 +25,9 @@ var db = mongoose.connection;
 
 // Add a check for DB connection.
 if (!db) {
-    console.log("Error while connecting to db")
+    console.log("Error while connecting to db");
 } else {
-    console.log("Db connection successful")
+    console.log("Db connection successful");
 }
 
 // Set up the server port.
