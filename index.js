@@ -19,6 +19,13 @@ app.use(express.urlencoded({
     extended: true
 }));
 app.use(express.json());
+
+// Fix mongoose deprecation warnings.
+// See https://stackoverflow.com/questions/51960171/node63208-deprecationwarning-collection-ensureindex-is-deprecated-use-creat.
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+
 // Connect to Mongoose and set the connection variable.
 mongoose.connect(config.db.url, { useNewUrlParser: true, useUnifiedTopology: true });
 var db = mongoose.connection;
