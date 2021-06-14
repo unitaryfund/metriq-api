@@ -1,13 +1,13 @@
 //userService.js
 
 // Data Access Layer
-const MongooseService = require( "./mongooseService" );
+const MongooseService = require('./mongooseService');
 // Database Model
-const UserModel = require( "../model/userModel" );
+const UserModel = require('../model/userModel');
 
 // Password hasher
 const bcrypt = require('bcrypt');
-const e = require("express");
+const e = require('express');
 const saltRounds = 10;
 
 const jwt = require('jsonwebtoken');
