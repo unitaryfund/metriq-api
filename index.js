@@ -13,7 +13,7 @@ const app = express();
 app.use(cors());
 
 // Import routes.
-const apiRoutes = require("./api-routes");
+const apiRoutes = require('./api-routes');
 // Configure bodyparser to handle post requests.
 app.use(express.urlencoded({
     extended: true
@@ -32,9 +32,9 @@ const db = mongoose.connection;
 
 // Add a check for DB connection.
 if (!db) {
-    console.log("Error while connecting to db");
+    console.log('Error while connecting to db');
 } else {
-    console.log("Db connection successful");
+    console.log('Db connection successful');
 }
 
 // Set up a message for the default URL.
@@ -44,5 +44,5 @@ app.get('/', (req, res) => res.send('Hello World with Express'));
 app.use('/api', apiRoutes);
 // Launch the app, to listen to the specified port.
 app.listen(config.app.port, function () {
-    console.log("Running RestHub on port " + config.app.port);
+    console.log('Running RestHub on port ' + config.app.port);
 });
