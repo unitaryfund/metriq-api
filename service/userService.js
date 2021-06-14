@@ -10,9 +10,9 @@ const bcrypt = require('bcrypt');
 const e = require("express");
 const saltRounds = 10;
 
-let jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 // Config for JWT secret key
-let config = require('./../config');
+const config = require('./../config');
 
 class UserService {
     constructor() {

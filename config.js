@@ -1,6 +1,9 @@
-var config = {};
+let config = {};
 
 config.isDebug = true;
+
+config.app = {};
+config.app.port = process.env.PORT || 8080;
 
 config.db = {};
 config.db.url = 'mongodb://localhost/metriq';
