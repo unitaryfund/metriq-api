@@ -1,3 +1,9 @@
+# REST API testing
+route.http
+
+# VSCode
+*.vscode
+
 # Logs
 logs
 *.log

@@ -40,6 +40,19 @@ class UserService {
         return await this.MongooseServiceInstance.find({ email: email });
     }
 
+    async login(reqBody) { 
+        let usernameResult = await this.getByUsername(reqBody.username);
+        if (usernameResult == null) {
+            return { success: false, error: 'Username not found.' };
+         }
+
+         const isPasswordValid =  bcrypt.compareSync(reqBody.password, usernameResult[0].passwordHash);
+         if (!isPasswordValid) {
+             return { success: false, error: 'Password incorrect.'};
+         }
+         return { success: true };
+    }
+
     async register(reqBody) {
         let validationResult = await this.validateRegistration(reqBody);
         if (!validationResult.success) {
