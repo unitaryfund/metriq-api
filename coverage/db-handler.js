@@ -5,6 +5,10 @@ const { MongoMemoryServer } = require('mongodb-memory-server')
 
 const mongod = new MongoMemoryServer()
 
+mongoose.set('useNewUrlParser', true)
+mongoose.set('useFindAndModify', false)
+mongoose.set('useCreateIndex', true)
+
 /**
  * Connect to the in-memory database.
  */
@@ -13,9 +17,7 @@ module.exports.connect = async () => {
 
   const mongooseOpts = {
     useNewUrlParser: true,
-    autoReconnect: true,
-    reconnectTries: Number.MAX_VALUE,
-    reconnectInterval: 1000
+    useUnifiedTopology: true
   }
 
   await mongoose.connect(uri, mongooseOpts)
