@@ -46,11 +46,11 @@ class UserService {
             return { success: false, error: 'Username not found.' };
          }
 
-         const isPasswordValid =  bcrypt.compareSync(reqBody.password, usernameResult[0].passwordHash);
-         if (!isPasswordValid) {
-             return { success: false, error: 'Password incorrect.'};
-         }
-         return { success: true };
+         //const isPasswordValid =  bcrypt.compareSync(reqBody.password, usernameResult[0].passwordHash);
+         //if (!isPasswordValid) {
+         //    return { success: false, error: 'Password incorrect.'};
+         //}
+         return { success: true, body: usernameResult };
     }
 
     async register(reqBody) {

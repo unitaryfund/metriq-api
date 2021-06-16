@@ -19,8 +19,12 @@ exports.new = async function (req, res) {
     try {
         let result = await userService.login(req.body);
         if (result.success) {
-            // Login successful.
-            // TODO: Still not entirely sure how to handle this.
+            res.json({
+                message: 'Login successful.',
+                data: result.body,
+                token: await userService.generateUserJwt(result.body._id)
+            }).end();
+            return;
         }
         sendResponse(res, 400, result.err);
     } catch (err) {
