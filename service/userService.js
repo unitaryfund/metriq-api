@@ -39,6 +39,14 @@ class UserService {
     return await this.MongooseServiceInstance.find({ email: email.trim().toLowerCase() })
   }
 
+  async delete(reqBody) {
+    const usernameResult = await this.getByUsername(reqBody.username)
+    if (!usernameResult || !usernameResult.length) {
+      return { success: false, error: 'Username not found.' }
+    }
+    return { success: true, body: usernameResult }
+  }
+
   async register (reqBody) {
     const validationResult = await this.validateRegistration(reqBody)
     if (!validationResult.success) {
