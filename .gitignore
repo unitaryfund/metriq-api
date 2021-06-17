@@ -1,3 +1,9 @@
+# REST API testing
+route.http
+
+# VSCode
+*.vscode
+
 # Logs
 logs
 *.log
@@ -19,7 +25,7 @@ pids
 lib-cov
 
 # Coverage directory used by tools like istanbul
-coverage
+# coverage
 *.lcov
 
 # nyc test coverage

@@ -32,11 +32,11 @@ class UserService {
   }
 
   async getByUsername (username) {
-    return await this.MongooseServiceInstance.find({ usernameNormal: username })
+    return await this.MongooseServiceInstance.find({ usernameNormal: username.trim().toLowerCase() })
   }
 
   async getByEmail (email) {
-    return await this.MongooseServiceInstance.find({ email: email })
+    return await this.MongooseServiceInstance.find({ email: email.trim().toLowerCase() })
   }
 
   async register (reqBody) {
@@ -56,6 +56,19 @@ class UserService {
     user.passwordHash = '[REDACTED]'
 
     return result
+  }
+
+  async login (reqBody) {
+    const usernameResult = await this.getByUsername(reqBody.username)
+    if (!usernameResult || !usernameResult.length) {
+      return { success: false, error: 'Username not found.' }
+    }
+
+    const isPasswordValid = bcrypt.compareSync(reqBody.password, usernameResult[0].passwordHash)
+    if (!isPasswordValid) {
+      return { success: false, error: 'Password incorrect.' }
+    }
+    return { success: true, body: usernameResult }
   }
 
   validateEmail (email) {
