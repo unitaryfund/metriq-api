@@ -24,30 +24,64 @@ afterAll(async () => await dbHandler.closeDatabase());
 describe('login', () => {
 
     it('returns the expected for a valid request', async () => {
-        // Init
-        let userService = new UserService();
-        await userService.register(registration1);
+        // Initialize
+        const userService = new UserService()
+        await userService.register(registration1)
 
-        //Act
-        let result = await userService.login(login1)
+        // Act
+        const result = await userService.login(login1)
 
-        //Assert
+        // Assert
         expect(result)
             .toMatchObject({
                 success: true
             })
-    });
+    })
 
-});
+  it('password that does not match user password should fail login', async () => {
+    // Initialize
+    const userService = new UserService()
+    await userService.register(registration1);
+
+    // Act
+    const result = await userService.login(incorrectPassword)
+
+    // Assert
+    expect(result)
+      .toMatchObject({
+        success: false
+      })
+  })
+
+  it('user that does not exist should fail login', async () => {
+    // Initialize
+    const userService = new UserService()
+
+    // Act
+    const result = await userService.login(login1)
+
+    // Assert
+    expect(result)
+      .toMatchObject({
+        success: false
+      })
+  })
+
+})
 
 const registration1 = {
     username: 'Test1',
     email:'test@test.com',
     password:'TestUser1!',
     passwordConfirm: 'TestUser1!'
-};
+}
 
 const login1 = {
     username: 'Test1',
     password: 'TestUser1!'
+}
+
+const incorrectPassword = {
+  username: 'Test1',
+  password: 'TestUser2!'
 }
