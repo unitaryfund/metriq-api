@@ -28,6 +28,5 @@
   },
   "jest": {
     "testEnvironment": "node"
-  },
-  "proxy": "http://localhost:8080"
+  }
 }
