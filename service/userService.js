@@ -31,6 +31,10 @@ class UserService {
     return jwt.sign({ id: userId }, config.api.token.secretKey, { expiresIn: config.api.token.expiresIn, algorithm: config.api.token.algorithm })
   }
 
+  async getByUserId (userId) {
+    return await this.MongooseServiceInstance.find({ _id: userId })
+  }
+
   async getByUsername (username) {
     return await this.MongooseServiceInstance.find({ usernameNormal: username.trim().toLowerCase() })
   }
@@ -39,12 +43,14 @@ class UserService {
     return await this.MongooseServiceInstance.find({ email: email.trim().toLowerCase() })
   }
 
-  async delete(reqBody) {
-    const usernameResult = await this.getByUsername(reqBody.username)
+  async delete (userId) {
+    const usernameResult = await this.getByUserId(userId)
     if (!usernameResult || !usernameResult.length) {
       return { success: false, error: 'Username not found.' }
     }
-    return { success: true, body: usernameResult }
+    usernameResult[0].isDeleted = true
+    await usernameResult[0].save()
+    return { success: true, body: usernameResult[0] }
   }
 
   async register (reqBody) {

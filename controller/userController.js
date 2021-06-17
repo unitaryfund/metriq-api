@@ -1,7 +1,7 @@
-// deleteController.js
+// userController.js
 
 // Service class
-const UserService = require('./../service/userService')
+const UserService = require('../service/userService')
 // Service instance
 const userService = new UserService()
 
@@ -16,14 +16,12 @@ function sendResponse (res, code, m) {
 
 // Validate the delete request and delete the user.
 exports.new = async function (req, res) {
-
   try {
-    let result = await userService.delete(req.body)
-    result.body[0].isDeleted = true
+    const result = await userService.delete(req.user.userId)
     if (result.success) {
       res.json({
         message: 'Deletion successful.',
-        data: result.body,
+        data: result.body
       }).end()
       return
     }

@@ -13,7 +13,7 @@ router.get('/', function (req, res) {
 
 const registerController = require('./controller/registerController')
 const loginController = require('./controller/loginController')
-const deleteController = require('./controller/deleteController')
+const userController = require('./controller/userController')
 
 // Register routes.
 router.route('/register')
@@ -21,7 +21,7 @@ router.route('/register')
 router.route('/login')
   .post(loginController.new)
 router.route('/delete')
-  .patch(deleteController.new)
+  .delete(userController.new)
 
 // Export API routes.
 module.exports = router
