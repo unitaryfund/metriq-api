@@ -6,6 +6,10 @@ const mongoose = require('mongoose')
 const express = require('express')
 // Import CORS
 const cors = require('cors')
+// Import express JWT auth
+const jwt = require('express-jwt')
+// Import cookie-parser middleware
+const cookieParser = require('cookie-parser')
 
 // Initialize the app
 const app = express()
@@ -18,7 +22,27 @@ const apiRoutes = require('./api-routes')
 app.use(express.urlencoded({
   extended: true
 }))
+
 app.use(express.json())
+app.use(cookieParser())
+
+// Set up cookie/header authorization checks.
+app.use(jwt({
+  secret: config.api.token.secretKey,
+  algorithms: [config.api.token.algorithm],
+  getToken: req => {
+    if (req.cookies && req.cookies.token) {
+      return req.cookies.token
+    }
+
+    const authHeader = req.get('Authorization')
+    if (authHeader) {
+      return authHeader.substring(7, authHeader.length - 1)
+    }
+
+    return ''
+  }
+}).unless({ path: ['/api/login', '/api/register'] }))
 
 // Fix mongoose deprecation warnings.
 // See https://stackoverflow.com/questions/51960171/node63208-deprecationwarning-collection-ensureindex-is-deprecated-use-creat.

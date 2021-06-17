@@ -19,10 +19,12 @@ exports.new = async function (req, res) {
   try {
     const result = await userService.login(req.body)
     if (result.success) {
+      const token = await userService.generateUserJwt(result.body._id)
+      res.cookie('token', token, { httpOnly: true })
       res.json({
         message: 'Login successful.',
         data: result.body,
-        token: await userService.generateUserJwt(result.body._id)
+        token: token
       }).end()
       return
     }
