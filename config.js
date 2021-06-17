@@ -22,6 +22,6 @@ config.api.token.secretKey = config.isDebug ? require('crypto').randomBytes(256)
 // Token is valid for 60 minutes (unless refreshed).
 config.api.token.expiresIn = 60
 // Algorithm used for encrypting JWT
-config.api.token.algorithm = 'RS256'
+config.api.token.algorithm = 'HS256'
 
 module.exports = config
