@@ -20,8 +20,8 @@ router.route('/register')
   .post(registerController.new)
 router.route('/login')
   .post(loginController.new)
-router.route('/delete')
-  .delete(userController.new)
+router.route('/user')
+  .delete(userController.delete)
 
 // Export API routes.
 module.exports = router

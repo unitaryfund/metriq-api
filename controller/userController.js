@@ -15,7 +15,7 @@ function sendResponse (res, code, m) {
 }
 
 // Validate the delete request and delete the user.
-exports.new = async function (req, res) {
+exports.delete = async function (req, res) {
   try {
     const result = await userService.delete(req.user.userId)
     if (result.success) {
