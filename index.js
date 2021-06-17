@@ -42,7 +42,17 @@ app.use(jwt({
 
     return ''
   }
-}).unless({ path: ['/api/login', '/api/register'] }))
+}).unless({ path: ['/api/csrf-token', '/api/login', '/api/register'] }))
+
+// Add anti-CSRF token.
+const csrf = require('csurf')
+const csrfProtection = csrf({
+  cookie: true
+})
+app.use(csrfProtection)
+app.get('/api/csrf-token', (req, res) => {
+  res.json({ csrfToken: req.csrfToken() })
+})
 
 // Fix mongoose deprecation warnings.
 // See https://stackoverflow.com/questions/51960171/node63208-deprecationwarning-collection-ensureindex-is-deprecated-use-creat.
