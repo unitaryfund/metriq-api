@@ -19,7 +19,7 @@ exports.new = async function (req, res) {
   try {
     const result = await userService.register(req.body)
     if (result.success) {
-      let token = await userService.generateUserJwt(result.body._id)
+      const token = await userService.generateUserJwt(result.body._id)
       res.cookie('token', token, { httpOnly: true })
       res.json({
         message: 'New account created!',

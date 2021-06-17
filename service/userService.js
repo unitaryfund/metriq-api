@@ -45,11 +45,12 @@ class UserService {
 
   async delete (userId) {
     const usernameResult = await this.getByUserId(userId)
-    if (!usernameResult || !usernameResult.length) {
+    if (!usernameResult || !usernameResult.length || usernameResult[0].isDeleted) {
       return { success: false, error: 'Username not found.' }
     }
     usernameResult[0].isDeleted = true
     await usernameResult[0].save()
+    usernameResult[0].passwordHash = '[REDACTED]'
     return { success: true, body: usernameResult[0] }
   }
 
@@ -74,7 +75,7 @@ class UserService {
 
   async login (reqBody) {
     const usernameResult = await this.getByUsername(reqBody.username)
-    if (!usernameResult || !usernameResult.length) {
+    if (!usernameResult || !usernameResult.length || usernameResult[0].isDeleted) {
       return { success: false, error: 'Username not found.' }
     }
 
