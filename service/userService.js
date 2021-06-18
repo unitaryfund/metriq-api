@@ -28,7 +28,8 @@ class UserService {
   }
 
   async generateUserJwt (userId) {
-    return jwt.sign({ id: userId }, config.api.token.secretKey, { expiresIn: config.api.token.expiresIn, algorithm: config.api.token.algorithm })
+    //return jwt.sign({ id: userId }, config.api.token.secretKey, { expiresIn: config.api.token.expiresIn, algorithm: config.api.token.algorithm })
+    return jwt.sign({ id: userId }, config.api.token.secretKey, { expiresIn: config.api.token.expiresIn })
   }
 
   async getByUserId (userId) {
