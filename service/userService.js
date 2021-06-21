@@ -43,6 +43,22 @@ class UserService {
     return await this.MongooseServiceInstance.find({ email: email.trim().toLowerCase() })
   }
 
+  async get (userId) {
+    const usernameResult = await this.getByUserId(userId)
+    if (!usernameResult || !usernameResult.length) {
+      return { success: false, error: 'Username not found.' }
+    }
+
+    const user = usernameResult[0]
+    user.passwordHash = '[REDACTED]'
+
+    if (user.isDeleted) {
+      return { success: false, error: 'Username not found.' }
+    }
+
+    return { success: true, body: user }
+  }
+
   async delete (userId) {
     const usernameResult = await this.getByUserId(userId)
     if (!usernameResult || !usernameResult.length) {

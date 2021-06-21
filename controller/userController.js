@@ -14,6 +14,22 @@ function sendResponse (res, code, m) {
     .end(body)
 }
 
+exports.read = async function (req, res) {
+  try {
+    const result = await userService.get(req.user.id)
+    if (result.success) {
+      res.json({
+        message: 'Successfully retrieved user profile.',
+        data: result.body
+      }).end()
+      return
+    }
+    sendResponse(res, 400, result.error)
+  } catch (err) {
+    sendResponse(res, 500, err)
+  }
+}
+
 // Validate the delete request and delete the user.
 exports.delete = async function (req, res) {
   try {
