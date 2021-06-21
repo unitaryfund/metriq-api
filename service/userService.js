@@ -28,7 +28,6 @@ class UserService {
   }
 
   async generateUserJwt (userId) {
-    //return jwt.sign({ id: userId }, config.api.token.secretKey, { expiresIn: config.api.token.expiresIn, algorithm: config.api.token.algorithm })
     return jwt.sign({ id: userId }, config.api.token.secretKey, { expiresIn: config.api.token.expiresIn, algorithm: config.api.token.algorithm })
   }
 
@@ -92,7 +91,7 @@ class UserService {
     if (!isPasswordValid) {
       return { success: false, error: 'Password incorrect.' }
     }
-    return { success: true, body: usernameResult }
+    return { success: true, body: usernameResult[0] }
   }
 
   validateEmail (email) {

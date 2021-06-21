@@ -1,5 +1,8 @@
 // loginController.js
 
+// Config for JWT expiration
+const config = require('./../config')
+
 // Service class
 const UserService = require('./../service/userService')
 // Service instance
@@ -20,7 +23,11 @@ exports.new = async function (req, res) {
     const result = await userService.login(req.body)
     if (result.success) {
       const token = await userService.generateUserJwt(result.body._id)
-      res.cookie('token', token, { httpOnly: true })
+      if (config.isDebug) {
+        res.cookie('token', token, { maxAge: config.api.token.expiresIn * 1000, httpOnly: true })
+      } else {
+        res.cookie('token', token, { maxAge: config.api.token.expiresIn * 1000, httpOnly: true, secure: true })
+      }
       res.json({
         message: 'Login successful.',
         data: result.body,

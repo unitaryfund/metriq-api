@@ -61,6 +61,10 @@ if (!db) {
   console.log('Db connection successful')
 }
 
+if (config.isDebug) {
+  console.log('Debugging session secret: ' + config.api.token.secretKey)
+}
+
 // Set up a message for the default URL.
 app.get('/', (req, res) => res.send('Hello World with Express'))
 
