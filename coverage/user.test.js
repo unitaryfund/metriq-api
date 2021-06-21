@@ -30,7 +30,7 @@ describe('user', () => {
         const loginResult = await userService.login(login1)
 
         // Act
-        const result = await userService.delete(loginResult.body[0].id)
+        const result = await userService.delete(loginResult.body.id)
 
         // Assert
         expect(result)
@@ -58,10 +58,10 @@ describe('user', () => {
         const userService = new UserService()
         await userService.register(registration1)
         const loginResult = await userService.login(login1)
-        await userService.delete(loginResult.body[0].id)
+        await userService.delete(loginResult.body.id)
 
         // Act
-        const result = await userService.delete(loginResult.body[0].id)
+        const result = await userService.delete(loginResult.body.id)
 
         // Assert
         expect(result)
