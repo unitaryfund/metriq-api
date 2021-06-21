@@ -21,6 +21,7 @@ router.route('/register')
 router.route('/login')
   .post(loginController.new)
 router.route('/user')
+  .get(userController.read)
   .delete(userController.delete)
 
 // Export API routes.

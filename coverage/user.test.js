@@ -23,6 +23,20 @@ afterAll(async () => await dbHandler.closeDatabase());
  */
 describe('user', () => {
 
+    it('can be retrieved', async () => {
+        // Initialize
+        const userService = new UserService()
+        await userService.register(registration1)
+        const loginResult = await userService.login(login1)
+
+        // Act
+        const result = await userService.get(loginResult.body.id)
+
+        // Assert
+        expect(result.body)
+            .toMatchObject(profile1)
+    })
+
     it('can be deleted after creation and login', async () => {
         // Initialize
         const userService = new UserService()
@@ -30,7 +44,7 @@ describe('user', () => {
         const loginResult = await userService.login(login1)
 
         // Act
-        const result = await userService.delete(loginResult.body[0].id)
+        const result = await userService.delete(loginResult.body.id)
 
         // Assert
         expect(result)
@@ -39,7 +53,7 @@ describe('user', () => {
             })
     })
 
-    it('user not found should yield failure', async () => {
+    it('not found should yield failure', async () => {
         // Initialize
         const userService = new UserService()
 
@@ -53,15 +67,15 @@ describe('user', () => {
             })
     })
 
-    it('user that is already deleted should fail to delete again', async () => {
+    it('should fail to delete again if already deleted', async () => {
         // Initialize
         const userService = new UserService()
         await userService.register(registration1)
         const loginResult = await userService.login(login1)
-        await userService.delete(loginResult.body[0].id)
+        await userService.delete(loginResult.body.id)
 
         // Act
-        const result = await userService.delete(loginResult.body[0].id)
+        const result = await userService.delete(loginResult.body.id)
 
         // Assert
         expect(result)
@@ -82,6 +96,11 @@ const registration1 = {
 const login1 = {
     username: 'Test1',
     password: 'TestUser1!'
+}
+
+const profile1 = {
+    username: 'Test1',
+    email:'test@test.com',
 }
 
 const undefinedUserId = {
