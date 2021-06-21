@@ -28,7 +28,12 @@ class UserService {
   }
 
   async generateUserJwt (userId) {
+    //return jwt.sign({ id: userId }, config.api.token.secretKey, { expiresIn: config.api.token.expiresIn, algorithm: config.api.token.algorithm })
     return jwt.sign({ id: userId }, config.api.token.secretKey, { expiresIn: config.api.token.expiresIn, algorithm: config.api.token.algorithm })
+  }
+
+  async getByUserId (userId) {
+    return await this.MongooseServiceInstance.find({ _id: userId })
   }
 
   async getByUsername (username) {
@@ -37,6 +42,25 @@ class UserService {
 
   async getByEmail (email) {
     return await this.MongooseServiceInstance.find({ email: email.trim().toLowerCase() })
+  }
+
+  async delete (userId) {
+    const usernameResult = await this.getByUserId(userId)
+    if (!usernameResult || !usernameResult.length) {
+      return { success: false, error: 'Username not found.' }
+    }
+
+    const userToDelete = usernameResult[0]
+
+    if (userToDelete.isDeleted) {
+      return { success: false, error: 'Username not found.' }
+    }
+
+    userToDelete.isDeleted = true
+    await userToDelete.save()
+    userToDelete.passwordHash = '[REDACTED]'
+
+    return { success: true, body: userToDelete }
   }
 
   async register (reqBody) {
@@ -60,7 +84,7 @@ class UserService {
 
   async login (reqBody) {
     const usernameResult = await this.getByUsername(reqBody.username)
-    if (!usernameResult || !usernameResult.length) {
+    if (!usernameResult || !usernameResult.length || usernameResult[0].isDeleted) {
       return { success: false, error: 'Username not found.' }
     }
 
@@ -78,44 +102,44 @@ class UserService {
 
   async validateRegistration (reqBody) {
     if (!reqBody.password || (reqBody.password.length < 8)) {
-      return { success: false, err: 'Password is too short.' }
+      return { success: false, error: 'Password is too short.' }
     }
 
     if (!reqBody.passwordConfirm || (reqBody.password !== reqBody.passwordConfirm)) {
-      return { success: false, err: 'Password and confirmation do not match.' }
+      return { success: false, error: 'Password and confirmation do not match.' }
     }
 
     if (!reqBody.username) {
-      return { success: false, err: 'Username cannot be blank.' }
+      return { success: false, error: 'Username cannot be blank.' }
     }
 
     const tlUsername = reqBody.username.trim().toLowerCase()
     if (tlUsername.length === 0) {
-      return { success: false, err: 'Username cannot be blank.' }
+      return { success: false, error: 'Username cannot be blank.' }
     }
 
     if (!reqBody.email) {
-      return { success: false, err: 'Email cannot be blank.' }
+      return { success: false, error: 'Email cannot be blank.' }
     }
 
     const tlEmail = reqBody.email.trim().toLowerCase()
 
     if (tlEmail.length === 0) {
-      return { success: false, err: 'Email cannot be blank.' }
+      return { success: false, error: 'Email cannot be blank.' }
     }
 
     if (!this.validateEmail(tlEmail)) {
-      return { success: false, err: 'Invalid email format.' }
+      return { success: false, error: 'Invalid email format.' }
     }
 
     const usernameMatch = await this.getByUsername(tlUsername)
     if (usernameMatch.length > 0) {
-      return { success: false, err: 'Username already in use.' }
+      return { success: false, error: 'Username already in use.' }
     }
 
     const emailMatch = await this.getByEmail(tlEmail)
     if (emailMatch.length > 0) {
-      return { success: false, err: 'Email already in use.' }
+      return { success: false, error: 'Email already in use.' }
     }
 
     return { success: true }

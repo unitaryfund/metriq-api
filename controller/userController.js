@@ -1,7 +1,7 @@
-// loginController.js
+// userController.js
 
 // Service class
-const UserService = require('./../service/userService')
+const UserService = require('../service/userService')
 // Service instance
 const userService = new UserService()
 
@@ -14,17 +14,14 @@ function sendResponse (res, code, m) {
     .end(body)
 }
 
-// Validate the login request and log the user in.
-exports.new = async function (req, res) {
+// Validate the delete request and delete the user.
+exports.delete = async function (req, res) {
   try {
-    const result = await userService.login(req.body)
+    const result = await userService.delete(req.user.id)
     if (result.success) {
-      const token = await userService.generateUserJwt(result.body._id)
-      res.cookie('token', token, { httpOnly: true })
       res.json({
-        message: 'Login successful.',
-        data: result.body,
-        token: token
+        message: 'Deletion successful.',
+        data: result.body
       }).end()
       return
     }

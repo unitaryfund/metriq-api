@@ -30,6 +30,10 @@ const userSchema = mongoose.Schema({
   dateJoined: {
     type: Date,
     required: true
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
   }
 }, { autoIndex: config.isDebug })
 
