@@ -23,7 +23,7 @@ afterAll(async () => await dbHandler.closeDatabase());
  */
 describe('user', () => {
 
-    it('returns the expected for a valid request', async () => {
+    it('can be deleted after creation and login', async () => {
         // Initialize
         const userService = new UserService()
         await userService.register(registration1)

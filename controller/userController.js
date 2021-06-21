@@ -17,7 +17,7 @@ function sendResponse (res, code, m) {
 // Validate the delete request and delete the user.
 exports.delete = async function (req, res) {
   try {
-    const result = await userService.delete(req.body.user.id)
+    const result = await userService.delete(req.user.id)
     if (result.success) {
       res.json({
         message: 'Deletion successful.',
