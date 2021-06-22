@@ -70,15 +70,15 @@ class UserService {
   }
 
   async get (userId) {
-    const usernameResult = await this.getByUserId(userId)
-    if (!usernameResult || !usernameResult.length) {
-      return { success: false, error: 'Usern ID not found.' }
+    const userResult = await this.getByUserId(userId)
+    if (!userResult || !userResult.length) {
+      return { success: false, error: 'User not found.' }
     }
 
-    const user = usernameResult[0]
+    const user = userResult[0]
 
     if (user.isDeleted) {
-      return { success: false, error: 'Username not found.' }
+      return { success: false, error: 'User not found.' }
     }
 
     return { success: true, body: user }
@@ -93,15 +93,15 @@ class UserService {
   }
 
   async delete (userId) {
-    const usernameResult = await this.getByUserId(userId)
-    if (!usernameResult || !usernameResult.length) {
-      return { success: false, error: 'Username not found.' }
+    const userResult = await this.getByUserId(userId)
+    if (!userResult || !userResult.length) {
+      return { success: false, error: 'User not found.' }
     }
 
-    const userToDelete = usernameResult[0]
+    const userToDelete = userResult[0]
 
     if (userToDelete.isDeleted) {
-      return { success: false, error: 'Username not found.' }
+      return { success: false, error: 'User not found.' }
     }
 
     userToDelete.isDeleted = true
@@ -132,12 +132,12 @@ class UserService {
   }
 
   async login (reqBody) {
-    const usernameResult = await this.getByUsername(reqBody.username)
-    if (!usernameResult || !usernameResult.length || usernameResult[0].isDeleted) {
-      return { success: false, error: 'Username not found.' }
+    const userResult = await this.getByUsername(reqBody.username)
+    if (!userResult || !userResult.length || userResult[0].isDeleted) {
+      return { success: false, error: 'User not found.' }
     }
 
-    const user = usernameResult[0]
+    const user = userResult[0]
 
     const isPasswordValid = bcrypt.compareSync(reqBody.password, user.passwordHash)
     if (!isPasswordValid) {
