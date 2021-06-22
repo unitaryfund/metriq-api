@@ -68,6 +68,11 @@ exports.login = async function (req, res) {
 
 // Validate the login request and log the user in.
 exports.newToken = async function (req, res) {
+  if (req.user.role !== 'web') {
+    sendResponse(res, 403, 'Authorization role lacks privileges.')
+    return
+  }
+
   routeWrapper(res,
     async () => {
       const users = await userService.getByUserId(req.user.id)
