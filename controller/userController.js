@@ -37,7 +37,7 @@ async function routeWrapper (req, res, serviceFn, successMessage, isUserLogin) {
 
 exports.read = async function (req, res) {
   routeWrapper(req, res,
-    async () => await userService.get(req.user.id),
+    async () => await userService.getSanitized(req.user.id),
     'Successfully retrieved user profile.')
 }
 

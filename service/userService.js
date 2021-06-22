@@ -27,6 +27,20 @@ class UserService {
     }
   }
 
+  async sanitize (user) {
+    return {
+      __v: user.__v,
+      _id: user._id,
+      clientToken: user.clientToken ? '[REDACTED]' : '',
+      dateJoined: user.dateJoined,
+      email: user.email,
+      isDeleted: user.isDeleted,
+      passwordHash: '[REDACTED]',
+      username: user.username,
+      usernameNormal: user.usernameNormal
+    }
+  }
+
   async generateWebJwt (userId) {
     return await this.generateJwt(userId, 'web', true)
   }
@@ -58,18 +72,24 @@ class UserService {
   async get (userId) {
     const usernameResult = await this.getByUserId(userId)
     if (!usernameResult || !usernameResult.length) {
-      return { success: false, error: 'Username not found.' }
+      return { success: false, error: 'Usern ID not found.' }
     }
 
     const user = usernameResult[0]
-    user.passwordHash = '[REDACTED]'
-    user.clientToken = user.clientToken ? '[REDACTED]' : ''
 
     if (user.isDeleted) {
       return { success: false, error: 'Username not found.' }
     }
 
     return { success: true, body: user }
+  }
+
+  async getSanitized (userId) {
+    const result = await this.get(userId)
+    if (!result.success) {
+      return result
+    }
+    return { success: true, body: await this.sanitize(result.body) }
   }
 
   async delete (userId) {
@@ -87,9 +107,8 @@ class UserService {
     userToDelete.isDeleted = true
     userToDelete.clientToken = ''
     await userToDelete.save()
-    userToDelete.passwordHash = '[REDACTED]'
 
-    return { success: true, body: userToDelete }
+    return { success: true, body: await this.sanitize(userToDelete) }
   }
 
   async register (reqBody) {
@@ -106,9 +125,10 @@ class UserService {
     user.passwordHash = await bcrypt.hash(reqBody.password, saltRounds)
 
     const result = await this.create(user)
-    user.passwordHash = '[REDACTED]'
-
-    return result
+    if (!result.success) {
+      return result
+    }
+    return { success: true, body: await this.sanitize(result.body) }
   }
 
   async login (reqBody) {
@@ -124,10 +144,7 @@ class UserService {
       return { success: false, error: 'Password incorrect.' }
     }
 
-    user.passwordHash = '[REDACTED]'
-    user.clientToken = user.clientToken ? '[REDACTED]' : ''
-
-    return { success: true, body: user }
+    return { success: true, body: await this.sanitize(user) }
   }
 
   validateEmail (email) {

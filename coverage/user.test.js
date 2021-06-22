@@ -53,7 +53,7 @@ describe('user', () => {
             })
     })
 
-    it('not found should yield failure', async () => {
+    it('not found should yield delete failure', async () => {
         // Initialize
         const userService = new UserService()
 
@@ -84,6 +84,23 @@ describe('user', () => {
             })
     })
 
+    it('should not expose generated client tokens', async () => {
+        // Initialize
+        const userService = new UserService()
+        await userService.register(registration1)
+        const user = registerResult.body
+
+        // Act
+        user.clientToken = await userService.generateClientJwt(user._id)
+        user.save()
+
+        // Assert
+        const nUser = await userService.get(user._id)
+        expect(nUser)
+            .toMatchObject({
+                clientToken: '[REDACTED]'
+            })
+    })
 })
 
 const registration1 = {
