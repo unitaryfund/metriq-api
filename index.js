@@ -8,6 +8,8 @@ const express = require('express')
 const cors = require('cors')
 // Import express JWT auth
 const jwt = require('express-jwt')
+// Import JWT decoder
+const jwtDecode = require('jwt-decode')
 // Import cookie-parser middleware
 const cookieParser = require('cookie-parser')
 
@@ -32,12 +34,21 @@ app.use(jwt({
   algorithms: [config.api.token.algorithm],
   getToken: req => {
     if (req.cookies && req.cookies.token) {
+      const decoded = jwtDecode(req.cookies.token)
+      if (decoded.role !== 'web') {
+        return ''
+      }
       return req.cookies.token
     }
 
     const authHeader = req.get('Authorization')
     if (authHeader) {
-      return authHeader.substring(7, authHeader.length - 1)
+      const token = authHeader.substring(7, authHeader.length - 1)
+      const decoded = jwtDecode(token)
+      if (decoded.role !== 'client') {
+        return ''
+      }
+      return token
     }
 
     return ''

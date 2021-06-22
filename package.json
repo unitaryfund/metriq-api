@@ -22,6 +22,7 @@
     "express-jwt": "^6.0.0",
     "jest": "^27.0.4",
     "jsonwebtoken": "^8.5.1",
+    "jwt-decode": "^3.1.2",
     "mongodb-memory-server": "^6.9.6",
     "mongoose": "^5.12.12",
     "standard": "^16.0.3"
