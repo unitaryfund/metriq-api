@@ -6,20 +6,21 @@ const router = require('express').Router()
 // Set default API response.
 router.get('/', function (req, res) {
   res.json({
-    status: 'API Its Working',
-    message: 'Welcome to RESTHub crafted with love!'
+    status: 'API is working',
+    message: 'This is the Metriq public REST API.'
   })
 })
 
-const registerController = require('./controller/registerController')
-const loginController = require('./controller/loginController')
+const accountController = require('./controller/accountController')
 const userController = require('./controller/userController')
 
 // Register routes.
 router.route('/register')
-  .post(registerController.new)
+  .post(accountController.new)
 router.route('/login')
-  .post(loginController.new)
+  .post(accountController.login)
+router.route('/token')
+  .post(accountController.newToken)
 router.route('/user')
   .get(userController.read)
   .delete(userController.delete)

@@ -66,10 +66,11 @@ if (config.isDebug) {
 }
 
 // Set up a message for the default URL.
-app.get('/', (req, res) => res.send('Hello World with Express'))
+app.get('/', (req, res) => res.send('Metriq API'))
 
 // Use API routes in the app.
 app.use('/api', apiRoutes)
+
 // Launch the app, to listen to the specified port.
 app.listen(config.app.port, function () {
   console.log('Running RestHub on port ' + config.app.port)

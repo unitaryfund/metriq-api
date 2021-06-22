@@ -27,8 +27,20 @@ class UserService {
     }
   }
 
-  async generateUserJwt (userId) {
-    return jwt.sign({ id: userId }, config.api.token.secretKey, { expiresIn: config.api.token.expiresIn, algorithm: config.api.token.algorithm })
+  async generateWebJwt (userId) {
+    return await this.generateJwt(userId, 'web', true)
+  }
+
+  async generateClientJwt (userId) {
+    return await this.generateJwt(userId, 'client', false)
+  }
+
+  async generateJwt (userId, role, isExpiring) {
+    const meta = { algorithm: config.api.token.algorithm }
+    if (isExpiring) {
+      meta.expiresIn = config.api.token.expiresIn
+    }
+    return jwt.sign({ id: userId, role: role }, config.api.token.secretKey, meta)
   }
 
   async getByUserId (userId) {
@@ -51,6 +63,7 @@ class UserService {
 
     const user = usernameResult[0]
     user.passwordHash = '[REDACTED]'
+    user.clientToken = user.clientToken ? '[REDACTED]' : ''
 
     if (user.isDeleted) {
       return { success: false, error: 'Username not found.' }
@@ -72,6 +85,7 @@ class UserService {
     }
 
     userToDelete.isDeleted = true
+    userToDelete.clientToken = ''
     await userToDelete.save()
     userToDelete.passwordHash = '[REDACTED]'
 
@@ -103,11 +117,17 @@ class UserService {
       return { success: false, error: 'Username not found.' }
     }
 
-    const isPasswordValid = bcrypt.compareSync(reqBody.password, usernameResult[0].passwordHash)
+    const user = usernameResult[0]
+
+    const isPasswordValid = bcrypt.compareSync(reqBody.password, user.passwordHash)
     if (!isPasswordValid) {
       return { success: false, error: 'Password incorrect.' }
     }
-    return { success: true, body: usernameResult[0] }
+
+    user.passwordHash = '[REDACTED]'
+    user.clientToken = user.clientToken ? '[REDACTED]' : ''
+
+    return { success: true, body: user }
   }
 
   validateEmail (email) {
