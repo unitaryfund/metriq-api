@@ -8,6 +8,8 @@ const express = require('express')
 const cors = require('cors')
 // Import express JWT auth
 const jwt = require('express-jwt')
+// Import JWT decoder
+const jwtDecode = require('jwt-decode')
 // Import cookie-parser middleware
 const cookieParser = require('cookie-parser')
 
@@ -32,15 +34,26 @@ app.use(jwt({
   algorithms: [config.api.token.algorithm],
   getToken: req => {
     if (req.cookies && req.cookies.token) {
+      const decoded = jwtDecode(req.cookies.token)
+      if (decoded.role !== 'web') {
+        return ''
+      }
       return req.cookies.token
     }
 
     const authHeader = req.get('Authorization')
-    if (authHeader) {
-      return authHeader.substring(7, authHeader.length - 1)
+    if (!authHeader) {
+      return ''
     }
 
-    return ''
+    const token = authHeader.substring(7, authHeader.length - 1)
+    const decoded = jwtDecode(token)
+
+    if (decoded.role !== 'client') {
+      return ''
+    }
+
+    return token
   }
 }).unless({ path: ['/api/login', '/api/register'] }))
 
@@ -66,10 +79,11 @@ if (config.isDebug) {
 }
 
 // Set up a message for the default URL.
-app.get('/', (req, res) => res.send('Hello World with Express'))
+app.get('/', (req, res) => res.send('Metriq API'))
 
 // Use API routes in the app.
 app.use('/api', apiRoutes)
+
 // Launch the app, to listen to the specified port.
 app.listen(config.app.port, function () {
   console.log('Running RestHub on port ' + config.app.port)

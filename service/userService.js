@@ -27,8 +27,34 @@ class UserService {
     }
   }
 
-  async generateUserJwt (userId) {
-    return jwt.sign({ id: userId }, config.api.token.secretKey, { expiresIn: config.api.token.expiresIn, algorithm: config.api.token.algorithm })
+  async sanitize (user) {
+    return {
+      __v: user.__v,
+      _id: user._id,
+      clientToken: user.clientToken ? '[REDACTED]' : '',
+      dateJoined: user.dateJoined,
+      email: user.email,
+      isDeleted: user.isDeleted,
+      passwordHash: '[REDACTED]',
+      username: user.username,
+      usernameNormal: user.usernameNormal
+    }
+  }
+
+  async generateWebJwt (userId) {
+    return await this.generateJwt(userId, 'web', true)
+  }
+
+  async generateClientJwt (userId) {
+    return await this.generateJwt(userId, 'client', false)
+  }
+
+  async generateJwt (userId, role, isExpiring) {
+    const meta = { algorithm: config.api.token.algorithm }
+    if (isExpiring) {
+      meta.expiresIn = config.api.token.expiresIn
+    }
+    return jwt.sign({ id: userId, role: role }, config.api.token.secretKey, meta)
   }
 
   async getByUserId (userId) {
@@ -44,38 +70,45 @@ class UserService {
   }
 
   async get (userId) {
-    const usernameResult = await this.getByUserId(userId)
-    if (!usernameResult || !usernameResult.length) {
-      return { success: false, error: 'Username not found.' }
+    const userResult = await this.getByUserId(userId)
+    if (!userResult || !userResult.length) {
+      return { success: false, error: 'User not found.' }
     }
 
-    const user = usernameResult[0]
-    user.passwordHash = '[REDACTED]'
+    const user = userResult[0]
 
     if (user.isDeleted) {
-      return { success: false, error: 'Username not found.' }
+      return { success: false, error: 'User not found.' }
     }
 
     return { success: true, body: user }
   }
 
+  async getSanitized (userId) {
+    const result = await this.get(userId)
+    if (!result.success) {
+      return result
+    }
+    return { success: true, body: await this.sanitize(result.body) }
+  }
+
   async delete (userId) {
-    const usernameResult = await this.getByUserId(userId)
-    if (!usernameResult || !usernameResult.length) {
-      return { success: false, error: 'Username not found.' }
+    const userResult = await this.getByUserId(userId)
+    if (!userResult || !userResult.length) {
+      return { success: false, error: 'User not found.' }
     }
 
-    const userToDelete = usernameResult[0]
+    const userToDelete = userResult[0]
 
     if (userToDelete.isDeleted) {
-      return { success: false, error: 'Username not found.' }
+      return { success: false, error: 'User not found.' }
     }
 
     userToDelete.isDeleted = true
+    userToDelete.clientToken = ''
     await userToDelete.save()
-    userToDelete.passwordHash = '[REDACTED]'
 
-    return { success: true, body: userToDelete }
+    return { success: true, body: await this.sanitize(userToDelete) }
   }
 
   async register (reqBody) {
@@ -92,22 +125,26 @@ class UserService {
     user.passwordHash = await bcrypt.hash(reqBody.password, saltRounds)
 
     const result = await this.create(user)
-    user.passwordHash = '[REDACTED]'
-
-    return result
+    if (!result.success) {
+      return result
+    }
+    return { success: true, body: await this.sanitize(result.body) }
   }
 
   async login (reqBody) {
-    const usernameResult = await this.getByUsername(reqBody.username)
-    if (!usernameResult || !usernameResult.length || usernameResult[0].isDeleted) {
-      return { success: false, error: 'Username not found.' }
+    const userResult = await this.getByUsername(reqBody.username)
+    if (!userResult || !userResult.length || userResult[0].isDeleted) {
+      return { success: false, error: 'User not found.' }
     }
 
-    const isPasswordValid = bcrypt.compareSync(reqBody.password, usernameResult[0].passwordHash)
+    const user = userResult[0]
+
+    const isPasswordValid = bcrypt.compareSync(reqBody.password, user.passwordHash)
     if (!isPasswordValid) {
       return { success: false, error: 'Password incorrect.' }
     }
-    return { success: true, body: usernameResult[0] }
+
+    return { success: true, body: await this.sanitize(user) }
   }
 
   validateEmail (email) {

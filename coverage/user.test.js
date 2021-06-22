@@ -30,7 +30,7 @@ describe('user', () => {
         const loginResult = await userService.login(login1)
 
         // Act
-        const result = await userService.get(loginResult.body.id)
+        const result = await userService.getSanitized(loginResult.body._id)
 
         // Assert
         expect(result.body)
@@ -44,7 +44,7 @@ describe('user', () => {
         const loginResult = await userService.login(login1)
 
         // Act
-        const result = await userService.delete(loginResult.body.id)
+        const result = await userService.delete(loginResult.body._id)
 
         // Assert
         expect(result)
@@ -53,7 +53,7 @@ describe('user', () => {
             })
     })
 
-    it('not found should yield failure', async () => {
+    it('not found should yield delete failure', async () => {
         // Initialize
         const userService = new UserService()
 
@@ -84,6 +84,22 @@ describe('user', () => {
             })
     })
 
+    it('should not expose password hashes and generated client tokens', async () => {
+        // Initialize
+        const userService = new UserService()
+        const registerResult = await userService.register(registration1)
+        const getResult = await userService.get(registerResult.body._id)
+        const user = getResult.body
+
+        // Act
+        const nUser = await userService.sanitize(user)
+
+        // Assert
+        expect(nUser)
+            .toMatchObject({
+                passwordHash: '[REDACTED]',
+            })
+    })
 })
 
 const registration1 = {

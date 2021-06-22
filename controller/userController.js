@@ -14,35 +14,36 @@ function sendResponse (res, code, m) {
     .end(body)
 }
 
-exports.read = async function (req, res) {
+async function routeWrapper (req, res, serviceFn, successMessage, isUserLogin) {
   try {
-    const result = await userService.get(req.user.id)
-    if (result.success) {
-      res.json({
-        message: 'Successfully retrieved user profile.',
-        data: result.body
-      }).end()
+    if (req.user.role !== 'web') {
+      sendResponse(res, 403, 'Authorization role lacks privileges.')
       return
     }
-    sendResponse(res, 400, result.error)
+    // Call the service function, to perform the intended action.
+    const result = await serviceFn()
+    if (result.success) {
+      // If successful, pass the service function result as the API response.
+      res.json({ message: successMessage, data: result.body }).end()
+    } else {
+      // The service function handled an error, but we can't perform the intended action.
+      sendResponse(res, 400, result.error)
+    }
   } catch (err) {
+    // There was an unhandled exception.
     sendResponse(res, 500, err)
   }
 }
 
+exports.read = async function (req, res) {
+  routeWrapper(req, res,
+    async () => await userService.getSanitized(req.user.id),
+    'Successfully retrieved user profile.')
+}
+
 // Validate the delete request and delete the user.
 exports.delete = async function (req, res) {
-  try {
-    const result = await userService.delete(req.user.id)
-    if (result.success) {
-      res.json({
-        message: 'Deletion successful.',
-        data: result.body
-      }).end()
-      return
-    }
-    sendResponse(res, 400, result.error)
-  } catch (err) {
-    sendResponse(res, 500, err)
-  }
+  routeWrapper(req, res,
+    async () => await userService.delete(req.user.id),
+    'Successfully deleted user profile.')
 }
