@@ -42,16 +42,18 @@ app.use(jwt({
     }
 
     const authHeader = req.get('Authorization')
-    if (authHeader) {
-      const token = authHeader.substring(7, authHeader.length - 1)
-      const decoded = jwtDecode(token)
-      if (decoded.role !== 'client') {
-        return ''
-      }
-      return token
+    if (!authHeader) {
+      return ''
     }
 
-    return ''
+    const token = authHeader.substring(7, authHeader.length - 1)
+    const decoded = jwtDecode(token)
+
+    if (decoded.role !== 'client') {
+      return ''
+    }
+
+    return token
   }
 }).unless({ path: ['/api/login', '/api/register'] }))
 
