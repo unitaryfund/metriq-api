@@ -196,6 +196,32 @@ class UserService {
 
     return { success: true }
   }
+
+  async saveClientTokenForUserId (userId) {
+    const users = await this.getByUserId(userId)
+    if (!users || !users.length) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    const user = users[0]
+    user.clientToken = await this.generateClientJwt(userId)
+    await user.save()
+
+    return { success: true, body: user.clientToken }
+  }
+
+  async deleteClientTokenForUserId (userId) {
+    const users = await this.getByUserId(userId)
+    if (!users || !users.length) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    const user = users[0]
+    user.clientToken = ''
+    await user.save()
+
+    return { success: true, body: '' }
+  }
 }
 
 module.exports = UserService
