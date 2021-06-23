@@ -10,6 +10,12 @@ const submissionSchema = mongoose.Schema({
     required: true,
     unique: true
   },
+  submissionNameNormal: {
+    type: String,
+    required: true,
+    unique: true,
+    index: true
+  },
   isDeleted: {
     type: Boolean,
     default: false

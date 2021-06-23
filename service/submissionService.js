@@ -51,53 +51,17 @@ class SubmissionService {
 
       const submission = await this.MongooseServiceInstance.new()
       submission.submissionName = reqBody.submissionName.trim()
+      submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
 
       // Note: This create method appears to not create a submission--but a user.
-      // const result = await this.create(submission)
-      // if (!result.success) {
-      //     return result
-      // }
+      const result = await this.create(submission)
+      if (!result.success) {
+           return result
+      }
       // return { success: true, body: await this.sanitize(result.body) }
 
       // Returning "success" here in the meantime.
       return { success: true }
-  }
-
-  async sanitize (submission) {
-    return {
-      //__v: user.__v,
-      _id: submission._id,
-      isDeleted: submission.isDeleted,
-      submissionName: submission.submissionName,
-      submissionNameNormal: submission.submissionNameNormal
-    }
-  }
-
-  async getSanitized (submissionId) {
-    const result = await this.get(submissionId)
-    if (!result.success) {
-      return result
-    }
-    return { success: true, body: await this.sanitize(result.body) }
-  }
-
-  async delete (submissionId) {
-    const submissionResult = await this.getBySubmissionId(submissionId)
-    if (!submissionResult || !submissionResult.length) {
-      return { success: false, error: 'Submission not found.' }
-    }
-
-    const submissionToDelete = submissionResult[0]
-
-    if (submissionToDelete.isDeleted) {
-      return { success: false, error: 'Submission not found.' }
-    }
-
-    submissionToDelete.isDeleted = true
-    submissionToDelete.clientToken = ''
-    await submissionToDelete.save()
-
-    return { success: true, body: await this.sanitize(submissionToDelete) }
   }
 
   async validateSubmission (reqBody) {
