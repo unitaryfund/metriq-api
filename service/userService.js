@@ -31,7 +31,7 @@ class UserService {
     return {
       __v: user.__v,
       _id: user._id,
-      clientToken: user.clientToken ? '[REDACTED]' : '',
+      clientToken: '[REDACTED]',
       dateJoined: user.dateJoined,
       email: user.email,
       isDeleted: user.isDeleted,
@@ -195,6 +195,34 @@ class UserService {
     }
 
     return { success: true }
+  }
+
+  async saveClientTokenForUserId (userId) {
+    const users = await this.getByUserId(userId)
+    if (!users || !users.length) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    const user = users[0]
+    user.clientToken = await this.generateClientJwt(userId)
+    user.clientTokenCreated = new Date()
+    await user.save()
+
+    return { success: true, body: user.clientToken }
+  }
+
+  async deleteClientTokenForUserId (userId) {
+    const users = await this.getByUserId(userId)
+    if (!users || !users.length) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    const user = users[0]
+    user.clientToken = ''
+    user.clientTokenCreated = null
+    await user.save()
+
+    return { success: true, body: '' }
   }
 }
 
