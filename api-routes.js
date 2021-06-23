@@ -13,6 +13,7 @@ router.get('/', function (req, res) {
 
 const accountController = require('./controller/accountController')
 const userController = require('./controller/userController')
+const submissionController = require('./controller/submissionController')
 
 // Register routes.
 router.route('/register')
@@ -24,6 +25,8 @@ router.route('/token')
 router.route('/user')
   .get(userController.read)
   .delete(userController.delete)
+router.route('/submission')
+  .put(submissionController.new)
 
 // Export API routes.
 module.exports = router
