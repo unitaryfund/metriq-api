@@ -42,11 +42,11 @@ const userSchema = mongoose.Schema({
 }, { autoIndex: config.isDebug })
 
 userSchema.methods.softDelete = function () {
-  this.model('user').deletedDate = new Date()
-  this.model('user').clientToken = ''
+  this.deletedDate = new Date()
+  this.clientToken = ''
 }
 userSchema.methods.isDeleted = function () {
-  return (this.model('user').deletedDate !== undefined) && (this.model('user').deletedDate !== null)
+  return !!(this.deletedDate)
 }
 
 // Export User model.

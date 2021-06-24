@@ -69,16 +69,21 @@ class UserService {
   }
 
   async get (userId) {
-    const userResult = await this.getByUserId(userId)
-    if (!userResult || !userResult.length) {
-      return { success: false, error: 'User not found.' }
+    let userResult = []
+    try {
+      userResult = await this.getByUserId(userId)
+      if (!userResult || !userResult.length) {
+        return { success: false, error: 'User not found.' }
+      }
+    } catch (err) {
+      return { success: false, error: err }
     }
 
     const user = userResult[0]
 
-    // if (user.isDeleted()) {
-    //  return { success: false, error: 'User not found.' }
-    // }
+    if (user.isDeleted()) {
+      return { success: false, error: 'User not found.' }
+    }
 
     return { success: true, body: user }
   }
@@ -126,6 +131,7 @@ class UserService {
     user.email = reqBody.email.trim().toLowerCase()
     user.dateJoined = new Date()
     user.passwordHash = await bcrypt.hash(reqBody.password, saltRounds)
+    user.deletedDate = null
 
     const result = await this.create(user)
     if (!result.success) {
