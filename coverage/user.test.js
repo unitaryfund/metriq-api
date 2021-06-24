@@ -88,15 +88,32 @@ describe('user', () => {
         // Initialize
         const userService = new UserService()
         const registerResult = await userService.register(registration1)
-        const getResult = await userService.get(registerResult.body._id)
-        const user = getResult.body
+        await userService.saveClientTokenForUserId(registerResult.body._id)
+        let getResult = await userService.get(registerResult.body._id)
+        let user = getResult.body
 
         // Act
-        const nUser = await userService.sanitize(user)
+        let nUser = await userService.sanitize(user)
 
         // Assert
         expect(nUser)
             .toMatchObject({
+                clientToken: '[REDACTED]',
+                passwordHash: '[REDACTED]',
+            })
+        
+        // Initialize
+        await userService.deleteClientTokenForUserId(registerResult.body._id)
+        getResult = await userService.get(registerResult.body._id)
+        user = getResult.body
+
+        // Act
+        nUser = await userService.sanitize(user)
+
+        // Assert
+        expect(nUser)
+            .toMatchObject({
+                clientToken: '',
                 passwordHash: '[REDACTED]',
             })
     })
