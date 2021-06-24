@@ -16,7 +16,7 @@ const submissionSchema = mongoose.Schema({
     unique: true,
     index: true
   },
-  dateAdded: {
+  submittedDate: {
     type: Date,
     required: true
   },

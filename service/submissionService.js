@@ -79,7 +79,7 @@ class SubmissionService {
     const submission = await this.MongooseServiceInstance.new()
     submission.submissionName = reqBody.submissionName.trim()
     submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
-    submission.dateAdded = new Date()
+    submission.submittedDate = new Date()
 
     const result = await this.create(submission)
     if (!result.success) {
