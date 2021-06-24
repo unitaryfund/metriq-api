@@ -32,6 +32,7 @@ class UserService {
       __v: user.__v,
       _id: user._id,
       clientToken: '[REDACTED]',
+      clientTokenCreated: user.clientTokenCreated,
       dateJoined: user.dateJoined,
       email: user.email,
       passwordHash: '[REDACTED]',
