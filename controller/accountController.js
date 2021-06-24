@@ -66,7 +66,7 @@ exports.login = async function (req, res) {
     true)
 }
 
-// Validate the login request and log the user in.
+// Generate a new client token for the user ID claim
 exports.newToken = async function (req, res) {
   if (req.user.role !== 'web') {
     sendResponse(res, 403, 'Authorization role lacks privileges.')
@@ -74,18 +74,20 @@ exports.newToken = async function (req, res) {
   }
 
   routeWrapper(res,
-    async () => {
-      const users = await userService.getByUserId(req.user.id)
-      if (!users || !users.length) {
-        return { success: false, error: 'User not found.' }
-      }
-
-      const user = users[0]
-      user.clientToken = await userService.generateClientJwt(req.user.id)
-      await user.save()
-
-      return { success: true, body: user.clientToken }
-    },
+    async () => await userService.saveClientTokenForUserId(req.user.id),
     'Client token was generated successfully.',
+    false)
+}
+
+// Delete any client token for the user ID claim
+exports.deleteToken = async function (req, res) {
+  if (req.user.role !== 'web') {
+    sendResponse(res, 403, 'Authorization role lacks privileges.')
+    return
+  }
+
+  routeWrapper(res,
+    async () => await userService.deleteClientTokenForUserId(req.user.id),
+    'Client token was deleted successfully.',
     false)
 }
