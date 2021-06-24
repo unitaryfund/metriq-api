@@ -16,11 +16,22 @@ const submissionSchema = mongoose.Schema({
     unique: true,
     index: true
   },
-  isDeleted: {
-    type: Boolean,
-    default: false
+  dateAdded: {
+    type: Date,
+    required: true
+  },
+  deletedDate: {
+    type: Date,
+    default: null
   }
 }, { autoIndex: config.isDebug })
+
+submissionSchema.methods.softDelete = function () {
+  this.deletedDate = new Date()
+}
+submissionSchema.methods.isDeleted = function () {
+  return !!(this.deletedDate)
+}
 
 // Export Submission model.
 const Submission = module.exports = mongoose.model('submission', submissionSchema)

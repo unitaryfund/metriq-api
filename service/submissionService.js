@@ -28,18 +28,46 @@ class SubmissionService {
   }
 
   async get (submissionId) {
-    const submissionResult = await this.getBySubmissionId(submissionId)
-    if (!submissionResult || !submissionResult.length) {
-      return { success: false, error: 'Submission not found.' }
+    let submissionResult = []
+    try {
+      submissionResult = await this.getBySubmissionId(submissionId)
+      if (!submissionResult || !submissionResult.length) {
+        return { success: false, error: 'Submission not found' }
+      }
+    } catch (err) {
+      return { success: false, error: err }
     }
 
     const submission = submissionResult[0]
 
-    if (submission.isDeleted) {
-      return { success: false, error: 'Submission no found.' }
+    if (submission.isDeleted()) {
+      return { success: false, error: 'Submission not found.' }
     }
 
     return { success: true, body: submission }
+  }
+
+  async delete (submissionId) {
+    let submissionResult = []
+    try {
+      submissionResult = await this.getBySubmissionId(submissionId)
+      if (!submissionResult || !submissionResult.length) {
+        return { success: false, error: 'Submission not found.' }
+      }
+    } catch (err) {
+      return { success: false, error: err }
+    }
+
+    const submissionToDelete = submissionResult[0]
+
+    if (submissionToDelete.isDeleted()) {
+      return { success: false, error: 'Submission not found.' }
+    }
+
+    submissionToDelete.softDelete()
+    await submissionToDelete.save()
+
+    return { success: true, body: await submissionToDelete }
   }
 
   async submit (reqBody) {
@@ -51,8 +79,8 @@ class SubmissionService {
     const submission = await this.MongooseServiceInstance.new()
     submission.submissionName = reqBody.submissionName.trim()
     submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
+    submission.dateAdded = new Date()
 
-    // Note: This create method appears to not create a submission--but a user.
     const result = await this.create(submission)
     if (!result.success) {
       return result

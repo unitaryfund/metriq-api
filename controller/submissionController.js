@@ -44,13 +44,13 @@ exports.new = async function (req, res) {
 
 exports.read = async function (req, res) {
   routeWrapper(req, res,
-    async () => await submissionService.get(req.user.id),
+    async () => await submissionService.get(req.submission.id),
     'Successfully retrieved submission.')
 }
 
-// Validate the delete request and delete the user.
+// Validate the delete request and delete the submission.
 exports.delete = async function (req, res) {
   routeWrapper(req, res,
-    async () => await submissionService.delete(req.user.id),
+    async () => await submissionService.delete(req.submission.id),
     'Successfully deleted submission.')
 }
