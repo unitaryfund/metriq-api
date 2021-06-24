@@ -58,7 +58,7 @@ describe('user', () => {
         const userService = new UserService()
 
         // Act
-        const result = await userService.delete(undefinedUserId.id)
+        const result = await userService.delete(undefinedUserId._id)
 
         // Assert
         expect(result)
@@ -70,12 +70,11 @@ describe('user', () => {
     it('should fail to delete again if already deleted', async () => {
         // Initialize
         const userService = new UserService()
-        await userService.register(registration1)
-        const loginResult = await userService.login(login1)
-        await userService.delete(loginResult.body.id)
+        const registerResult = await userService.register(registration1)
+        await userService.delete(registerResult.body._id)
 
         // Act
-        const result = await userService.delete(loginResult.body.id)
+        const result = await userService.delete(registerResult.body._id)
 
         // Assert
         expect(result)

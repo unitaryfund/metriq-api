@@ -34,7 +34,6 @@ class UserService {
       clientToken: user.clientToken ? '[REDACTED]' : '',
       dateJoined: user.dateJoined,
       email: user.email,
-      isDeleted: user.isDeleted,
       passwordHash: '[REDACTED]',
       username: user.username,
       usernameNormal: user.usernameNormal
@@ -77,9 +76,9 @@ class UserService {
 
     const user = userResult[0]
 
-    if (user.isDeleted) {
-      return { success: false, error: 'User not found.' }
-    }
+    // if (user.isDeleted()) {
+    //  return { success: false, error: 'User not found.' }
+    // }
 
     return { success: true, body: user }
   }
@@ -93,19 +92,23 @@ class UserService {
   }
 
   async delete (userId) {
-    const userResult = await this.getByUserId(userId)
-    if (!userResult || !userResult.length) {
-      return { success: false, error: 'User not found.' }
+    let userResult = []
+    try {
+      userResult = await this.getByUserId(userId)
+      if (!userResult || !userResult.length) {
+        return { success: false, error: 'User not found.' }
+      }
+    } catch (err) {
+      return { success: false, error: err }
     }
 
     const userToDelete = userResult[0]
 
-    if (userToDelete.isDeleted) {
+    if (userToDelete.isDeleted()) {
       return { success: false, error: 'User not found.' }
     }
 
-    userToDelete.isDeleted = true
-    userToDelete.clientToken = ''
+    userToDelete.softDelete()
     await userToDelete.save()
 
     return { success: true, body: await this.sanitize(userToDelete) }
@@ -128,12 +131,13 @@ class UserService {
     if (!result.success) {
       return result
     }
+
     return { success: true, body: await this.sanitize(result.body) }
   }
 
   async login (reqBody) {
     const userResult = await this.getByUsername(reqBody.username)
-    if (!userResult || !userResult.length || userResult[0].isDeleted) {
+    if (!userResult || !userResult.length || userResult[0].isDeleted()) {
       return { success: false, error: 'User not found.' }
     }
 
