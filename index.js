@@ -29,33 +29,33 @@ app.use(express.json())
 app.use(cookieParser())
 
 // Set up cookie/header authorization checks.
-//app.use(jwt({
-//  secret: config.api.token.secretKey,
-//  algorithms: [config.api.token.algorithm],
-//  getToken: req => {
-//    if (req.cookies && req.cookies.token) {
-//      const decoded = jwtDecode(req.cookies.token)
-//      if (decoded.role !== 'web') {
-//        return ''
-//      }
-//      return req.cookies.token
-//    }
-//
-//    const authHeader = req.get('Authorization')
-//    if (!authHeader) {
-//      return ''
-//    }
-//
-//    const token = authHeader.substring(7, authHeader.length - 1)
-//    const decoded = jwtDecode(token)
-//
-//    if (decoded.role !== 'client') {
-//      return ''
-//    }
-//
-//    return token
-//  }
-//}).unless({ path: ['/api/login', '/api/register'] }))
+app.use(jwt({
+  secret: config.api.token.secretKey,
+  algorithms: [config.api.token.algorithm],
+  getToken: req => {
+    if (req.cookies && req.cookies.token) {
+      const decoded = jwtDecode(req.cookies.token)
+      if (decoded.role !== 'web') {
+        return ''
+      }
+      return req.cookies.token
+    }
+
+    const authHeader = req.get('Authorization')
+    if (!authHeader) {
+      return ''
+    }
+
+    const token = authHeader.substring(7, authHeader.length - 1)
+    const decoded = jwtDecode(token)
+
+    if (decoded.role !== 'client') {
+      return ''
+    }
+
+    return token
+  }
+}).unless({ path: ['/api/login', '/api/register'] }))
 
 // Fix mongoose deprecation warnings.
 // See https://stackoverflow.com/questions/51960171/node63208-deprecationwarning-collection-ensureindex-is-deprecated-use-creat.

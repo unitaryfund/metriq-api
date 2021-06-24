@@ -20,48 +20,44 @@ class SubmissionService {
   }
 
   async getBySubmissionId (submissionId) {
-      return await this.MongooseServiceInstance.find({ _id: submissionId })
+    return await this.MongooseServiceInstance.find({ _id: submissionId })
   }
 
   async getBySubmissionName (submissionName) {
-      return await this.MongooseServiceInstance.find({ submissionNameNormal: submissionName.trim().toLowerCase() })
+    return await this.MongooseServiceInstance.find({ submissionNameNormal: submissionName.trim().toLowerCase() })
   }
 
   async get (submissionId) {
-      const submissionResult = await this.getBySubmissionId(submissionId)
-      if (!submissionResult || !submissionResult.length) {
-          return { success: false, error: 'Submission not found.' }
-      }
+    const submissionResult = await this.getBySubmissionId(submissionId)
+    if (!submissionResult || !submissionResult.length) {
+      return { success: false, error: 'Submission not found.' }
+    }
 
-      const submission = submissionResult[0]
+    const submission = submissionResult[0]
 
-      if (submission.isDeleted) {
-          return { success: false, error: 'Submission no found.' }
-      }
-      console.log(submission)
+    if (submission.isDeleted) {
+      return { success: false, error: 'Submission no found.' }
+    }
 
-      return { success: true, body: submission }
+    return { success: true, body: submission }
   }
 
   async submit (reqBody) {
-      const validationResult = await this.validateSubmission(reqBody)
-      if (!validationResult.success) {
-          return validationResult
-      }
+    const validationResult = await this.validateSubmission(reqBody)
+    if (!validationResult.success) {
+      return validationResult
+    }
 
-      const submission = await this.MongooseServiceInstance.new()
-      submission.submissionName = reqBody.submissionName.trim()
-      submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
+    const submission = await this.MongooseServiceInstance.new()
+    submission.submissionName = reqBody.submissionName.trim()
+    submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
 
-      // Note: This create method appears to not create a submission--but a user.
-      const result = await this.create(submission)
-      if (!result.success) {
-           return result
-      }
-      // return { success: true, body: await this.sanitize(result.body) }
-
-      // Returning "success" here in the meantime.
-      return { success: true }
+    // Note: This create method appears to not create a submission--but a user.
+    const result = await this.create(submission)
+    if (!result.success) {
+      return result
+    }
+    return { success: true, body: result.body }
   }
 
   async validateSubmission (reqBody) {
