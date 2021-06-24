@@ -77,6 +77,7 @@ class SubmissionService {
     }
 
     const submission = await this.MongooseServiceInstance.new()
+    submission.userId = reqBody.userId
     submission.submissionName = reqBody.submissionName.trim()
     submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
     submission.submittedDate = new Date()

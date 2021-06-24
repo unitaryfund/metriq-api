@@ -5,6 +5,11 @@ const mongoose = require('mongoose')
 
 // Set up schema.
 const submissionSchema = mongoose.Schema({
+  userId: {
+    type: String,
+    required: true,
+    index: true
+  },
   submissionName: {
     type: String,
     required: true,
@@ -14,7 +19,6 @@ const submissionSchema = mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    index: true
   },
   submittedDate: {
     type: Date,

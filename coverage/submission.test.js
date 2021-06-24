@@ -83,10 +83,13 @@ describe('submission', () => {
 })
 
 const submission1 = {
+    userId: '1234',
     submissionName: 'Test Submission',
 }
 
 const submissionResponse1 = {
+    userId: '1234',
+    submissionName: 'Test Submission',
     submissionName: 'Test Submission',
     submissionNameNormal: 'test submission'
 }
