@@ -74,7 +74,7 @@ if (!db) {
   console.log('Db connection successful')
 }
 
-if (config.isDebug) {
+if (config.isDebug && !process.env.METRIQ_SECRET_KEY) {
   console.log('Debugging session secret: ' + config.api.token.secretKey)
 }
 
