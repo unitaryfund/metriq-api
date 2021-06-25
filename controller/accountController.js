@@ -66,6 +66,16 @@ exports.login = async function (req, res) {
     true)
 }
 
+exports.logout = async function (req, res) {
+  // Set token to none and expire after 5 seconds.
+  res.cookie('token', 'none', {
+    expires: new Date(Date.now() + 5 * 1000),
+    httpOnly: true
+  })
+  res.status(200)
+    .json({ success: true, message: 'Logout was successful.' })
+}
+
 // Generate a new client token for the user ID claim.
 exports.newToken = async function (req, res) {
   if (req.user.role !== 'web') {
