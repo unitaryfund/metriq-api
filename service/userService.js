@@ -143,7 +143,11 @@ class UserService {
   }
 
   async login (reqBody) {
-    const userResult = await this.getByUsername(reqBody.username)
+    let userResult = await this.getByUsername(reqBody.username)
+    // If user not found by username, attempt lookup by email address.
+    if (userResult.length === 0) {
+      userResult = await this.getByEmail(reqBody.username)
+    }
     if (!userResult || !userResult.length || userResult[0].isDeleted()) {
       return { success: false, error: 'User not found.' }
     }
