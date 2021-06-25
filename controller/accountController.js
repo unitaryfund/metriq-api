@@ -66,7 +66,7 @@ exports.login = async function (req, res) {
     true)
 }
 
-// Generate a new client token for the user ID claim
+// Generate a new client token for the user ID claim.
 exports.newToken = async function (req, res) {
   if (req.user.role !== 'web') {
     sendResponse(res, 403, 'Authorization role lacks privileges.')

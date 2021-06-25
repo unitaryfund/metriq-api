@@ -91,28 +91,10 @@ describe('user', () => {
         let getResult = await userService.get(registerResult.body._id)
         let user = getResult.body
 
-        // Act
-        let nUser = await userService.sanitize(user)
-
         // Assert
         expect(nUser)
             .toMatchObject({
                 clientToken: '[REDACTED]',
-                passwordHash: '[REDACTED]',
-            })
-        
-        // Initialize
-        await userService.deleteClientTokenForUserId(registerResult.body._id)
-        getResult = await userService.get(registerResult.body._id)
-        user = getResult.body
-
-        // Act
-        nUser = await userService.sanitize(user)
-
-        // Assert
-        expect(nUser)
-            .toMatchObject({
-                clientToken: '',
                 passwordHash: '[REDACTED]',
             })
     })

@@ -27,13 +27,17 @@ const userSchema = mongoose.Schema({
     match: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
     index: true
   },
+  dateJoined: {
+    type: Date,
+    required: true
+  },
   clientToken: {
     type: String,
     default: ''
   },
-  dateJoined: {
+  clientTokenCreated: {
     type: Date,
-    required: true
+    default: null
   },
   deletedDate: {
     type: Date,
