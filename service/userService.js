@@ -31,7 +31,8 @@ class UserService {
     return {
       __v: user.__v,
       _id: user._id,
-      clientToken: user.clientToken ? '[REDACTED]' : '',
+      clientToken: '[REDACTED]',
+      clientTokenCreated: user.clientTokenCreated,
       dateJoined: user.dateJoined,
       email: user.email,
       passwordHash: '[REDACTED]',
@@ -215,6 +216,7 @@ class UserService {
 
     const user = users[0]
     user.clientToken = await this.generateClientJwt(userId)
+    user.clientTokenCreated = new Date()
     await user.save()
 
     return { success: true, body: user.clientToken }
@@ -228,6 +230,7 @@ class UserService {
 
     const user = users[0]
     user.clientToken = ''
+    user.clientTokenCreated = null
     await user.save()
 
     return { success: true, body: '' }
