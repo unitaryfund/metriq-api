@@ -23,13 +23,28 @@ afterAll(async () => await dbHandler.closeDatabase());
  */
 describe('login', () => {
 
-    it('returns the expected for a valid request', async () => {
+    it('perform login by valid username', async () => {
         // Initialize
         const userService = new UserService()
         await userService.register(registration1)
 
         // Act
-        const result = await userService.login(login1)
+        const result = await userService.login(loginUsername1)
+
+        // Assert
+        expect(result)
+            .toMatchObject({
+                success: true
+            })
+    })
+
+    it('perform login by valid email', async () => {
+        // Initialize
+        const userService = new UserService()
+        await userService.register(registration1)
+
+        // Act
+        const result = await userService.login(loginEmail1)
 
         // Assert
         expect(result)
@@ -58,7 +73,7 @@ describe('login', () => {
     const userService = new UserService()
 
     // Act
-    const result = await userService.login(login1)
+    const result = await userService.login(loginUsername1)
 
     // Assert
     expect(result)
@@ -76,8 +91,13 @@ const registration1 = {
     passwordConfirm: 'TestUser1!'
 }
 
-const login1 = {
+const loginUsername1 = {
     username: 'Test1',
+    password: 'TestUser1!'
+}
+
+const loginEmail1 = {
+    email: 'test@test.com',
     password: 'TestUser1!'
 }
 
