@@ -239,6 +239,28 @@ class UserService {
 
     return { success: true, body: '' }
   }
+
+  async changePassword (reqBody) {
+    const users = await this.getByUserId(reqBody.id)
+    if (!users || !users.length) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    const user = users[0]
+
+    if (!reqBody.password || (reqBody.password.length < 8)) {
+      return { success: false, error: 'Password is too short.' }
+    }
+
+    if (!reqBody.passwordConfirm || (reqBody.password !== reqBody.passwordConfirm)) {
+      return { success: false, error: 'Password and confirmation do not match.' }
+    }
+
+    user.passwordHash = await bcrypt.hash(reqBody.password, saltRounds)
+    await user.save()
+
+    return { success: true }
+  }
 }
 
 module.exports = UserService

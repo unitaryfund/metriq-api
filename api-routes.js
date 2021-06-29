@@ -30,6 +30,8 @@ router.route('/user')
   .delete(userController.delete)
 router.route('/submission')
   .put(submissionController.new)
+router.route('/user/password')
+  .post(accountController.newPassword)
 
 // Export API routes.
 module.exports = router

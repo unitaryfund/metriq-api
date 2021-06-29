@@ -89,7 +89,7 @@ exports.newToken = async function (req, res) {
     false)
 }
 
-// Delete any client token for the user ID claim
+// Delete any client token for the user ID claim.
 exports.deleteToken = async function (req, res) {
   if (req.user.role !== 'web') {
     sendResponse(res, 403, 'Authorization role lacks privileges.')
@@ -100,4 +100,17 @@ exports.deleteToken = async function (req, res) {
     async () => await userService.deleteClientTokenForUserId(req.user.id),
     'Client token was deleted successfully.',
     false)
+}
+
+// Allow client to change password for the user ID claim.
+exports.newPassword = async function (req, res) {
+  if (req.user.role !== 'web') {
+    sendResponse(res, 403, 'Authorization role lacks privileges.')
+    return
+  }
+
+  routeWrapper(res,
+    async () => await userService.changePassword(req),
+    'Password was changed successfully.',
+    true)
 }

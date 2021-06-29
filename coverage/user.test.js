@@ -2,6 +2,7 @@
 
 const dbHandler = require('./db-handler');
 const UserService = require('../service/userService');
+const { login } = require('../controller/accountController');
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -101,6 +102,71 @@ describe('user', () => {
                 passwordHash: '[REDACTED]',
             })
     })
+
+    it('should allow validated user to change password', async () => {
+        // Initialize
+        const userService = new UserService()
+        const registerResult = await userService.register(registration1)
+        await userService.saveClientTokenForUserId(registerResult.body._id)
+        let getResult = await userService.get(registerResult.body._id)
+        let user = getResult.body
+
+        user.password = newPassword1.password
+        user.passwordConfirm = newPassword1.passwordConfirm
+
+        // Act
+        const result = await userService.changePassword(user)
+
+        // Assert
+        expect(result)
+            .toMatchObject({
+                success: true
+            })
+    })
+
+    it('if password changed should fail login on prior password', async () => {
+        // Initialize
+        const userService = new UserService()
+        const registerResult = await userService.register(registration1)
+        await userService.saveClientTokenForUserId(registerResult.body._id)
+        let getResult = await userService.get(registerResult.body._id)
+        let user = getResult.body
+
+        user.password = newPassword1.password
+        user.passwordConfirm = newPassword1.passwordConfirm
+        await userService.changePassword(user)
+
+        // Act
+        const result = await userService.login(login1)
+
+        // Assert
+        expect(result)
+            .toMatchObject({
+                success: false
+            })
+    })
+
+    it('if password changed should succeed login on new password', async () => {
+        // Initialize
+        const userService = new UserService()
+        const registerResult = await userService.register(registration1)
+        await userService.saveClientTokenForUserId(registerResult.body._id)
+        let getResult = await userService.get(registerResult.body._id)
+        let user = getResult.body
+
+        user.password = newPassword1.password
+        user.passwordConfirm = newPassword1.passwordConfirm
+        await userService.changePassword(user)
+
+        // Act
+        const result = await userService.login(newPassword1)
+
+        // Assert
+        expect(result)
+            .toMatchObject({
+                success: true
+            })
+    })
 })
 
 const registration1 = {
@@ -113,6 +179,12 @@ const registration1 = {
 const login1 = {
     username: 'Test1',
     password: 'TestUser1!'
+}
+
+const newPassword1 = {
+    username: 'Test1',
+    password: 'TestUser2!',
+    passwordConfirm: 'TestUser2!'
 }
 
 const profile1 = {
