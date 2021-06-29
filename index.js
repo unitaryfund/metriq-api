@@ -46,7 +46,7 @@ app.use(jwt({
       return ''
     }
 
-    const token = authHeader.substring(7, authHeader.length - 1)
+    const token = authHeader.substring(authHeader.indexOf(' ') + 1, authHeader.length)
     const decoded = jwtDecode(token)
 
     if (decoded.role !== 'client') {
