@@ -101,3 +101,14 @@ exports.deleteToken = async function (req, res) {
     'Client token was deleted successfully.',
     false)
 }
+
+// Generate a new client token for the user ID claim.
+exports.recover = async function (req, res) {
+  routeWrapper(res,
+    async () => {
+      await userService.SendRecoveryEmail(req.body.user)
+      return { success: true, body: '' }
+    },
+    'Request received.',
+    false)
+}

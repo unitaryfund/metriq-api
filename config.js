@@ -24,4 +24,9 @@ config.api.token.expiresIn = 3600
 // Algorithm used for encrypting JWT
 config.api.token.algorithm = 'HS256'
 
+config.supportEmail = {}
+config.supportEmail.service = process.env.METRIQ_SUPPORT_EMAIL_SERVICE
+config.supportEmail.address = process.env.METRIQ_SUPPORT_EMAIL_ADDRESS
+config.supportEmail.password = process.env.METRIQ_SUPPORT_EMAIL_PASSWORD
+
 module.exports = config

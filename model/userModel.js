@@ -2,6 +2,10 @@
 
 const config = require('./../config')
 const mongoose = require('mongoose')
+const { v4: uuidv4 } = require('uuid')
+
+const recoveryExpirationMinutes = 30
+const millisPerMinute = 60000
 
 // Set up schema.
 const userSchema = mongoose.Schema({
@@ -42,6 +46,14 @@ const userSchema = mongoose.Schema({
   deletedDate: {
     type: Date,
     default: null
+  },
+  recoveryToken: {
+    type: String,
+    default: null
+  },
+  recoveryTokenExpiration: {
+    type: Date,
+    default: null
   }
 }, { autoIndex: config.isDebug })
 
@@ -51,6 +63,10 @@ userSchema.methods.softDelete = function () {
 }
 userSchema.methods.isDeleted = function () {
   return !!(this.deletedDate)
+}
+userSchema.methods.generateRecovery = function () {
+  this.recoveryToken = uuidv4()
+  this.recoveryTokenExpiration = new Date((new Date()).getTime() + recoveryExpirationMinutes * millisPerMinute)
 }
 
 // Export User model.

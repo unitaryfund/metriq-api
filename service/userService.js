@@ -239,6 +239,22 @@ class UserService {
 
     return { success: true, body: '' }
   }
+
+  async SendRecoveryEmail (usernameOrEmail) {
+    let users = await this.getByUsername(usernameOrEmail)
+    if (!users || !users.length) {
+      users = await this.getByEmail(usernameOrEmail)
+      if (!users || !users.length) {
+        return { success: false, error: 'User not found.' }
+      }
+    }
+
+    const user = users[0]
+    user.generateRecovery()
+    user.save()
+
+    return { success: true, body: '' }
+  }
 }
 
 module.exports = UserService

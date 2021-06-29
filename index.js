@@ -55,7 +55,7 @@ app.use(jwt({
 
     return token
   }
-}).unless({ path: ['/api/login', '/api/register'] }))
+}).unless({ path: ['/api/login', '/api/register', '/api/recover'] }))
 
 // Fix mongoose deprecation warnings.
 // See https://stackoverflow.com/questions/51960171/node63208-deprecationwarning-collection-ensureindex-is-deprecated-use-creat.
@@ -76,6 +76,12 @@ if (!db) {
 
 if (config.isDebug && !process.env.METRIQ_SECRET_KEY) {
   console.log('Debugging session secret: ' + config.api.token.secretKey)
+}
+
+if (!config.supportEmail.service || !config.supportEmail.address || !config.supportEmail.password) {
+  console.log('Support email configuration is missing!')
+} else {
+  console.log('Support email is configured.')
 }
 
 // Set up a message for the default URL.
