@@ -13,6 +13,8 @@ const jwt = require('jsonwebtoken')
 // Config for JWT secret key
 const config = require('./../config')
 
+const nodemailer = require('nodemailer')
+
 class UserService {
   constructor () {
     this.MongooseServiceInstance = new MongooseService(UserModel)
@@ -251,9 +253,31 @@ class UserService {
 
     const user = users[0]
     user.generateRecovery()
-    user.save()
 
-    return { success: true, body: '' }
+    const transporter = nodemailer.createTransport({
+      service: config.supportEmail.service,
+      auth: {
+        user: config.supportEmail.account,
+        pass: config.supportEmail.password
+      }
+    })
+
+    const mailBody = 'Your password reset link is below: \n\n' + config.web.getUri() + '?token=' + user.recoveryToken + '\n\n If you did not request a password reset, you can ignore this message.'
+
+    const mailOptions = {
+      from: config.supportEmail.address,
+      to: user.email,
+      subject: 'Password reset request',
+      text: mailBody
+    }
+
+    const emailResult = await transporter.sendMail(mailOptions)
+    if (emailResult.accepted && (emailResult.accepted[0] === user.email)) {
+      user.save()
+      return { success: true, body: user.recoveryToken }
+    } else {
+      return { success: false, message: 'Could not send email.' }
+    }
   }
 }
 

@@ -78,7 +78,7 @@ if (config.isDebug && !process.env.METRIQ_SECRET_KEY) {
   console.log('Debugging session secret: ' + config.api.token.secretKey)
 }
 
-if (!config.supportEmail.service || !config.supportEmail.address || !config.supportEmail.password) {
+if (!config.supportEmail.service || !config.supportEmail.account || !config.supportEmail.password || !config.supportEmail.address) {
   console.log('Support email configuration is missing!')
 } else {
   console.log('Support email is configured.')

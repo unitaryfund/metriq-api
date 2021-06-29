@@ -25,6 +25,7 @@
     "jwt-decode": "^3.1.2",
     "mongodb-memory-server": "^6.9.6",
     "mongoose": "^5.12.12",
+    "nodemailer": "^6.6.2",
     "standard": "^16.0.3",
     "uuid": "^8.3.2"
   },
