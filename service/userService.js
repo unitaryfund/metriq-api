@@ -262,7 +262,7 @@ class UserService {
       }
     })
 
-    const mailBody = 'Your password reset link is below: \n\n' + config.web.getUri() + '?token=' + user.recoveryToken + '\n\n If you did not request a password reset, you can ignore this message.'
+    const mailBody = 'Your password reset link is below: \n\n' + config.web.getUri() + '/Recover?user=' + encodeURIComponent(user.usernameNormal) + '&token=' + user.recoveryToken + '\n\n If you did not request a password reset, you can ignore this message.'
 
     const mailOptions = {
       from: config.supportEmail.address,
