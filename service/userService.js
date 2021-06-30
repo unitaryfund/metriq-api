@@ -242,7 +242,7 @@ class UserService {
     return { success: true, body: '' }
   }
 
-  async SendRecoveryEmail (usernameOrEmail) {
+  async sendRecoveryEmail (usernameOrEmail) {
     let users = await this.getByUsername(usernameOrEmail)
     if (!users || !users.length) {
       users = await this.getByEmail(usernameOrEmail)
@@ -280,7 +280,7 @@ class UserService {
     }
   }
 
-  async TryPasswordRecoveryChange (reqBody) {
+  async tryPasswordRecoveryChange (reqBody) {
     if (!reqBody.password || (reqBody.password.length < 8)) {
       return { success: false, error: 'Password is too short.' }
     }
