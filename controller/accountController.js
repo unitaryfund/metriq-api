@@ -101,3 +101,22 @@ exports.deleteToken = async function (req, res) {
     'Client token was deleted successfully.',
     false)
 }
+
+// Generate a new recovery UUID and email.
+exports.recover = async function (req, res) {
+  routeWrapper(res,
+    async () => {
+      await userService.sendRecoveryEmail(req.body.user)
+      return { success: true, body: '' }
+    },
+    'Request received.',
+    false)
+}
+
+// Change password if UUID is valid for user.
+exports.password = async function (req, res) {
+  routeWrapper(res,
+    async () => await userService.tryPasswordRecoveryChange(req.body),
+    'Successfully changed password.',
+    true)
+}

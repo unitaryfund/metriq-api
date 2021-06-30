@@ -45,10 +45,7 @@ describe('submission', () => {
         const result = await submissionService.delete(submissionResult.body._id)
 
         // Assert
-        expect(result)
-            .toMatchObject({
-                success: true
-            })
+        expect(result.success).toBe(true)
     })
 
     it('not found should yield delete failure', async () => {
@@ -59,10 +56,7 @@ describe('submission', () => {
         const result = await submissionService.delete(undefinedSubmissionId._id)
 
         // Assert
-        expect(result)
-            .toMatchObject({
-                success: false
-            })
+        expect(result.success).toBe(false)
     })
 
     it('should fail to delete again if already deleted', async () => {
@@ -75,10 +69,7 @@ describe('submission', () => {
         const result = await submissionService.delete(submissionResult.body._id)
 
         // Assert
-        expect(result)
-            .toMatchObject({
-                success: false
-            })
+        expect(result.success).toBe(false)
     })
 })
 

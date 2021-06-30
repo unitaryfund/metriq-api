@@ -13,6 +13,8 @@ const jwt = require('jsonwebtoken')
 // Config for JWT secret key
 const config = require('./../config')
 
+const nodemailer = require('nodemailer')
+
 class UserService {
   constructor () {
     this.MongooseServiceInstance = new MongooseService(UserModel)
@@ -67,6 +69,14 @@ class UserService {
 
   async getByEmail (email) {
     return await this.MongooseServiceInstance.find({ email: email.trim().toLowerCase() })
+  }
+
+  async getByUsernameOrEmail (usernameOrEmail) {
+    let users = await this.getByUsername(usernameOrEmail)
+    if (!users || !users.length) {
+      users = await this.getByEmail(usernameOrEmail)
+    }
+    return users
   }
 
   async get (userId) {
@@ -143,11 +153,7 @@ class UserService {
   }
 
   async login (reqBody) {
-    let userResult = await this.getByUsername(reqBody.username)
-    // If user not found by username, attempt lookup by email address.
-    if (userResult.length === 0) {
-      userResult = await this.getByEmail(reqBody.username)
-    }
+    const userResult = await this.getByUsernameOrEmail(reqBody.username)
     if (!userResult || !userResult.length || userResult[0].isDeleted()) {
       return { success: false, error: 'User not found.' }
     }
@@ -167,12 +173,16 @@ class UserService {
     return re.test(email)
   }
 
+  validatePassword (password) {
+    return password && (password.length >= 8)
+  }
+
   async validateRegistration (reqBody) {
-    if (!reqBody.password || (reqBody.password.length < 8)) {
+    if (!this.validatePassword(reqBody.password)) {
       return { success: false, error: 'Password is too short.' }
     }
 
-    if (!reqBody.passwordConfirm || (reqBody.password !== reqBody.passwordConfirm)) {
+    if (reqBody.password !== reqBody.passwordConfirm) {
       return { success: false, error: 'Password and confirmation do not match.' }
     }
 
@@ -238,6 +248,68 @@ class UserService {
     await user.save()
 
     return { success: true, body: '' }
+  }
+
+  async sendRecoveryEmail (usernameOrEmail) {
+    const users = await this.getByUsernameOrEmail(usernameOrEmail)
+    if (!users || !users.length) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    const user = users[0]
+    user.generateRecovery()
+
+    const transporter = nodemailer.createTransport({
+      service: config.supportEmail.service,
+      auth: {
+        user: config.supportEmail.account,
+        pass: config.supportEmail.password
+      }
+    })
+
+    const mailBody = 'Your password reset link is below: \n\n' + config.web.getUri() + '/Recover/' + encodeURIComponent(user.usernameNormal) + '/' + user.recoveryToken + '\n\n If you did not request a password reset, you can ignore this message.'
+
+    const mailOptions = {
+      from: config.supportEmail.address,
+      to: user.email,
+      subject: 'Password reset request',
+      text: mailBody
+    }
+
+    const emailResult = await transporter.sendMail(mailOptions)
+    if (emailResult.accepted && (emailResult.accepted[0] === user.email)) {
+      await user.save()
+      return { success: true, body: user.recoveryToken }
+    } else {
+      return { success: false, message: 'Could not send email.' }
+    }
+  }
+
+  async tryPasswordRecoveryChange (reqBody) {
+    if (!this.validatePassword(reqBody.password)) {
+      return { success: false, error: 'Password is too short.' }
+    }
+
+    if (reqBody.password !== reqBody.passwordConfirm) {
+      return { success: false, error: 'Password and confirmation do not match.' }
+    }
+
+    const userResult = await this.getByUsernameOrEmail(reqBody.username)
+    if (!userResult || !userResult.length || userResult[0].isDeleted()) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    const user = userResult[0]
+    if (!user.recoveryToken || (user.recoveryToken !== reqBody.uuid) || (user.recoveryTokenExpiration < new Date())) {
+      return { success: false, error: 'Supplied bad recovery token.' }
+    }
+
+    user.passwordHash = await bcrypt.hash(reqBody.password, saltRounds)
+    user.recoveryToken = null
+    user.recoveryTokenExpiration = null
+    await user.save()
+
+    return { success: true, body: await this.sanitize(user) }
   }
 }
 

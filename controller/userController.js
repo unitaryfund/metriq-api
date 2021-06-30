@@ -14,7 +14,7 @@ function sendResponse (res, code, m) {
     .end(body)
 }
 
-async function routeWrapper (req, res, serviceFn, successMessage, isUserLogin) {
+async function routeWrapper (req, res, serviceFn, successMessage) {
   try {
     if (req.user.role !== 'web') {
       sendResponse(res, 403, 'Authorization role lacks privileges.')

@@ -32,10 +32,7 @@ describe('login', () => {
       const result = await userService.login(loginUsername1)
 
       // Assert
-      expect(result)
-          .toMatchObject({
-              success: true
-          })
+      expect(result.success).toBe(true)
   })
 
   it('perform login by valid email', async () => {
@@ -47,10 +44,7 @@ describe('login', () => {
       const result = await userService.login(loginEmail1)
 
       // Assert
-      expect(result)
-          .toMatchObject({
-              success: true
-          })
+      expect(result.success).toBe(true)
   })
 
   it('password that does not match user password should fail login', async () => {
@@ -62,10 +56,7 @@ describe('login', () => {
     const result = await userService.login(incorrectPassword)
 
     // Assert
-    expect(result)
-      .toMatchObject({
-        success: false
-      })
+    expect(result.success).toBe(false)
   })
 
   it('user that does not exist should fail login', async () => {
@@ -76,10 +67,7 @@ describe('login', () => {
     const result = await userService.login(loginUsername1)
 
     // Assert
-    expect(result)
-      .toMatchObject({
-        success: false
-      })
+    expect(result.success).toBe(false)
   })
 
 })
