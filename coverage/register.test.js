@@ -54,10 +54,7 @@ describe('register', () => {
         success: true,
         body: registration1Response
       })
-    expect(blocked)
-      .toMatchObject({
-        success: false
-      })
+    expect(blocked.success).toBe(false)
   })
 
   it('will not block a second unique user creation', async () => {
@@ -74,10 +71,7 @@ describe('register', () => {
         success: true,
         body: registration1Response
       })
-    expect(created2)
-      .toMatchObject({
-        success: true
-      })
+    expect(created2.success).toBe(true)
   })
 
   it('validates email', async () => {
@@ -88,10 +82,7 @@ describe('register', () => {
     const result = await userService.register(invalidEmail)
 
     // Assert
-    expect(result)
-      .toMatchObject({
-        success: false
-      })
+    expect(result.success).toBe(false)
   })
 
   it('validates password length', async () => {
@@ -102,10 +93,7 @@ describe('register', () => {
     const result = await userService.register(invalidPassword)
 
     // Assert
-    expect(result)
-      .toMatchObject({
-        success: false
-      })
+    expect(result.success).toBe(false)
   })
 
   it('validates password/confirm match', async () => {
@@ -116,10 +104,7 @@ describe('register', () => {
     const result = await userService.register(mismatchedPassword)
 
     // Assert
-    expect(result)
-      .toMatchObject({
-        success: false
-      })
+    expect(result.success).toBe(false)
   })
 })
 

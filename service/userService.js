@@ -278,7 +278,7 @@ class UserService {
 
     const emailResult = await transporter.sendMail(mailOptions)
     if (emailResult.accepted && (emailResult.accepted[0] === user.email)) {
-      user.save()
+      await user.save()
       return { success: true, body: user.recoveryToken }
     } else {
       return { success: false, message: 'Could not send email.' }
@@ -300,14 +300,14 @@ class UserService {
     }
 
     const user = userResult[0]
-    if ((user.recoveryToken !== reqBody.uuid) || (user.recoveryTokenExpiration < new Date())) {
+    if (!user.recoveryToken || (user.recoveryToken !== reqBody.uuid) || (user.recoveryTokenExpiration < new Date())) {
       return { success: false, error: 'Supplied bad recovery token.' }
     }
 
     user.passwordHash = await bcrypt.hash(reqBody.password, saltRounds)
     user.recoveryToken = null
     user.recoveryTokenExpiration = null
-    user.save()
+    await user.save()
 
     return { success: true, body: await this.sanitize(user) }
   }
