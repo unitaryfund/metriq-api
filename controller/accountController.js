@@ -106,7 +106,7 @@ exports.deleteToken = async function (req, res) {
 exports.recover = async function (req, res) {
   routeWrapper(res,
     async () => {
-      await userService.SendRecoveryEmail(req.body.user)
+      await userService.sendRecoveryEmail(req.body.user)
       return { success: true, body: '' }
     },
     'Request received.',
@@ -116,7 +116,7 @@ exports.recover = async function (req, res) {
 // Change password if UUID is valid for user.
 exports.password = async function (req, res) {
   routeWrapper(res,
-    async () => await userService.TryPasswordRecoveryChange(req.body),
+    async () => await userService.tryPasswordRecoveryChange(req.body),
     'Successfully changed password.',
     true)
 }

@@ -71,6 +71,14 @@ class UserService {
     return await this.MongooseServiceInstance.find({ email: email.trim().toLowerCase() })
   }
 
+  async getByUsernameOrEmail (usernameOrEmail) {
+    let users = await this.getByUsername(usernameOrEmail)
+    if (!users || !users.length) {
+      users = await this.getByEmail(usernameOrEmail)
+    }
+    return users
+  }
+
   async get (userId) {
     let userResult = []
     try {
@@ -145,11 +153,7 @@ class UserService {
   }
 
   async login (reqBody) {
-    let userResult = await this.getByUsername(reqBody.username)
-    // If user not found by username, attempt lookup by email address.
-    if (userResult.length === 0) {
-      userResult = await this.getByEmail(reqBody.username)
-    }
+    const userResult = await this.getByUsernameOrEmail(reqBody.username)
     if (!userResult || !userResult.length || userResult[0].isDeleted()) {
       return { success: false, error: 'User not found.' }
     }
@@ -169,12 +173,16 @@ class UserService {
     return re.test(email)
   }
 
+  validatePassword (password) {
+    return password && (password.length >= 8)
+  }
+
   async validateRegistration (reqBody) {
-    if (!reqBody.password || (reqBody.password.length < 8)) {
+    if (!this.validatePassword(reqBody.password)) {
       return { success: false, error: 'Password is too short.' }
     }
 
-    if (!reqBody.passwordConfirm || (reqBody.password !== reqBody.passwordConfirm)) {
+    if (reqBody.password !== reqBody.passwordConfirm) {
       return { success: false, error: 'Password and confirmation do not match.' }
     }
 
@@ -243,12 +251,9 @@ class UserService {
   }
 
   async sendRecoveryEmail (usernameOrEmail) {
-    let users = await this.getByUsername(usernameOrEmail)
+    const users = await this.getByUsernameOrEmail(usernameOrEmail)
     if (!users || !users.length) {
-      users = await this.getByEmail(usernameOrEmail)
-      if (!users || !users.length) {
-        return { success: false, error: 'User not found.' }
-      }
+      return { success: false, error: 'User not found.' }
     }
 
     const user = users[0]
@@ -281,19 +286,15 @@ class UserService {
   }
 
   async tryPasswordRecoveryChange (reqBody) {
-    if (!reqBody.password || (reqBody.password.length < 8)) {
+    if (!this.validatePassword(reqBody.password)) {
       return { success: false, error: 'Password is too short.' }
     }
 
-    if (!reqBody.passwordConfirm || (reqBody.password !== reqBody.passwordConfirm)) {
+    if (reqBody.password !== reqBody.passwordConfirm) {
       return { success: false, error: 'Password and confirmation do not match.' }
     }
 
-    let userResult = await this.getByUsername(reqBody.username)
-    // If user not found by username, attempt lookup by email address.
-    if (userResult.length === 0) {
-      userResult = await this.getByEmail(reqBody.username)
-    }
+    const userResult = await this.getByUsernameOrEmail(reqBody.username)
     if (!userResult || !userResult.length || userResult[0].isDeleted()) {
       return { success: false, error: 'User not found.' }
     }
