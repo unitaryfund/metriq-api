@@ -279,6 +279,37 @@ class UserService {
       return { success: false, message: 'Could not send email.' }
     }
   }
+
+  async TryPasswordRecoveryChange (reqBody) {
+    if (!reqBody.password || (reqBody.password.length < 8)) {
+      return { success: false, error: 'Password is too short.' }
+    }
+
+    if (!reqBody.passwordConfirm || (reqBody.password !== reqBody.passwordConfirm)) {
+      return { success: false, error: 'Password and confirmation do not match.' }
+    }
+
+    let userResult = await this.getByUsername(reqBody.username)
+    // If user not found by username, attempt lookup by email address.
+    if (userResult.length === 0) {
+      userResult = await this.getByEmail(reqBody.username)
+    }
+    if (!userResult || !userResult.length || userResult[0].isDeleted()) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    const user = userResult[0]
+    if ((user.recoveryToken !== reqBody.uuid) || (user.recoveryTokenExpiration < new Date())) {
+      return { success: false, error: 'Supplied bad recovery token.' }
+    }
+
+    user.passwordHash = await bcrypt.hash(reqBody.password, saltRounds)
+    user.recoveryToken = null
+    user.recoveryTokenExpiration = null
+    user.save()
+
+    return { success: true, body: await this.sanitize(user) }
+  }
 }
 
 module.exports = UserService

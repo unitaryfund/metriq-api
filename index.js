@@ -55,7 +55,7 @@ app.use(jwt({
 
     return token
   }
-}).unless({ path: ['/api/login', '/api/register', '/api/recover'] }))
+}).unless({ path: ['/api/login', '/api/register', '/api/recover', '/api/password'] }))
 
 // Fix mongoose deprecation warnings.
 // See https://stackoverflow.com/questions/51960171/node63208-deprecationwarning-collection-ensureindex-is-deprecated-use-creat.
