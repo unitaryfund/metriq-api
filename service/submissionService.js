@@ -27,10 +27,18 @@ class SubmissionService {
     return await this.MongooseServiceInstance.find({ submissionNameNormal: submissionName.trim().toLowerCase() })
   }
 
-  async get (submissionId) {
+  async getBySubmissionNameOrId (submissionNameOrId) {
+    let submission = await this.getBySubmissionId(submissionNameOrId)
+    if (!submission || !submission.length) {
+      submission = await this.getBySubmissionName(submissionNameOrId)
+    }
+    return submission
+  }
+
+  async get (submissionNameOrId) {
     let submissionResult = []
     try {
-      submissionResult = await this.getBySubmissionId(submissionId)
+      submissionResult = await this.getBySubmissionNameOrId(submissionNameOrId)
       if (!submissionResult || !submissionResult.length) {
         return { success: false, error: 'Submission not found' }
       }
@@ -45,6 +53,14 @@ class SubmissionService {
     }
 
     return { success: true, body: submission }
+  }
+
+  async getSanitized (submissionNameOrId) {
+    const result = await this.get(submissionNameOrId)
+    if (!result.success) {
+      return result
+    }
+    return { success: true, body: result.body }
   }
 
   async delete (submissionId) {
