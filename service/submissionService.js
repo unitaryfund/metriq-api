@@ -134,11 +134,11 @@ class SubmissionService {
     }
     const submission = submissions[0]
 
-    const users = await userService.getByUserId(userId)
-    if (!users || !users.length) {
+    const userResponse = await userService.get(userId)
+    if (!userResponse.success) {
       return { success: false, error: 'User not found.' }
     }
-    const user = users[0]
+    const user = userResponse.body
 
     if (!submission.upvotes.includes(user._id)) {
       submission.upvotes.push(user._id)

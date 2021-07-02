@@ -2,6 +2,7 @@
 
 const dbHandler = require('./db-handler');
 const SubmissionService = require('../service/submissionService');
+const UserService = require('../service/userService');
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -71,6 +72,37 @@ describe('submission', () => {
         // Assert
         expect(result.success).toBe(false)
     })
+
+    it('can be upvoted (only once)', async () => {
+        // Initialize
+        const submissionService = new SubmissionService()
+        const submissionResult = await submissionService.submit(submission1)
+        const userService = new UserService()
+        const user = await userService.register(registration1)
+
+        // Act
+        await submissionService.upvote(submissionResult.body._id, user.body._id)
+        const result = await submissionService.upvote(submissionResult.body._id, user.body._id)
+        console.log(result)
+
+        // Assert
+        expect(result.body.upvotes.length).toBe(1)
+    })
+
+    it('cannot be upvoted by a deleted user', async () => {
+        // Initialize
+        const submissionService = new SubmissionService()
+        const submissionResult = await submissionService.submit(submission1)
+        const userService = new UserService()
+        const user = await userService.register(registration1)
+        await userService.delete(user.body._id)
+
+        // Act
+        const result = await submissionService.upvote(submissionResult.body._id, user.body._id)
+
+        // Assert
+        expect(result.success).toBe(false)
+    })
 })
 
 const submission1 = {
@@ -88,4 +120,11 @@ const submissionResponse1 = {
 const undefinedSubmissionId = {
     submissionName: 'Test',
     id: "60cbedcdf5cf30ca9d645ab7"
+}
+
+const registration1 = {
+    username: 'Test1',
+    email:'test@test.com',
+    password:'TestUser1!',
+    passwordConfirm: 'TestUser1!'
 }
