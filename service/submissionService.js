@@ -5,6 +5,10 @@ const MongooseService = require('./mongooseService')
 // Database Model
 const SubmissionModel = require('../model/submissionModel')
 
+// Service dependencies
+const UserService = require('./userService')
+const userService = new UserService()
+
 class SubmissionService {
   constructor () {
     this.MongooseServiceInstance = new MongooseService(SubmissionModel)
@@ -121,6 +125,27 @@ class SubmissionService {
     }
 
     return { success: true }
+  }
+
+  async upvote (submissionId, userId) {
+    const submissions = await this.getBySubmissionId(submissionId)
+    if (!submissions || !submissions.length) {
+      return { success: false, error: 'Submission not found.' }
+    }
+    const submission = submissions[0]
+
+    const users = await userService.getByUserId(userId)
+    if (!users || !users.length) {
+      return { success: false, error: 'User not found.' }
+    }
+    const user = users[0]
+
+    if (!submission.upvotes.includes(user._id)) {
+      submission.upvotes.push(user._id)
+      await submission.save()
+    }
+
+    return { success: true, body: submission }
   }
 }
 
