@@ -20,6 +20,16 @@ app.use(cors())
 
 // Import routes.
 const apiRoutes = require('./api-routes')
+const publicApiRoutes = ['/api/login', '/api/register', '/api/recover', '/api/password']
+const unless = function (paths, middleware) {
+  return function (req, res, next) {
+    if (paths.includes(req.path)) {
+      return next()
+    } else {
+      return middleware(req, res, next)
+    }
+  }
+}
 // Configure bodyparser to handle post requests.
 app.use(express.urlencoded({
   extended: true
@@ -55,7 +65,42 @@ app.use(jwt({
 
     return token
   }
-}).unless({ path: ['/api/login', '/api/register', '/api/recover', '/api/password'] }))
+}).unless({ path: publicApiRoutes }))
+
+// Service class, for middleware
+const UserService = require('./service/userService')
+// Service instance, for middleware
+const userService = new UserService()
+
+function sendResponse (res, code, m) {
+  const body = JSON.stringify({ message: m })
+  res.writeHead(code, {
+    'Content-Length': Buffer.byteLength(body),
+    'Content-Type': 'text/plain'
+  })
+    .end(body)
+}
+
+// Check that cookie/header actually corresponds to a valid token
+app.use(unless(publicApiRoutes, async function (req, res, next) {
+  const userResponse = await userService.get(req.user.id)
+  if (!userResponse.success) {
+    sendResponse(res, 403, 'Invalid user token.')
+    return
+  }
+  const user = userResponse.body
+
+  if (req.user.role !== 'web') {
+    const authHeader = req.get('Authorization')
+    const token = authHeader.substring(authHeader.indexOf(' ') + 1, authHeader.length)
+    if (token !== user.clientToken) {
+      sendResponse(res, 403, 'Invalid user token.')
+      return
+    }
+  }
+
+  next()
+}))
 
 // Fix mongoose deprecation warnings.
 // See https://stackoverflow.com/questions/51960171/node63208-deprecationwarning-collection-ensureindex-is-deprecated-use-creat.
