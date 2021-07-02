@@ -27,6 +27,10 @@ const submissionSchema = mongoose.Schema({
   deletedDate: {
     type: Date,
     default: null
+  },
+  upvotes: {
+    type: [mongoose.Schema.Types.ObjectId],
+    default: []
   }
 }, { autoIndex: config.isDebug })
 

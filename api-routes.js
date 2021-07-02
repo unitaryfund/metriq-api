@@ -36,6 +36,8 @@ router.route('/submission')
   .put(submissionController.new)
 router.route('/submission/:id')
   .get(submissionController.read)
+router.route('/submission/:id/upvote')
+  .put(submissionController.upvote)
 
 // Export API routes.
 module.exports = router

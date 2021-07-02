@@ -50,3 +50,9 @@ exports.delete = async function (req, res) {
     async () => await submissionService.delete(req.submission.id),
     'Successfully deleted submission.')
 }
+
+exports.upvote = async function (req, res) {
+  routeWrapper(res,
+    async () => await submissionService.upvote(req.params.id, req.user.id),
+    'Up-voted submission!')
+}
