@@ -83,7 +83,6 @@ describe('submission', () => {
         // Act
         await submissionService.upvote(submissionResult.body._id, user.body._id)
         const result = await submissionService.upvote(submissionResult.body._id, user.body._id)
-        console.log(result)
 
         // Assert
         expect(result.body.upvotes.length).toBe(1)
