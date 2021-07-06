@@ -33,12 +33,12 @@ router.route('/user')
   .get(userController.read)
   .delete(userController.delete)
 router.route('/submission')
-  .put(submissionController.new)
+  .post(submissionController.new)
 router.route('/submission/:id')
   .get(submissionController.read)
   .delete(submissionController.delete)
 router.route('/submission/:id/upvote')
-  .put(submissionController.upvote)
+  .post(submissionController.upvote)
 
 // Export API routes.
 module.exports = router
