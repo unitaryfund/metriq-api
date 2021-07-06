@@ -36,6 +36,7 @@ router.route('/submission')
   .put(submissionController.new)
 router.route('/submission/:id')
   .get(submissionController.read)
+  .delete(submissionController.delete)
 router.route('/submission/:id/upvote')
   .put(submissionController.upvote)
 
