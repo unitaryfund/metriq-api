@@ -44,9 +44,9 @@ async function routeWrapper (res, serviceFn, successMessage, isUserLogin) {
 
 function setJwtCookie (res, token) {
   if (config.isDebug) {
-    res.cookie('token', token, { maxAge: config.api.token.expiresIn * 1000, httpOnly: true })
+    res.cookie('token', token, { maxAge: config.api.token.expiresIn * 1000, httpOnly: true, sameSite: 'Strict' })
   } else {
-    res.cookie('token', token, { maxAge: config.api.token.expiresIn * 1000, httpOnly: true, secure: true })
+    res.cookie('token', token, { maxAge: config.api.token.expiresIn * 1000, httpOnly: true, sameSite: 'Strict', secure: true })
   }
 }
 
