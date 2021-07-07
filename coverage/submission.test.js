@@ -106,19 +106,29 @@ describe('submission', () => {
     it('can be retrieved in popularity order', async () => {
         // Initialize
         const submissionService = new SubmissionService()
-        const submissionResult = await submissionService.submit(submission1)
+        const submissionResult1 = await submissionService.submit(submission1)
+        const submissionResult2 = await submissionService.submit(submission2)
+        const userService = new UserService()
+        const user = await userService.register(registration1)
+        await submissionService.upvote(submissionResult2.body._id, user.body._id)
 
         // Act
         const result = await submissionService.getTop(0, 10)
 
         // Assert
-        expect(result.body.length).toBe(1)
+        expect(result.body.length).toBe(2)
+        expect(result.body[0].upvoteRate).toBeGreaterThan(result.body[1].upvoteRate)
     })
 })
 
 const submission1 = {
     userId: '1234',
     submissionName: 'Test Submission',
+}
+
+const submission2 = {
+    userId: '1234',
+    submissionName: 'Test Submission 2',
 }
 
 const submissionResponse1 = {

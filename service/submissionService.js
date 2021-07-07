@@ -149,20 +149,20 @@ class SubmissionService {
   }
 
   async getTop (startIndex, count) {
-    const result = await this.MongooseServiceInstance.Collection.find( {
-      '$query': { deletedDate: null },
-      '$expr':
-        { "$addFields": {
-          "upvoteRate": {
-            "$divide": [
-              { "$size": "$upvotes" },
-              { "$toLong": {"$subtract": ["$$NOW", "$submittedDate"] } }
+    const result = await this.MongooseServiceInstance.Collection.aggregate([
+      { $match: { deletedDate: null } },
+      {
+        $addFields: {
+          upvoteRate: {
+            $divide: [
+              { $size: '$upvotes' },
+              { $toLong: { $subtract: [new Date(), '$submittedDate'] } }
             ]
           }
-        }}
-      })
-      .sort({ upvoteRate: -1 })
-      .skip(startIndex).limit(count);
+        }
+      },
+      { $sort: { upvoteRate: -1 } }
+    ]).skip(startIndex).limit(count)
     return { success: true, body: result }
   }
 }
