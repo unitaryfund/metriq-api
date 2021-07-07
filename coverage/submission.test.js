@@ -102,6 +102,18 @@ describe('submission', () => {
         // Assert
         expect(result.success).toBe(false)
     })
+
+    it('can be retrieved in popularity order', async () => {
+        // Initialize
+        const submissionService = new SubmissionService()
+        const submissionResult = await submissionService.submit(submission1)
+
+        // Act
+        const result = await submissionService.getTop(0, 10)
+
+        // Assert
+        expect(result.body.length).toBe(1)
+    })
 })
 
 const submission1 = {

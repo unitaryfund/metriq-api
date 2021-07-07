@@ -147,6 +147,24 @@ class SubmissionService {
 
     return { success: true, body: submission }
   }
+
+  async getTop (startIndex, count) {
+    const result = await this.MongooseServiceInstance.Collection.find( {
+      '$query': { deletedDate: null },
+      '$expr':
+        { "$addFields": {
+          "upvoteRate": {
+            "$divide": [
+              { "$size": "$upvotes" },
+              { "$toLong": {"$subtract": ["$$NOW", "$submittedDate"] } }
+            ]
+          }
+        }}
+      })
+      .sort({ upvoteRate: -1 })
+      .skip(startIndex).limit(count);
+    return { success: true, body: result }
+  }
 }
 
 module.exports = SubmissionService

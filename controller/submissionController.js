@@ -56,3 +56,10 @@ exports.upvote = async function (req, res) {
     async () => await submissionService.upvote(req.params.id, req.user.id),
     'Up-voted submission!')
 }
+
+const itemsPerPage = 10
+exports.top = async function (req, res) {
+  routeWrapper(res,
+    async () => await submissionService.getTop(req.params.page * itemsPerPage, itemsPerPage),
+    'Retrieved top results.')
+}
