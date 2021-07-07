@@ -40,6 +40,15 @@ submissionSchema.methods.softDelete = function () {
 submissionSchema.methods.isDeleted = function () {
   return !!(this.deletedDate)
 }
+submissionSchema.methods.getUpvoteCount = function () {
+  return this.upvotes.length
+}
+submissionSchema.methods.getAgeTicks = function () {
+  return (new Date().getTime() - this.submittedDate.getTime())
+}
+submissionSchema.methods.getUpvoteRate = function () {
+  return this.getUpvoteCount() / this.getAgeTicks()
+}
 
 // Export Submission model.
 const Submission = module.exports = mongoose.model('submission', submissionSchema)

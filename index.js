@@ -30,7 +30,7 @@ const unless = function (paths, middleware) {
     }
   }
 }
-// Configure bodyparser to handle post requests.
+// Configure express to handle post requests.
 app.use(express.urlencoded({
   extended: true
 }))

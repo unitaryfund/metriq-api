@@ -39,6 +39,8 @@ router.route('/submission/:id')
   .delete(submissionController.delete)
 router.route('/submission/:id/upvote')
   .post(submissionController.upvote)
+router.route('/submission/top/:page')
+  .get(submissionController.top)
 
 // Export API routes.
 module.exports = router
