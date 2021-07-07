@@ -106,7 +106,7 @@ describe('submission', () => {
     it('can be retrieved in popularity order', async () => {
         // Initialize
         const submissionService = new SubmissionService()
-        const submissionResult1 = await submissionService.submit(submission1)
+        await submissionService.submit(submission1)
         const submissionResult2 = await submissionService.submit(submission2)
         const userService = new UserService()
         const user = await userService.register(registration1)
