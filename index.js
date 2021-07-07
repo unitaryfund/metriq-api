@@ -20,14 +20,15 @@ app.use(cors())
 
 // Import routes.
 const apiRoutes = require('./api-routes')
-const publicApiRoutes = ['/api/login', '/api/register', '/api/recover', '/api/password']
+const publicApiRoutes = ['/api/login', '/api/register', '/api/recover', '/api/password', '/api/submission/trending', '/api/submission/latest', '/api/submission/popular']
 const unless = function (paths, middleware) {
   return function (req, res, next) {
-    if (paths.includes(req.path)) {
-      return next()
-    } else {
-      return middleware(req, res, next)
+    for (let i = 0; i < paths.length; i++) {
+      if (req.path.startsWith(paths[i])) {
+        return next()
+      }
     }
+    return middleware(req, res, next)
   }
 }
 // Configure express to handle post requests.
@@ -39,33 +40,35 @@ app.use(express.json())
 app.use(cookieParser())
 
 // Set up cookie/header authorization checks.
-app.use(jwt({
-  secret: config.api.token.secretKey,
-  algorithms: [config.api.token.algorithm],
-  getToken: req => {
-    if (req.cookies && req.cookies.token) {
-      const decoded = jwtDecode(req.cookies.token)
-      if (decoded.role !== 'web') {
+app.use(unless(publicApiRoutes,
+  jwt({
+    secret: config.api.token.secretKey,
+    algorithms: [config.api.token.algorithm],
+    getToken: req => {
+      if (req.cookies && req.cookies.token) {
+        const decoded = jwtDecode(req.cookies.token)
+        if (decoded.role !== 'web') {
+          return ''
+        }
+        return req.cookies.token
+      }
+
+      const authHeader = req.get('Authorization')
+      if (!authHeader) {
         return ''
       }
-      return req.cookies.token
+
+      const token = authHeader.substring(authHeader.indexOf(' ') + 1, authHeader.length)
+      const decoded = jwtDecode(token)
+
+      if (decoded.role !== 'client') {
+        return ''
+      }
+
+      return token
     }
-
-    const authHeader = req.get('Authorization')
-    if (!authHeader) {
-      return ''
-    }
-
-    const token = authHeader.substring(authHeader.indexOf(' ') + 1, authHeader.length)
-    const decoded = jwtDecode(token)
-
-    if (decoded.role !== 'client') {
-      return ''
-    }
-
-    return token
-  }
-}).unless({ path: publicApiRoutes }))
+  })
+))
 
 // Service class, for middleware
 const UserService = require('./service/userService')

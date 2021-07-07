@@ -39,8 +39,12 @@ router.route('/submission/:id')
   .delete(submissionController.delete)
 router.route('/submission/:id/upvote')
   .post(submissionController.upvote)
-router.route('/submission/top/:page')
-  .get(submissionController.top)
+router.route('/submission/trending/:page')
+  .get(submissionController.trending)
+router.route('/submission/popular/:page')
+  .get(submissionController.popular)
+router.route('/submission/latest/:page')
+  .get(submissionController.latest)
 
 // Export API routes.
 module.exports = router
