@@ -1,4 +1,4 @@
-// loginController.js
+// accountController.js
 
 // Config for JWT expiration
 const config = require('../config')
