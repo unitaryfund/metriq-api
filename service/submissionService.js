@@ -149,19 +149,20 @@ class SubmissionService {
   }
 
   async getTop (startIndex, count) {
+    const millisPerHour = 1000 * 60 * 60
     const result = await this.MongooseServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null } },
       {
         $addFields: {
-          upvoteRate: {
+          upvotesPerHour: {
             $divide: [
-              { $size: '$upvotes' },
+              { $multiply: [{ $size: '$upvotes' }, millisPerHour] },
               { $subtract: [new Date(), '$submittedDate'] }
             ]
           }
         }
       },
-      { $sort: { upvoteRate: -1 } }
+      { $sort: { upvotesPerHour: -1 } }
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
   }

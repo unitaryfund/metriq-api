@@ -117,7 +117,7 @@ describe('submission', () => {
 
         // Assert
         expect(result.body.length).toBe(2)
-        expect(result.body[0].upvoteRate).toBeGreaterThan(result.body[1].upvoteRate)
+        expect(result.body[0].upvotesPerHour).toBeGreaterThan(result.body[1].upvotesPerHour)
     })
 })
 
