@@ -156,7 +156,7 @@ class SubmissionService {
           upvoteRate: {
             $divide: [
               { $size: '$upvotes' },
-              { $toLong: { $subtract: [new Date(), '$submittedDate'] } }
+              { $subtract: [new Date(), '$submittedDate'] }
             ]
           }
         }
