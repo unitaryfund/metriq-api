@@ -27,7 +27,7 @@ describe('submission', () => {
     it('can be retrieved', async () => {
         // Initialize
         const submissionService = new SubmissionService()
-        const submissionResult = await submissionService.submit(submission1)
+        const submissionResult = await submissionService.submit(userId, submission1)
 
         // Act
         const result = await submissionService.get(submissionResult.body._id)
@@ -40,7 +40,7 @@ describe('submission', () => {
     it('can be deleted after creation', async () => {
         // Initialize
         const submissionService = new SubmissionService()
-        const submissionResult = await submissionService.submit(submission1)
+        const submissionResult = await submissionService.submit(userId, submission1)
 
         // Act
         const result = await submissionService.delete(submissionResult.body._id)
@@ -63,7 +63,7 @@ describe('submission', () => {
     it('should fail to delete again if already deleted', async () => {
         // Initialize
         const submissionService = new SubmissionService()
-        const submissionResult = await submissionService.submit(submission1)
+        const submissionResult = await submissionService.submit(userId, submission1)
         await submissionService.delete(submissionResult.body._id)
 
         // Act
@@ -76,7 +76,7 @@ describe('submission', () => {
     it('can be upvoted (only once)', async () => {
         // Initialize
         const submissionService = new SubmissionService()
-        const submissionResult = await submissionService.submit(submission1)
+        const submissionResult = await submissionService.submit(userId, submission1)
         const userService = new UserService()
         const user = await userService.register(registration1)
 
@@ -91,7 +91,7 @@ describe('submission', () => {
     it('cannot be upvoted by a deleted user', async () => {
         // Initialize
         const submissionService = new SubmissionService()
-        const submissionResult = await submissionService.submit(submission1)
+        const submissionResult = await submissionService.submit(userId, submission1)
         const userService = new UserService()
         const user = await userService.register(registration1)
         await userService.delete(user.body._id)
@@ -106,8 +106,8 @@ describe('submission', () => {
     it('can be retrieved in trending order', async () => {
         // Initialize
         const submissionService = new SubmissionService()
-        await submissionService.submit(submission1)
-        const submissionResult2 = await submissionService.submit(submission2)
+        await submissionService.submit(userId, submission1)
+        const submissionResult2 = await submissionService.submit(userId, submission2)
         const userService = new UserService()
         const user = await userService.register(registration1)
         await submissionService.upvote(submissionResult2.body._id, user.body._id)
@@ -123,8 +123,8 @@ describe('submission', () => {
     it('can be retrieved in popular order', async () => {
         // Initialize
         const submissionService = new SubmissionService()
-        await submissionService.submit(submission1)
-        const submissionResult2 = await submissionService.submit(submission2)
+        await submissionService.submit(userId, submission1)
+        const submissionResult2 = await submissionService.submit(userId, submission2)
         const userService = new UserService()
         const user = await userService.register(registration1)
         await submissionService.upvote(submissionResult2.body._id, user.body._id)
@@ -140,8 +140,8 @@ describe('submission', () => {
     it('can be retrieved in latest order', async () => {
         // Initialize
         const submissionService = new SubmissionService()
-        await submissionService.submit(submission1)
-        const submissionResult2 = await submissionService.submit(submission2)
+        await submissionService.submit(userId, submission1)
+        const submissionResult2 = await submissionService.submit(userId, submission2)
 
         // Act
         const result = await submissionService.getLatest(0, 10)
@@ -152,13 +152,13 @@ describe('submission', () => {
     })
 })
 
+const userId = '1234';
+
 const submission1 = {
-    userId: '1234',
     submissionName: 'Test Submission',
 }
 
 const submission2 = {
-    userId: '1234',
     submissionName: 'Test Submission 2',
 }
 
