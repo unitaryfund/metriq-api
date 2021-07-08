@@ -90,14 +90,14 @@ class SubmissionService {
     return { success: true, body: await submissionToDelete }
   }
 
-  async submit (reqBody) {
+  async submit (userId, reqBody) {
     const validationResult = await this.validateSubmission(reqBody)
     if (!validationResult.success) {
       return validationResult
     }
 
     const submission = await this.MongooseServiceInstance.new()
-    submission.userId = reqBody.userId
+    submission.userId = userId
     submission.submissionName = reqBody.submissionName.trim()
     submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
     submission.submittedDate = new Date()
