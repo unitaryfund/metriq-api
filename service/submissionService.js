@@ -148,7 +148,7 @@ class SubmissionService {
     return { success: true, body: submission }
   }
 
-  async getTop (startIndex, count) {
+  async getTrending (startIndex, count) {
     const millisPerHour = 1000 * 60 * 60
     const result = await this.MongooseServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null } },
@@ -163,6 +163,27 @@ class SubmissionService {
         }
       },
       { $sort: { upvotesPerHour: -1 } }
+    ]).skip(startIndex).limit(count)
+    return { success: true, body: result }
+  }
+
+  async getLatest (startIndex, count) {
+    const result = await this.MongooseServiceInstance.Collection.aggregate([
+      { $match: { deletedDate: null } },
+      { $sort: { submittedDate: -1 } }
+    ]).skip(startIndex).limit(count)
+    return { success: true, body: result }
+  }
+
+  async getPopular (startIndex, count) {
+    const result = await this.MongooseServiceInstance.Collection.aggregate([
+      { $match: { deletedDate: null } },
+      {
+        $addFields: {
+          upvotesCount: { $size: '$upvotes' }
+        }
+      },
+      { $sort: { upvotesCount: -1 } }
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
   }

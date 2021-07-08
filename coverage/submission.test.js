@@ -103,7 +103,7 @@ describe('submission', () => {
         expect(result.success).toBe(false)
     })
 
-    it('can be retrieved in popularity order', async () => {
+    it('can be retrieved in trending order', async () => {
         // Initialize
         const submissionService = new SubmissionService()
         await submissionService.submit(submission1)
@@ -113,11 +113,42 @@ describe('submission', () => {
         await submissionService.upvote(submissionResult2.body._id, user.body._id)
 
         // Act
-        const result = await submissionService.getTop(0, 10)
+        const result = await submissionService.getTrending(0, 10)
 
         // Assert
         expect(result.body.length).toBe(2)
         expect(result.body[0].upvotesPerHour).toBeGreaterThan(result.body[1].upvotesPerHour)
+    })
+
+    it('can be retrieved in popular order', async () => {
+        // Initialize
+        const submissionService = new SubmissionService()
+        await submissionService.submit(submission1)
+        const submissionResult2 = await submissionService.submit(submission2)
+        const userService = new UserService()
+        const user = await userService.register(registration1)
+        await submissionService.upvote(submissionResult2.body._id, user.body._id)
+
+        // Act
+        const result = await submissionService.getPopular(0, 10)
+
+        // Assert
+        expect(result.body.length).toBe(2)
+        expect(result.body[0].upvotesCount).toBeGreaterThan(result.body[1].upvotesCount)
+    })
+
+    it('can be retrieved in latest order', async () => {
+        // Initialize
+        const submissionService = new SubmissionService()
+        await submissionService.submit(submission1)
+        const submissionResult2 = await submissionService.submit(submission2)
+
+        // Act
+        const result = await submissionService.getLatest(0, 10)
+
+        // Assert
+        expect(result.body.length).toBe(2)
+        expect(result.body[0].submittedDate.getTime()).toBeGreaterThan(result.body[1].submittedDate.getTime())
     })
 })
 

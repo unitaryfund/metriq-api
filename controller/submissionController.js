@@ -58,8 +58,21 @@ exports.upvote = async function (req, res) {
 }
 
 const itemsPerPage = 10
-exports.top = async function (req, res) {
+
+exports.trending = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.getTop(parseInt(req.params.page) * itemsPerPage, itemsPerPage),
+    async () => await submissionService.getTrending(parseInt(req.params.page) * itemsPerPage, itemsPerPage),
+    'Retrieved top results.')
+}
+
+exports.latest = async function (req, res) {
+  routeWrapper(res,
+    async () => await submissionService.getLatest(parseInt(req.params.page) * itemsPerPage, itemsPerPage),
+    'Retrieved top results.')
+}
+
+exports.popular = async function (req, res) {
+  routeWrapper(res,
+    async () => await submissionService.getPopular(parseInt(req.params.page) * itemsPerPage, itemsPerPage),
     'Retrieved top results.')
 }
