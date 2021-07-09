@@ -37,6 +37,19 @@ describe('submission', () => {
             .toMatchObject(submissionResponse1)
     })
 
+    it('can be retrieved by user', async () => {
+        // Initialize
+        const submissionService = new SubmissionService()
+        const submissionResult = await submissionService.submit(userId, submission1)
+
+        // Act
+        const result = await submissionService.getByUserId(userId)
+
+        // Assert
+        expect(result.body[0])
+            .toMatchObject(submissionResponse1)
+    })
+
     it('can be deleted after creation', async () => {
         // Initialize
         const submissionService = new SubmissionService()
