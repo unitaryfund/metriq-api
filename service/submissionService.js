@@ -39,6 +39,10 @@ class SubmissionService {
     return submission
   }
 
+  async getByUserId (userId) {
+    return { success: true, body: await this.MongooseServiceInstance.find({ userId: userId, deletedDate: null }) }
+  }
+
   async get (submissionNameOrId) {
     let submissionResult = []
     try {

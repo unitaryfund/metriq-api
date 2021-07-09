@@ -141,7 +141,7 @@ describe('submission', () => {
         // Initialize
         const submissionService = new SubmissionService()
         await submissionService.submit(userId, submission1)
-        const submissionResult2 = await submissionService.submit(userId, submission2)
+        await submissionService.submit(userId, submission2)
 
         // Act
         const result = await submissionService.getLatest(0, 10)

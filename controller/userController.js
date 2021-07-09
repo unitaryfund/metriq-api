@@ -1,9 +1,11 @@
 // userController.js
 
-// Service class
+// Service classes
 const UserService = require('../service/userService')
-// Service instance
+const SubmissionService = require('../service/submissionService')
+// Service instances
 const userService = new UserService()
+const submissionService = new SubmissionService()
 
 function sendResponse (res, code, m) {
   const body = JSON.stringify({ message: m })
@@ -42,4 +44,11 @@ exports.delete = async function (req, res) {
   routeWrapper(req, res,
     async () => await userService.delete(req.user.id),
     'Successfully deleted user profile.')
+}
+
+// Validate the delete request and delete the user.
+exports.readSubmissions = async function (req, res) {
+  routeWrapper(req, res,
+    async () => await submissionService.getByUserId(req.user.id),
+    'Successfully retrieved user submissions.')
 }
