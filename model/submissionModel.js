@@ -24,6 +24,10 @@ const submissionSchema = mongoose.Schema({
     type: Date,
     required: true
   },
+  approvedDate: {
+    type: Date,
+    default: null
+  },
   deletedDate: {
     type: Date,
     default: null
@@ -44,7 +48,7 @@ submissionSchema.methods.getUpvoteCount = function () {
   return this.upvotes.length
 }
 submissionSchema.methods.getAgeTicks = function () {
-  return (new Date().getTime() - this.submittedDate.getTime())
+  return (new Date().getTime() - this.approvedDate.getTime())
 }
 submissionSchema.methods.getUpvoteRate = function () {
   return this.getUpvoteCount() / this.getAgeTicks()

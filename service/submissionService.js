@@ -155,13 +155,13 @@ class SubmissionService {
   async getTrending (startIndex, count) {
     const millisPerHour = 1000 * 60 * 60
     const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null } },
+      { $match: { deletedDate: null, approvedDate: { $ne: null } } },
       {
         $addFields: {
           upvotesPerHour: {
             $divide: [
               { $multiply: [{ $size: '$upvotes' }, millisPerHour] },
-              { $subtract: [new Date(), '$submittedDate'] }
+              { $subtract: [new Date(), '$approvedDate'] }
             ]
           }
         }
@@ -173,7 +173,7 @@ class SubmissionService {
 
   async getLatest (startIndex, count) {
     const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null } },
+      { $match: { deletedDate: null, approvedDate: { $ne: null } } },
       { $sort: { submittedDate: -1 } }
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
@@ -181,7 +181,7 @@ class SubmissionService {
 
   async getPopular (startIndex, count) {
     const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null } },
+      { $match: { deletedDate: null, approvedDate: { $ne: null } } },
       {
         $addFields: {
           upvotesCount: { $size: '$upvotes' }
