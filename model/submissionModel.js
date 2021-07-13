@@ -53,6 +53,9 @@ submissionSchema.methods.getAgeTicks = function () {
 submissionSchema.methods.getUpvoteRate = function () {
   return this.getUpvoteCount() / this.getAgeTicks()
 }
+submissionSchema.methods.approve = function () {
+  this.approvedDate = new Date()
+}
 
 // Export Submission model.
 const Submission = module.exports = mongoose.model('submission', submissionSchema)

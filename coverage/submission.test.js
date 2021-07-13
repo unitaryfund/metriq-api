@@ -1,5 +1,6 @@
 // tests/submission.test.js
 
+const mongoose = require('mongoose')
 const dbHandler = require('./db-handler');
 const SubmissionService = require('../service/submissionService');
 const UserService = require('../service/userService');
@@ -43,7 +44,7 @@ describe('submission', () => {
         const submissionResult = await submissionService.submit(userId, submission1)
 
         // Act
-        const result = await submissionService.getByUserId(userId)
+        const result = await submissionService.getByUserId(userId, 0, 10)
 
         // Assert
         expect(result.body[0])
@@ -56,7 +57,7 @@ describe('submission', () => {
         const submissionResult = await submissionService.submit(userId, submission1)
 
         // Act
-        const result = await submissionService.delete(submissionResult.body._id)
+        const result = await submissionService.deleteIfOwner(userId, submissionResult.body._id)
 
         // Assert
         expect(result.success).toBe(true)
@@ -67,7 +68,7 @@ describe('submission', () => {
         const submissionService = new SubmissionService()
 
         // Act
-        const result = await submissionService.delete(undefinedSubmissionId._id)
+        const result = await submissionService.deleteIfOwner(userId, undefinedSubmissionId._id)
 
         // Assert
         expect(result.success).toBe(false)
@@ -77,10 +78,10 @@ describe('submission', () => {
         // Initialize
         const submissionService = new SubmissionService()
         const submissionResult = await submissionService.submit(userId, submission1)
-        await submissionService.delete(submissionResult.body._id)
+        await submissionService.deleteIfOwner(userId, submissionResult.body._id)
 
         // Act
-        const result = await submissionService.delete(submissionResult.body._id)
+        const result = await submissionService.deleteIfOwner(userId, submissionResult.body._id)
 
         // Assert
         expect(result.success).toBe(false)
@@ -119,8 +120,12 @@ describe('submission', () => {
     it('can be retrieved in trending order', async () => {
         // Initialize
         const submissionService = new SubmissionService()
-        await submissionService.submit(userId, submission1)
+        const submissionResult1 = await submissionService.submit(userId, submission1)
+        submissionResult1.body.approve()
+        await submissionResult1.body.save()
         const submissionResult2 = await submissionService.submit(userId, submission2)
+        submissionResult2.body.approve()
+        await submissionResult2.body.save()
         const userService = new UserService()
         const user = await userService.register(registration1)
         await submissionService.upvote(submissionResult2.body._id, user.body._id)
@@ -136,8 +141,12 @@ describe('submission', () => {
     it('can be retrieved in popular order', async () => {
         // Initialize
         const submissionService = new SubmissionService()
-        await submissionService.submit(userId, submission1)
+        const submissionResult1 = await submissionService.submit(userId, submission1)
+        submissionResult1.body.approve()
+        await submissionResult1.body.save()
         const submissionResult2 = await submissionService.submit(userId, submission2)
+        submissionResult2.body.approve()
+        await submissionResult2.body.save()
         const userService = new UserService()
         const user = await userService.register(registration1)
         await submissionService.upvote(submissionResult2.body._id, user.body._id)
@@ -153,8 +162,12 @@ describe('submission', () => {
     it('can be retrieved in latest order', async () => {
         // Initialize
         const submissionService = new SubmissionService()
-        await submissionService.submit(userId, submission1)
-        await submissionService.submit(userId, submission2)
+        const submissionResult1 = await submissionService.submit(userId, submission1)
+        submissionResult1.body.approve()
+        await submissionResult1.body.save()
+        const submissionResult2 = await submissionService.submit(userId, submission2)
+        submissionResult2.body.approve()
+        await submissionResult2.body.save()
 
         // Act
         const result = await submissionService.getLatest(0, 10)
@@ -165,7 +178,7 @@ describe('submission', () => {
     })
 })
 
-const userId = '1234';
+const userId = mongoose.Types.ObjectId();
 
 const submission1 = {
     submissionName: 'Test Submission',
@@ -176,7 +189,7 @@ const submission2 = {
 }
 
 const submissionResponse1 = {
-    userId: '1234',
+    userId: userId,
     submissionName: 'Test Submission',
     submissionName: 'Test Submission',
     submissionNameNormal: 'test submission'
@@ -184,7 +197,7 @@ const submissionResponse1 = {
 
 const undefinedSubmissionId = {
     submissionName: 'Test',
-    id: "60cbedcdf5cf30ca9d645ab7"
+    id: mongoose.Types.ObjectId("60cbedcdf5cf30ca9d645ab7")
 }
 
 const registration1 = {

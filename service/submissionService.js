@@ -69,6 +69,18 @@ class SubmissionService {
     return { success: true, body: result.body }
   }
 
+  async approve (submissionId) {
+    const submissionResult = this.get(submissionId)
+    if (!submissionResult.success) {
+      return submissionResult
+    }
+    const submission = submissionResult.body
+    submission.approve()
+    await submission.save()
+
+    return { success: true, body: submission }
+  }
+
   async deleteIfOwner (userId, submissionId) {
     let submissionResult = []
     try {
