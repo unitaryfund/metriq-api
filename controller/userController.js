@@ -46,9 +46,11 @@ exports.delete = async function (req, res) {
     'Successfully deleted user profile.')
 }
 
+const itemsPerPage = 10
+
 // Validate the delete request and delete the user.
 exports.readSubmissions = async function (req, res) {
   routeWrapper(req, res,
-    async () => await submissionService.getByUserId(req.user.id),
+    async () => await submissionService.getByUserId(req.user.id, parseInt(req.params.page) * itemsPerPage, itemsPerPage),
     'Successfully retrieved user submissions.')
 }

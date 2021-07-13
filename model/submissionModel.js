@@ -6,7 +6,7 @@ const mongoose = require('mongoose')
 // Set up schema.
 const submissionSchema = mongoose.Schema({
   userId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
     index: true
   },

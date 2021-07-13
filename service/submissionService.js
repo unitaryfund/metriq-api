@@ -1,5 +1,7 @@
 // submissionService.js
 
+const mongoose = require('mongoose')
+
 // Data Access Layer
 const MongooseService = require('./mongooseService')
 // Database Model
@@ -39,10 +41,6 @@ class SubmissionService {
     return submission
   }
 
-  async getByUserId (userId) {
-    return { success: true, body: await this.MongooseServiceInstance.find({ userId: userId, deletedDate: null }) }
-  }
-
   async get (submissionNameOrId) {
     let submissionResult = []
     try {
@@ -71,7 +69,7 @@ class SubmissionService {
     return { success: true, body: result.body }
   }
 
-  async delete (submissionId) {
+  async deleteIfOwner (userId, submissionId) {
     let submissionResult = []
     try {
       submissionResult = await this.getBySubmissionId(submissionId)
@@ -86,6 +84,10 @@ class SubmissionService {
 
     if (submissionToDelete.isDeleted()) {
       return { success: false, error: 'Submission not found.' }
+    }
+
+    if (toString(submissionToDelete.userId) !== toString(userId)) {
+      return { success: false, error: 'Insufficient privileges to delete submission.' }
     }
 
     submissionToDelete.softDelete()
@@ -150,6 +152,15 @@ class SubmissionService {
     }
 
     return { success: true, body: submission }
+  }
+
+  async getByUserId (userId, startIndex, count) {
+    const oid = mongoose.Types.ObjectId(userId)
+    const result = await this.MongooseServiceInstance.Collection.aggregate([
+      { $match: { userId: oid, deletedDate: null } },
+      { $sort: { submittedDate: -1 } }
+    ]).skip(startIndex).limit(count)
+    return { success: true, body: result }
   }
 
   async getTrending (startIndex, count) {
