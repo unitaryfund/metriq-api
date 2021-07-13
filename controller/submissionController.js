@@ -34,7 +34,7 @@ async function routeWrapper (res, serviceFn, successMessage) {
 // Validate the submission request and create the submission model.
 exports.new = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.submit(req.user.id, req.body),
+    async () => await submissionService.submit(req.user.id, req.body, true),
     'New submission created!')
 }
 

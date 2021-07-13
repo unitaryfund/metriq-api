@@ -7,6 +7,10 @@ const MongooseService = require('./mongooseService')
 // Database Model
 const SubmissionModel = require('../model/submissionModel')
 
+// For email
+const config = require('./../config')
+const nodemailer = require('nodemailer')
+
 // Service dependencies
 const UserService = require('./userService')
 const userService = new UserService()
@@ -108,11 +112,17 @@ class SubmissionService {
     return { success: true, body: await submissionToDelete }
   }
 
-  async submit (userId, reqBody) {
+  async submit (userId, reqBody, sendEmail) {
     const validationResult = await this.validateSubmission(reqBody)
     if (!validationResult.success) {
       return validationResult
     }
+
+    const users = await userService.getByUserId(userId)
+    if (!users || !users.length) {
+      return { success: false, error: 'User not found.' }
+    }
+    const user = users[0]
 
     const submission = await this.MongooseServiceInstance.new()
     submission.userId = userId
@@ -124,6 +134,33 @@ class SubmissionService {
     if (!result.success) {
       return result
     }
+
+    if (!sendEmail) {
+      return { success: true, body: result.body }
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: config.supportEmail.service,
+      auth: {
+        user: config.supportEmail.account,
+        pass: config.supportEmail.password
+      }
+    })
+
+    const mailBody = 'We have received your submission: \n\n' + submission.submissionName + '\n\n There is a simple manual review process from an administrator, primarily to ensure that your submission is best categorized within our normal metadata categories. Once approved, your submission will be immediately visible to other users. If our administrators need further input from you, in order to properly categorize your submission, they will reach out to your email address, here.\n\nThank you for your submission!'
+
+    const mailOptions = {
+      from: config.supportEmail.address,
+      to: user.email,
+      subject: 'MetriQ submission received and under review',
+      text: mailBody
+    }
+
+    const emailResult = await transporter.sendMail(mailOptions)
+    if (!emailResult.accepted || (emailResult.accepted[0] !== user.email)) {
+      return { success: false, message: 'Could not send email.' }
+    }
+
     return { success: true, body: result.body }
   }
 
