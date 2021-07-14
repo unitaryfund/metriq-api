@@ -34,7 +34,7 @@ async function routeWrapper (res, serviceFn, successMessage) {
 // Validate the submission request and create the submission model.
 exports.new = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.submit(req.user.id, req.body),
+    async () => await submissionService.submit(req.user.id, req.body, true),
     'New submission created!')
 }
 
@@ -47,7 +47,7 @@ exports.read = async function (req, res) {
 // Validate the delete request and delete the submission.
 exports.delete = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.delete(req.params.id),
+    async () => await submissionService.deleteIfOwner(req.user.id, req.params.id),
     'Successfully deleted submission.')
 }
 

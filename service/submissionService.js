@@ -1,9 +1,15 @@
 // submissionService.js
 
+const mongoose = require('mongoose')
+
 // Data Access Layer
 const MongooseService = require('./mongooseService')
 // Database Model
 const SubmissionModel = require('../model/submissionModel')
+
+// For email
+const config = require('./../config')
+const nodemailer = require('nodemailer')
 
 // Service dependencies
 const UserService = require('./userService')
@@ -39,10 +45,6 @@ class SubmissionService {
     return submission
   }
 
-  async getByUserId (userId) {
-    return { success: true, body: await this.MongooseServiceInstance.find({ userId: userId, deletedDate: null }) }
-  }
-
   async get (submissionNameOrId) {
     let submissionResult = []
     try {
@@ -71,7 +73,19 @@ class SubmissionService {
     return { success: true, body: result.body }
   }
 
-  async delete (submissionId) {
+  async approve (submissionId) {
+    const submissionResult = this.get(submissionId)
+    if (!submissionResult.success) {
+      return submissionResult
+    }
+    const submission = submissionResult.body
+    submission.approve()
+    await submission.save()
+
+    return { success: true, body: submission }
+  }
+
+  async deleteIfOwner (userId, submissionId) {
     let submissionResult = []
     try {
       submissionResult = await this.getBySubmissionId(submissionId)
@@ -88,17 +102,27 @@ class SubmissionService {
       return { success: false, error: 'Submission not found.' }
     }
 
+    if (toString(submissionToDelete.userId) !== toString(userId)) {
+      return { success: false, error: 'Insufficient privileges to delete submission.' }
+    }
+
     submissionToDelete.softDelete()
     await submissionToDelete.save()
 
     return { success: true, body: await submissionToDelete }
   }
 
-  async submit (userId, reqBody) {
+  async submit (userId, reqBody, sendEmail) {
     const validationResult = await this.validateSubmission(reqBody)
     if (!validationResult.success) {
       return validationResult
     }
+
+    const users = await userService.getByUserId(userId)
+    if (!users || !users.length) {
+      return { success: false, error: 'User not found.' }
+    }
+    const user = users[0]
 
     const submission = await this.MongooseServiceInstance.new()
     submission.userId = userId
@@ -110,6 +134,33 @@ class SubmissionService {
     if (!result.success) {
       return result
     }
+
+    if (!sendEmail) {
+      return { success: true, body: result.body }
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: config.supportEmail.service,
+      auth: {
+        user: config.supportEmail.account,
+        pass: config.supportEmail.password
+      }
+    })
+
+    const mailBody = 'We have received your submission: \n\n' + submission.submissionName + '\n\n There is a simple manual review process from an administrator, primarily to ensure that your submission is best categorized within our normal metadata categories. Once approved, your submission will be immediately visible to other users. If our administrators need further input from you, in order to properly categorize your submission, they will reach out to your email address, here.\n\nThank you for your submission!'
+
+    const mailOptions = {
+      from: config.supportEmail.address,
+      to: user.email,
+      subject: 'MetriQ submission received and under review',
+      text: mailBody
+    }
+
+    const emailResult = await transporter.sendMail(mailOptions)
+    if (!emailResult.accepted || (emailResult.accepted[0] !== user.email)) {
+      return { success: false, message: 'Could not send email.' }
+    }
+
     return { success: true, body: result.body }
   }
 
@@ -152,16 +203,25 @@ class SubmissionService {
     return { success: true, body: submission }
   }
 
+  async getByUserId (userId, startIndex, count) {
+    const oid = mongoose.Types.ObjectId(userId)
+    const result = await this.MongooseServiceInstance.Collection.aggregate([
+      { $match: { userId: oid, deletedDate: null } },
+      { $sort: { submittedDate: -1 } }
+    ]).skip(startIndex).limit(count)
+    return { success: true, body: result }
+  }
+
   async getTrending (startIndex, count) {
     const millisPerHour = 1000 * 60 * 60
     const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null } },
+      { $match: { deletedDate: null, approvedDate: { $ne: null } } },
       {
         $addFields: {
           upvotesPerHour: {
             $divide: [
               { $multiply: [{ $size: '$upvotes' }, millisPerHour] },
-              { $subtract: [new Date(), '$submittedDate'] }
+              { $subtract: [new Date(), '$approvedDate'] }
             ]
           }
         }
@@ -173,7 +233,7 @@ class SubmissionService {
 
   async getLatest (startIndex, count) {
     const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null } },
+      { $match: { deletedDate: null, approvedDate: { $ne: null } } },
       { $sort: { submittedDate: -1 } }
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
@@ -181,7 +241,7 @@ class SubmissionService {
 
   async getPopular (startIndex, count) {
     const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null } },
+      { $match: { deletedDate: null, approvedDate: { $ne: null } } },
       {
         $addFields: {
           upvotesCount: { $size: '$upvotes' }

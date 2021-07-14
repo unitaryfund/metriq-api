@@ -6,7 +6,7 @@ const mongoose = require('mongoose')
 // Set up schema.
 const submissionSchema = mongoose.Schema({
   userId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
     index: true
   },
@@ -23,6 +23,10 @@ const submissionSchema = mongoose.Schema({
   submittedDate: {
     type: Date,
     required: true
+  },
+  approvedDate: {
+    type: Date,
+    default: null
   },
   deletedDate: {
     type: Date,
@@ -44,10 +48,13 @@ submissionSchema.methods.getUpvoteCount = function () {
   return this.upvotes.length
 }
 submissionSchema.methods.getAgeTicks = function () {
-  return (new Date().getTime() - this.submittedDate.getTime())
+  return (new Date().getTime() - this.approvedDate.getTime())
 }
 submissionSchema.methods.getUpvoteRate = function () {
   return this.getUpvoteCount() / this.getAgeTicks()
+}
+submissionSchema.methods.approve = function () {
+  this.approvedDate = new Date()
 }
 
 // Export Submission model.
