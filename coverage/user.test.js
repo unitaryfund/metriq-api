@@ -2,7 +2,6 @@
 
 const dbHandler = require('./db-handler');
 const UserService = require('../service/userService');
-const { password } = require('../controller/accountController');
 
 /**
  * Connect to a new in-memory database before running any tests.
