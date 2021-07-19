@@ -14,6 +14,8 @@ const nodemailer = require('nodemailer')
 // Service dependencies
 const UserService = require('./userService')
 const userService = new UserService()
+const TagService = require('./tagService')
+const tagService = new TagService()
 
 class SubmissionService {
   constructor () {
@@ -136,7 +138,8 @@ class SubmissionService {
       for (let i = 0; i < tagSplit.length; i++) {
         const tag = tagSplit[i].trim().toLowerCase()
         if (tag) {
-          tags.push(tag)
+          const tagModel = await tagService.incrementAndGet(tag)
+          tags.push(tagModel._id)
         }
       }
     }

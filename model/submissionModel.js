@@ -7,6 +7,7 @@ const mongoose = require('mongoose')
 const submissionSchema = mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
     required: true,
     index: true
   },
@@ -32,15 +33,9 @@ const submissionSchema = mongoose.Schema({
     type: Date,
     default: null
   },
-  upvotes: {
-    type: [mongoose.Schema.Types.ObjectId],
-    default: []
-  },
-  tags: {
-    type: [String],
-    default: []
-  }
-}, { autoIndex: config.isDebug })
+  upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
+  tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'tag' }]
+}, { autoIndex: config.isDebug, optimisticConcurrency: true })
 
 submissionSchema.methods.softDelete = function () {
   this.deletedDate = new Date()

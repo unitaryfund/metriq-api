@@ -55,7 +55,7 @@ const userSchema = mongoose.Schema({
     type: Date,
     default: null
   }
-}, { autoIndex: config.isDebug })
+}, { autoIndex: config.isDebug, optimisticConcurrency: true })
 
 userSchema.methods.softDelete = function () {
   this.deletedDate = new Date()
