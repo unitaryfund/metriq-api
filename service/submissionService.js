@@ -130,11 +130,11 @@ class SubmissionService {
     submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
     submission.submittedDate = new Date()
 
-    let tags = []
+    const tags = []
     if (reqBody.tags) {
-      let tagSplit = reqBody.tags.split(",")
+      const tagSplit = reqBody.tags.split(',')
       for (let i = 0; i < tagSplit.length; i++) {
-        let tag = tagSplit[i].trim().toLowerCase()
+        const tag = tagSplit[i].trim().toLowerCase()
         if (tag) {
           tags.push(tag)
         }
@@ -254,6 +254,19 @@ class SubmissionService {
   async getPopular (startIndex, count) {
     const result = await this.MongooseServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null, approvedDate: { $ne: null } } },
+      {
+        $addFields: {
+          upvotesCount: { $size: '$upvotes' }
+        }
+      },
+      { $sort: { upvotesCount: -1 } }
+    ]).skip(startIndex).limit(count)
+    return { success: true, body: result }
+  }
+
+  async getPopularByTag (tag, startIndex, count) {
+    const result = await this.MongooseServiceInstance.Collection.aggregate([
+      { $match: { deletedDate: null, approvedDate: { $ne: null }, tags: tag } },
       {
         $addFields: {
           upvotesCount: { $size: '$upvotes' }
