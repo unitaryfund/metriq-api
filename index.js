@@ -20,7 +20,7 @@ app.use(cors())
 
 // Import routes.
 const apiRoutes = require('./api-routes')
-const publicApiRoutes = ['/api/login', '/api/register', '/api/recover', '/api/password', '/api/submission/trending', '/api/submission/latest', '/api/submission/popular']
+const publicApiRoutes = ['/api/login', '/api/register', '/api/recover', '/api/password', '/api/tag', '/api/submission/trending', '/api/submission/latest', '/api/submission/popular']
 const unless = function (paths, middleware) {
   return function (req, res, next) {
     for (let i = 0; i < paths.length; i++) {

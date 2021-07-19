@@ -1,11 +1,9 @@
-// userController.js
+// tagController.js
 
 // Service classes
-const UserService = require('../service/userService')
-const SubmissionService = require('../service/submissionService')
+const TagService = require('../service/tagService')
 // Service instances
-const userService = new UserService()
-const submissionService = new SubmissionService()
+const tagService = new TagService()
 
 function sendResponse (res, code, m) {
   const body = JSON.stringify({ message: m })
@@ -35,22 +33,6 @@ async function routeWrapper (res, serviceFn, successMessage) {
 
 exports.read = async function (req, res) {
   routeWrapper(res,
-    async () => await userService.getSanitized(req.user.id),
-    'Successfully retrieved user profile.')
-}
-
-// Validate the delete request and delete the user.
-exports.delete = async function (req, res) {
-  routeWrapper(res,
-    async () => await userService.delete(req.user.id),
-    'Successfully deleted user profile.')
-}
-
-const itemsPerPage = 10
-
-// Validate the delete request and delete the user.
-exports.readSubmissions = async function (req, res) {
-  routeWrapper(res,
-    async () => await submissionService.getByUserId(req.user.id, parseInt(req.params.page) * itemsPerPage, itemsPerPage),
-    'Successfully retrieved user submissions.')
+    async () => await tagService.getAllNamesAndCounts(),
+    'Retrieved all tag names and counts.')
 }

@@ -14,6 +14,7 @@ router.get('/', function (req, res) {
 const accountController = require('./controller/accountController')
 const userController = require('./controller/userController')
 const submissionController = require('./controller/submissionController')
+const tagController = require('./controller/tagController')
 
 // Register routes.
 router.route('/register')
@@ -47,6 +48,8 @@ router.route('/submission/popular/:page')
   .get(submissionController.popular)
 router.route('/submission/latest/:page')
   .get(submissionController.latest)
+router.route('/tag')
+  .get(tagController.read)
 router.route('/submission/:tag/trending/:page')
   .get(submissionController.tagTrending)
 router.route('/submission/:tag/popular/:page')

@@ -33,4 +33,17 @@ describe('tag', () => {
         expect(result.submissionCount)
             .toEqual(1)
     })
+
+    it('can be listed', async () => {
+        // Initialize
+        const tagService = new TagService()
+        await tagService.incrementAndGet("test")
+
+        // Act
+        const result = await tagService.getAllNamesAndCounts()
+
+        // Assert
+        expect(result.success).toEqual(true)
+        expect(result.body.length).toEqual(1)
+    })
 })
