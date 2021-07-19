@@ -28,7 +28,6 @@ class TagService {
   }
 
   async getAllNamesAndCounts () {
-    console.log('In method.')
     const result = await this.MongooseServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null, submissionCount: { $gte: 1 } } },
       {
