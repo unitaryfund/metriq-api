@@ -35,6 +35,10 @@ const submissionSchema = mongoose.Schema({
   upvotes: {
     type: [mongoose.Schema.Types.ObjectId],
     default: []
+  },
+  tags: {
+    type: [String],
+    default: []
   }
 }, { autoIndex: config.isDebug })
 

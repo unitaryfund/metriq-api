@@ -130,6 +130,18 @@ class SubmissionService {
     submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
     submission.submittedDate = new Date()
 
+    let tags = []
+    if (reqBody.tags) {
+      let tagSplit = reqBody.tags.split(",")
+      for (let i = 0; i < tagSplit.length; i++) {
+        let tag = tagSplit[i].trim().toLowerCase()
+        if (tag) {
+          tags.push(tag)
+        }
+      }
+    }
+    submission.tags = tags
+
     const result = await this.create(submission)
     if (!result.success) {
       return result
