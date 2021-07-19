@@ -76,3 +76,9 @@ exports.popular = async function (req, res) {
     async () => await submissionService.getPopular(parseInt(req.params.page) * itemsPerPage, itemsPerPage),
     'Retrieved top results.')
 }
+
+exports.tagPopular = async function (req, res) {
+  routeWrapper(res,
+    async () => await submissionService.getPopularByTag(req.params.tag, parseInt(req.params.page) * itemsPerPage, itemsPerPage),
+    'Retrieved top results.')
+}

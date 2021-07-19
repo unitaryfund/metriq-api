@@ -47,6 +47,8 @@ router.route('/submission/popular/:page')
   .get(submissionController.popular)
 router.route('/submission/latest/:page')
   .get(submissionController.latest)
+router.route('/submission/:tag/popular/:page')
+  .get(submissionController.tagPopular)
 
 // Export API routes.
 module.exports = router
