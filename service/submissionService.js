@@ -311,6 +311,14 @@ class SubmissionService {
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
   }
+
+  async getLatestByTag (tag, startIndex, count) {
+    const result = await this.MongooseServiceInstance.Collection.aggregate([
+      { $match: { deletedDate: null, approvedDate: { $ne: null }, tags: tag } },
+      { $sort: { submittedDate: -1 } }
+    ]).skip(startIndex).limit(count)
+    return { success: true, body: result }
+  }
 }
 
 module.exports = SubmissionService
