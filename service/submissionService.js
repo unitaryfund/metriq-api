@@ -267,10 +267,17 @@ class SubmissionService {
     return { success: true, body: result }
   }
 
-  async getTrendingByTag (tag, startIndex, count) {
+  async getTrendingByTag (tagName, startIndex, count) {
     const millisPerHour = 1000 * 60 * 60
+
+    const tag = await tagService.getByTagName(tagName)
+    if (!tag || !tag.length) {
+      return { success: false, error: 'Category not found' }
+    }
+    const tagId = tag[0]._id
+
     const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, approvedDate: { $ne: null }, tags: tag } },
+      { $match: { deletedDate: null, approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
       {
         $addFields: {
           upvotesPerHour: {
@@ -286,9 +293,15 @@ class SubmissionService {
     return { success: true, body: result }
   }
 
-  async getPopularByTag (tag, startIndex, count) {
+  async getPopularByTag (tagName, startIndex, count) {
+    const tag = await tagService.getByTagName(tagName)
+    if (!tag || !tag.length) {
+      return { success: false, error: 'Category not found' }
+    }
+    const tagId = tag[0]._id
+
     const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, approvedDate: { $ne: null }, tags: tag } },
+      { $match: { deletedDate: null, approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
       {
         $addFields: {
           upvotesCount: { $size: '$upvotes' }
@@ -299,9 +312,15 @@ class SubmissionService {
     return { success: true, body: result }
   }
 
-  async getLatestByTag (tag, startIndex, count) {
+  async getLatestByTag (tagName, startIndex, count) {
+    const tag = await tagService.getByTagName(tagName)
+    if (!tag || !tag.length) {
+      return { success: false, error: 'Category not found' }
+    }
+    const tagId = tag[0]._id
+
     const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, approvedDate: { $ne: null }, tags: tag } },
+      { $match: { deletedDate: null, approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
       { $sort: { submittedDate: -1 } }
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
