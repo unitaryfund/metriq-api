@@ -312,9 +312,15 @@ class SubmissionService {
     return { success: true, body: result }
   }
 
-  async getLatestByTag (tag, startIndex, count) {
+  async getLatestByTag (tagName, startIndex, count) {
+    const tag = await tagService.getByTagName(tagName)
+    if (!tag || !tag.length) {
+      return { success: false, error: 'Category not found' }
+    }
+    const tagId = tag[0]._id
+
     const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, approvedDate: { $ne: null }, tags: tag } },
+      { $match: { deletedDate: null, approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
       { $sort: { submittedDate: -1 } }
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
