@@ -43,7 +43,7 @@ describe('submission', () => {
         // Initialize
         const userId = (await (new UserService()).register(registration1)).body._id
         const submissionService = new SubmissionService()
-        const submissionResult = await submissionService.submit(userId, submission1, false)
+        await submissionService.submit(userId, submission1, false)
 
         // Act
         const result = await submissionService.getByUserId(userId, 0, 10)
@@ -98,7 +98,7 @@ describe('submission', () => {
         const submissionService = new SubmissionService()
         const submissionResult = await submissionService.submit(userId, submission1, false)
         const userService = new UserService()
-        const user = await userService.register(registration1)
+        await userService.register(registration1)
 
         // Act
         await submissionService.upvote(submissionResult.body._id, userId)
@@ -114,7 +114,7 @@ describe('submission', () => {
         const submissionService = new SubmissionService()
         const submissionResult = await submissionService.submit(userId, submission1, false)
         const userService = new UserService()
-        const user = await userService.register(registration1)
+        await userService.register(registration1)
         await userService.delete(userId)
 
         // Act
@@ -135,7 +135,7 @@ describe('submission', () => {
         submissionResult2.body.approve()
         await submissionResult2.body.save()
         const userService = new UserService()
-        const user = await userService.register(registration1)
+        await userService.register(registration1)
         await submissionService.upvote(submissionResult2.body._id, userId)
 
         // Act
@@ -157,7 +157,7 @@ describe('submission', () => {
         submissionResult2.body.approve()
         await submissionResult2.body.save()
         const userService = new UserService()
-        const user = await userService.register(registration1)
+        await userService.register(registration1)
         await submissionService.upvote(submissionResult2.body._id, userId)
 
         // Act
