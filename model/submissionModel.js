@@ -25,6 +25,10 @@ const submissionSchema = mongoose.Schema({
     type: Date,
     required: true
   },
+  submissionThumbnailUrl: {
+    type: String,
+    default: config.defaultSubmissionThumbnailUrl
+  },
   approvedDate: {
     type: Date,
     default: null

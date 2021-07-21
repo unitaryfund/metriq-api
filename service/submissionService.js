@@ -132,6 +132,12 @@ class SubmissionService {
     submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
     submission.submittedDate = new Date()
 
+    if (reqBody.submissionThumbnailUrl) {
+      submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl
+    } else {
+      submission.submissionThumbnailUrl = config.defaultSubmissionThumbnailUrl
+    }
+
     const tags = []
     if (reqBody.tags) {
       const tagSplit = reqBody.tags.split(',')

@@ -37,4 +37,6 @@ config.supportEmail.account = process.env.METRIQ_SUPPORT_EMAIL_ACCOUNT
 config.supportEmail.password = process.env.METRIQ_SUPPORT_EMAIL_PASSWORD
 config.supportEmail.address = process.env.METRIQ_SUPPORT_EMAIL_ADDRESS
 
+config.defaultSubmissionThumbnailUrl = config.api.protocol + config.api.url + '/default.jpg'
+
 module.exports = config
