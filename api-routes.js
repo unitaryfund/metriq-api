@@ -15,6 +15,7 @@ const accountController = require('./controller/accountController')
 const userController = require('./controller/userController')
 const submissionController = require('./controller/submissionController')
 const tagController = require('./controller/tagController')
+const resultController = require('./controller/resultController')
 
 // Register routes.
 router.route('/register')
@@ -56,6 +57,8 @@ router.route('/submission/:tag/popular/:page')
   .get(submissionController.tagPopular)
 router.route('/submission/:tag/latest/:page')
   .get(submissionController.tagLatest)
+router.route('/result')
+  .post(resultController.new)
 
 // Export API routes.
 module.exports = router
