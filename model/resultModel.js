@@ -11,6 +11,11 @@ const resultSchema = mongoose.Schema({
     unique: true,
     index: true
   },
+  submission: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'submission',
+    required: true
+  },
   isHigherBetter: {
     type: Boolean,
     required: true
