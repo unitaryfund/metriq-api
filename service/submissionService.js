@@ -72,7 +72,7 @@ class SubmissionService {
     if (!result.success) {
       return result
     }
-    await result.body.populate('results').populate('tags').execPopulate()
+    await result.body.populate('results').populate('tags').populate('methods').execPopulate()
     return { success: true, body: result.body }
   }
 

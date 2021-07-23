@@ -11,8 +11,8 @@ const methodSchema = mongoose.Schema({
     required: true
   },
   name: {
-      type: String,
-      required: true
+    type: String,
+    required: true
   },
   fullName: {
     type: String,
@@ -30,7 +30,7 @@ const methodSchema = mongoose.Schema({
     type: Date,
     default: null
   },
-  submissions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'submission' }],
+  submissions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'submission' }]
 }, { autoIndex: config.isDebug, optimisticConcurrency: true })
 
 methodSchema.methods.softDelete = function () {
