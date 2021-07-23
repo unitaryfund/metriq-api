@@ -32,7 +32,7 @@ class ResultService {
   }
 
   async listMetricNames () {
-    return await this.MongooseServiceInstance.find().distinct('metricName')
+    return this.MongooseServiceInstance.Collection.distinct('metricName', {})
   }
 
   async submit (userId, reqBody) {

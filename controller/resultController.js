@@ -37,3 +37,9 @@ exports.new = async function (req, res) {
     async () => await resultService.submit(req.user.id, req.body),
     'New result added to submission!')
 }
+
+exports.readMetricNames = async function (req, res) {
+  routeWrapper(res,
+    async () => { return { success: true, body: await resultService.listMetricNames(req.user.id, req.body) } },
+    'Retrieved all metric names.')
+}
