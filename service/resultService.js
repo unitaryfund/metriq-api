@@ -31,6 +31,10 @@ class ResultService {
     return await this.MongooseServiceInstance.find({ submission: submissionId })
   }
 
+  async listMetricNames () {
+    return await this.MongooseServiceInstance.find().distinct('metricName')
+  }
+
   async submit (userId, reqBody) {
     const submissions = await submissionService.getBySubmissionId(reqBody.submission)
     if (!submissions || !submissions.length) {
@@ -42,6 +46,7 @@ class ResultService {
     result.user = userId
     result.submission = submission._id
     result.isHigherBetter = reqBody.isHigherBetter
+    result.metricName = reqBody.metricName
     result.metricValue = reqBody.metricValue
     result.evaluatedDate = reqBody.evaluatedDate
     result.submittedDate = new Date()

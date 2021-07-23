@@ -19,6 +19,10 @@ const resultSchema = mongoose.Schema({
     type: Boolean,
     required: true
   },
+  metricName: {
+    type: String,
+    required: true
+  },
   metricValue: {
     type: Number,
     required: true
