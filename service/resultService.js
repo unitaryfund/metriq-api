@@ -58,6 +58,7 @@ class ResultService {
 
     submission.results.push(result._id)
     submission.save()
+    await submission.populate('results').populate('tags').execPopulate()
 
     return toReturn
   }
