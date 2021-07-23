@@ -72,6 +72,7 @@ class SubmissionService {
     if (!result.success) {
       return result
     }
+    await result.body.populate('results').populate('tags').execPopulate()
     return { success: true, body: result.body }
   }
 
@@ -104,7 +105,7 @@ class SubmissionService {
       return { success: false, error: 'Submission not found.' }
     }
 
-    if (toString(submissionToDelete.userId) !== toString(userId)) {
+    if (toString(submissionToDelete.user) !== toString(userId)) {
       return { success: false, error: 'Insufficient privileges to delete submission.' }
     }
 
@@ -127,7 +128,7 @@ class SubmissionService {
     const user = users[0]
 
     const submission = await this.MongooseServiceInstance.new()
-    submission.userId = userId
+    submission.user = userId
     submission.submissionName = reqBody.submissionName.trim()
     submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
     submission.submittedDate = new Date()
@@ -227,7 +228,7 @@ class SubmissionService {
   async getByUserId (userId, startIndex, count) {
     const oid = mongoose.Types.ObjectId(userId)
     const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { userId: oid, deletedDate: null } },
+      { $match: { user: oid, deletedDate: null } },
       { $sort: { submittedDate: -1 } }
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
