@@ -51,16 +51,16 @@ class ResultService {
     result.evaluatedDate = reqBody.evaluatedDate
     result.submittedDate = new Date()
 
-    const toReturn = await this.create(result)
-    if (!toReturn.success) {
-      return toReturn
+    const nResult = await this.create(result)
+    if (!nResult.success) {
+      return nResult
     }
 
     submission.results.push(result._id)
     submission.save()
     await submission.populate('results').populate('tags').execPopulate()
 
-    return toReturn
+    return submission
   }
 }
 
