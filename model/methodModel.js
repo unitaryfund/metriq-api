@@ -18,6 +18,10 @@ const methodSchema = mongoose.Schema({
     type: String,
     required: true
   },
+  description: {
+    type: String,
+    required: true
+  },
   submittedDate: {
     type: Date,
     required: true
@@ -29,15 +33,15 @@ const methodSchema = mongoose.Schema({
   submissions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'submission' }],
 }, { autoIndex: config.isDebug, optimisticConcurrency: true })
 
-resultSchema.methods.softDelete = function () {
+methodSchema.methods.softDelete = function () {
   this.deletedDate = new Date()
 }
-resultSchema.methods.isDeleted = function () {
+methodSchema.methods.isDeleted = function () {
   return !!(this.deletedDate)
 }
 
 // Export Tag model.
-const Result = module.exports = mongoose.model('result', resultSchema)
+const Method = module.exports = mongoose.model('method', methodSchema)
 module.exports.get = function (callback, limit) {
-  Result.find(callback).limit(limit)
+  Method.find(callback).limit(limit)
 }
