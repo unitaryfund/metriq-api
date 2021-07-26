@@ -35,8 +35,8 @@ class ResultService {
     return this.MongooseServiceInstance.Collection.distinct('metricName', {})
   }
 
-  async submit (userId, reqBody) {
-    const submissions = await submissionService.getBySubmissionId(reqBody.submission)
+  async submit (userId, submissionId, reqBody) {
+    const submissions = await submissionService.getBySubmissionId(submissionId)
     if (!submissions || !submissions.length) {
       return { succes: false, error: 'Submission not found' }
     }
@@ -44,7 +44,7 @@ class ResultService {
 
     const result = await this.MongooseServiceInstance.new()
     result.user = userId
-    result.submission = submission._id
+    result.submission = submissionId
     result.isHigherBetter = reqBody.isHigherBetter
     result.metricName = reqBody.metricName
     result.metricValue = reqBody.metricValue
@@ -60,7 +60,7 @@ class ResultService {
     submission.save()
     await submission.populate('results').populate('tags').execPopulate()
 
-    return submission
+    return { success: true, body: submission }
   }
 }
 
