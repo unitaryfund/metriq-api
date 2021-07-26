@@ -43,3 +43,9 @@ exports.read = async function (req, res) {
     async () => await methodService.getSanitized(req.params.id),
     'Retrieved method by Id.')
 }
+
+exports.readSubmissionCounts = async function (req, res) {
+  routeWrapper(res,
+    async () => await methodService.getAllNamesAndCounts(),
+    'Retrieved method by Id.')
+}

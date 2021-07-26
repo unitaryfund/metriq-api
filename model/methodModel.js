@@ -24,7 +24,8 @@ const methodSchema = mongoose.Schema({
   },
   submittedDate: {
     type: Date,
-    required: true
+    required: true,
+    default: new Date()
   },
   deletedDate: {
     type: Date,

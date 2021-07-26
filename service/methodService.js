@@ -31,6 +31,27 @@ class MethodService {
     return { success: true, body: methods[0] }
   }
 
+  async getAllNamesAndCounts () {
+    const result = await this.MongooseServiceInstance.Collection.aggregate([
+      { $match: { deletedDate: null } },
+      {
+        $project: {
+          name: true,
+          submissions: true
+        }
+      },
+      { $addFields: { submissionCount: { $size: '$submissions' } } },
+      { $match: { submissionCount: { $gte: 1 } } },
+      {
+        $project: {
+          name: true,
+          submissionCount: true
+        }
+      }
+    ])
+    return { success: true, body: result }
+  }
+
   async submit (userId, reqBody) {
     const method = await this.MongooseServiceInstance.new()
     method.user = userId
