@@ -40,7 +40,7 @@ methodSchema.methods.isDeleted = function () {
   return !!(this.deletedDate)
 }
 
-// Export Tag model.
+// Export Method model.
 const Method = module.exports = mongoose.model('method', methodSchema)
 module.exports.get = function (callback, limit) {
   Method.find(callback).limit(limit)

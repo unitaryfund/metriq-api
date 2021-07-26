@@ -6,6 +6,8 @@ const mongoose = require('mongoose')
 const MongooseService = require('./mongooseService')
 // Database Model
 const SubmissionModel = require('../model/submissionModel')
+// Ensure that Method model schema is defined for populate
+require('../model/methodModel')
 
 // For email
 const config = require('./../config')
@@ -73,6 +75,7 @@ class SubmissionService {
       return result
     }
     await result.body.populate('results').populate('tags').populate('methods').execPopulate()
+
     return { success: true, body: result.body }
   }
 
