@@ -1,4 +1,4 @@
-// resultService.js
+// methodService.js
 
 // Data Access Layer
 const MongooseService = require('./mongooseService')

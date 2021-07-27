@@ -38,7 +38,7 @@ class ResultService {
   async submit (userId, submissionId, reqBody) {
     const submissions = await submissionService.getBySubmissionId(submissionId)
     if (!submissions || !submissions.length) {
-      return { succes: false, error: 'Submission not found' }
+      return { success: false, error: 'Submission not found' }
     }
     const submission = submissions[0]
 
