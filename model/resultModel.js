@@ -48,7 +48,7 @@ resultSchema.methods.isDeleted = function () {
   return !!(this.deletedDate)
 }
 
-// Export Tag model.
+// Export Result model.
 const Result = module.exports = mongoose.model('result', resultSchema)
 module.exports.get = function (callback, limit) {
   Result.find(callback).limit(limit)

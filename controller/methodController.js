@@ -1,4 +1,4 @@
-// tagController.js
+// methodController.js
 
 // Service classes
 const MethodService = require('../service/methodService')
@@ -35,7 +35,7 @@ async function routeWrapper (res, serviceFn, successMessage) {
 exports.new = async function (req, res) {
   routeWrapper(res,
     async () => await methodService.submit(req.user.id, req.body),
-    'New result added to submission!')
+    'New method added to submission!')
 }
 
 exports.read = async function (req, res) {
