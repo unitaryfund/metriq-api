@@ -16,6 +16,8 @@ const UserService = require('./userService')
 const userService = new UserService()
 const TagService = require('./tagService')
 const tagService = new TagService()
+const TaskService = require('./taskService')
+const taskService = new TaskService()
 
 class SubmissionService {
   constructor () {
@@ -72,7 +74,7 @@ class SubmissionService {
     if (!result.success) {
       return result
     }
-    await result.body.populate('results').populate('tags').populate('methods').execPopulate()
+    await result.body.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
 
     return { success: true, body: result.body }
   }
@@ -332,6 +334,28 @@ class SubmissionService {
       { $sort: { submittedDate: -1 } }
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
+  }
+
+  async addTask (submissionId, taskId) {
+    const submissions = await this.getBySubmissionId(submissionId)
+    if (!submissions || !submissions.length || submissions[0].isDeleted()) {
+      return { success: false, error: 'Submission not found.' }
+    }
+    const submission = submissions[0]
+
+    const tasks = await taskService.getById(taskId)
+    if (!tasks || !tasks.length || tasks[0].isDeleted()) {
+      return { success: false, error: 'Task not found.' }
+    }
+    const task = tasks[0]
+
+    submission.tasks.push(taskId)
+    task.submissions.push(submissionId)
+
+    await submission.save()
+    await task.save()
+
+    return { success: true, body: submission }
   }
 }
 

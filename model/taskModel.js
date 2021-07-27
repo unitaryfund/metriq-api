@@ -10,7 +10,7 @@ const taskSchema = mongoose.Schema({
     ref: 'user',
     required: true
   },
-  name: {
+  taskName: {
     type: String,
     required: true
   },
@@ -29,13 +29,6 @@ const taskSchema = mongoose.Schema({
   },
   submissions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'submission' }]
 }, { autoIndex: config.isDebug, optimisticConcurrency: true })
-
-taskSchema.tasks.softDelete = function () {
-  this.deletedDate = new Date()
-}
-taskSchema.tasks.isDeleted = function () {
-  return !!(this.deletedDate)
-}
 
 // Export Task model.
 const Task = module.exports = mongoose.model('task', taskSchema)

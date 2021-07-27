@@ -28,35 +28,15 @@ class TaskService {
     if (!tasks || !tasks.length || tasks[0].isDeleted()) {
       return { success: false, error: 'Task not found.' }
     }
-    return { success: true, body: tasks[0] }
-  }
-
-  async getAllNamesAndCounts () {
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null } },
-      {
-        $project: {
-          name: true,
-          submissions: true
-        }
-      },
-      { $addFields: { submissionCount: { $size: '$submissions' } } },
-      // { $match: { submissionCount: { $gte: 1 } } },
-      {
-        $project: {
-          name: true,
-          submissionCount: true
-        }
-      }
-    ])
-    return { success: true, body: result }
+    const task = tasks[0]
+    await task.populate('submissions').execPopulate()
+    return { success: true, body: task }
   }
 
   async submit (userId, reqBody) {
     const task = await this.MongooseServiceInstance.new()
     task.user = userId
-    task.name = reqBody.name
-    task.fullName = reqBody.fullName
+    task.taskName = reqBody.taskName
     task.description = reqBody.description
 
     return await this.create(task)
