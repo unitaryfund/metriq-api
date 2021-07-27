@@ -1,4 +1,4 @@
-// tagController.js
+// methodController.js
 
 // Service classes
 const MethodService = require('../service/methodService')
