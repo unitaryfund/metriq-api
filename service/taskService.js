@@ -36,7 +36,7 @@ class TaskService {
   async submit (userId, reqBody) {
     const task = await this.MongooseServiceInstance.new()
     task.user = userId
-    task.taskName = reqBody.taskName
+    task.name = reqBody.name
     task.description = reqBody.description
 
     return await this.create(task)

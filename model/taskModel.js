@@ -5,12 +5,12 @@ const mongoose = require('mongoose')
 
 // Set up schema.
 const taskSchema = mongoose.Schema({
-  user: {
+  submission: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
+    ref: 'submission',
     required: true
   },
-  taskName: {
+  name: {
     type: String,
     required: true
   },
