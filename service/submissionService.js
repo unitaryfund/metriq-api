@@ -73,6 +73,7 @@ class SubmissionService {
       return result
     }
     await result.body.populate('results').populate('tags').populate('methods').execPopulate()
+    result.body.upvotesCount = result.body.upvotes.length
 
     return { success: true, body: result.body }
   }
