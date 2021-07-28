@@ -12,8 +12,8 @@ class TaskService {
 
   async create (taskToCreate) {
     try {
-      const task = await this.MongooseServiceInstance.create(taskToCreate)
-      return { success: true, body: task }
+      const result = await this.MongooseServiceInstance.create(taskToCreate)
+      return { success: true, body: result }
     } catch (err) {
       return { success: false, error: err }
     }
@@ -33,9 +33,9 @@ class TaskService {
     return { success: true, body: task }
   }
 
-  async submit (userId, reqBody) {
+  async submit (submissionId, reqBody) {
     const task = await this.MongooseServiceInstance.new()
-    task.user = userId
+    task.submission = submissionId
     task.name = reqBody.name
     task.description = reqBody.description
 

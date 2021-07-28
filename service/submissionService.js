@@ -161,8 +161,10 @@ class SubmissionService {
       for (let i = 0; i < taskSplit.length; i++) {
         const task = taskSplit[i].trim().toLowerCase()
         if (task) {
-          const taskModel = await taskService.create(task)
-          tasks.push(taskModel._id)
+          // The `task` variable contains the name of the task from the metadata
+          // of the POST api/submission request.
+//          const taskModel = await taskService.getById(task)
+//          tasks.push(taskModel._id)
         }
       }
     }
