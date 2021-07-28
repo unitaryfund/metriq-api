@@ -155,6 +155,19 @@ class SubmissionService {
     }
     submission.tags = tags
 
+    const tasks = []
+    if (reqBody.tasks) {
+      const taskSplit = reqBody.tasks.split(',')
+      for (let i = 0; i < taskSplit.length; i++) {
+        const task = taskSplit[i].trim().toLowerCase()
+        if (task) {
+          const taskModel = await taskService.create(task)
+          tasks.push(taskModel._id)
+        }
+      }
+    }
+    submission.tasks = tasks
+
     const result = await this.create(submission)
     if (!result.success) {
       return result

@@ -12,8 +12,8 @@ class TaskService {
 
   async create (taskToCreate) {
     try {
-      const result = await this.MongooseServiceInstance.create(taskToCreate)
-      return { success: true, body: result }
+      const task = await this.MongooseServiceInstance.create(taskToCreate)
+      return { success: true, body: task }
     } catch (err) {
       return { success: false, error: err }
     }

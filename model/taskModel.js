@@ -12,11 +12,13 @@ const taskSchema = mongoose.Schema({
   },
   name: {
     type: String,
-    required: true
+    required: true,
+    unique: true,
+    index: true
   },
   description: {
     type: String,
-    required: true
+    required: false
   },
   submittedDate: {
     type: Date,
