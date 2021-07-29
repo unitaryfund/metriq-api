@@ -44,6 +44,12 @@ exports.read = async function (req, res) {
     'Retrieved task by Id.')
 }
 
+exports.delete = async function (req, res) {
+  routeWrapper(res,
+    async () => await taskService.delete(req.params.id),
+    'New task added to submission!')
+}
+
 exports.readSubmissionCounts = async function (req, res) {
   routeWrapper(res,
     async () => await taskService.getAllNamesAndCounts(),
