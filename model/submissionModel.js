@@ -40,6 +40,7 @@ const submissionSchema = mongoose.Schema({
   upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
   tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'tag' }],
   methods: [{ type: mongoose.Schema.Types.ObjectId, ref: 'method' }],
+  tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'task' }],
   results: [{ type: mongoose.Schema.Types.ObjectId, ref: 'result' }]
 }, { autoIndex: config.isDebug, optimisticConcurrency: true })
 
