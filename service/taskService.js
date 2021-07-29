@@ -93,7 +93,7 @@ class TaskService {
       await submissionModels[i].save()
     }
 
-    await method.save()
+    await task.save()
 
     return createResult
   }
