@@ -25,6 +25,29 @@ class MethodService {
     }
   }
 
+  async delete (methodId) {
+    let methodResult = []
+    try {
+      methodResult = await this.getById(methodId)
+      if (!methodResult || !methodResult.length) {
+        return { success: false, error: 'Method not found.' }
+      }
+    } catch (err) {
+      return { success: false, error: err }
+    }
+
+    const methodToDelete = methodResult[0]
+
+    if (methodToDelete.isDeleted()) {
+      return { success: false, error: 'Method not found.' }
+    }
+
+    methodToDelete.softDelete()
+    await methodToDelete.save()
+
+    return { success: true, body: await methodToDelete }
+  }
+
   async getById (methodId) {
     return await this.MongooseServiceInstance.find({ _id: methodId })
   }

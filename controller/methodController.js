@@ -38,6 +38,12 @@ exports.new = async function (req, res) {
     'New method added to submission!')
 }
 
+exports.delete = async function (req, res) {
+  routeWrapper(res,
+    async () => await methodService.delete(req.params.id),
+    'Successfully deleted method.')
+}
+
 exports.read = async function (req, res) {
   routeWrapper(res,
     async () => await methodService.getSanitized(req.params.id),
