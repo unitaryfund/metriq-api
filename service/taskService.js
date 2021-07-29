@@ -49,7 +49,6 @@ class TaskService {
         }
       },
       { $addFields: { submissionCount: { $size: '$submissions' } } },
-      // { $match: { submissionCount: { $gte: 1 } } },
       {
         $project: {
           name: true,
@@ -58,6 +57,29 @@ class TaskService {
       }
     ])
     return { success: true, body: result }
+  }
+
+  async delete (taskId) {
+    let taskResult = []
+    try {
+      taskResult = await this.getById(taskId)
+      if (!taskResult || !taskResult.length) {
+        return { success: false, error: 'Task not found.' }
+      }
+    } catch (err) {
+      return { success: false, error: err }
+    }
+
+    const taskToDelete = taskResult[0]
+
+    if (taskToDelete.isDeleted()) {
+      return { success: false, error: 'Task not found.' }
+    }
+
+    taskToDelete.softDelete()
+    await taskToDelete.save()
+
+    return { success: true, body: await taskToDelete }
   }
 
   async submit (userId, reqBody) {
