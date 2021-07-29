@@ -47,7 +47,7 @@ exports.read = async function (req, res) {
 exports.delete = async function (req, res) {
   routeWrapper(res,
     async () => await taskService.delete(req.params.id),
-    'New task added to submission!')
+    'Successfully deleted task.')
 }
 
 exports.readSubmissionCounts = async function (req, res) {
