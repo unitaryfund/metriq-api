@@ -49,7 +49,6 @@ class MethodService {
         }
       },
       { $addFields: { submissionCount: { $size: '$submissions' } } },
-      // { $match: { submissionCount: { $gte: 1 } } },
       {
         $project: {
           name: true,
