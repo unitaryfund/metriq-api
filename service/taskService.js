@@ -60,9 +60,9 @@ class TaskService {
     return { success: true, body: result }
   }
 
-  async submit (submissionId, reqBody) {
+  async submit (userId, reqBody) {
     let task = await this.MongooseServiceInstance.new()
-    task.submission = submissionId
+    task.user = userId
     task.name = reqBody.name
     task.description = reqBody.description
 
@@ -93,7 +93,7 @@ class TaskService {
       await submissionModels[i].save()
     }
 
-    await task.save()
+    await method.save()
 
     return createResult
   }
