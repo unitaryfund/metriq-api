@@ -72,10 +72,36 @@ class MethodService {
         }
       },
       { $addFields: { submissionCount: { $size: '$submissions' } } },
+      { $match: { submissionCount: { $gte: 1 } } },
+      {
+        $lookup: {
+          from: 'submissions',
+          localField: 'submissions',
+          foreignField: '_id',
+          as: 'submissionObjects'
+        }
+      },
+      {
+        $addFields: {
+          upvotes: {
+            $reduce: {
+              input: '$submissionObjects.upvotes',
+              initialValue: [],
+              in: { $concatArrays: ['$$value', '$$this'] }
+            }
+          }
+        }
+      },
+      {
+        $addFields: {
+          upvoteTotal: { $size: '$upvotes' }
+        }
+      },
       {
         $project: {
           name: true,
-          submissionCount: true
+          submissionCount: true,
+          upvoteTotal: true
         }
       }
     ])

@@ -29,11 +29,44 @@ class TagService {
 
   async getAllNamesAndCounts () {
     const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, submissionCount: { $gte: 1 } } },
+      { $match: { deletedDate: null } },
       {
         $project: {
           name: true,
-          submissionCount: true
+          submissions: true
+        }
+      },
+      { $addFields: { submissionCount: { $size: '$submissions' } } },
+      { $match: { submissionCount: { $gte: 1 } } },
+      {
+        $lookup: {
+          from: 'submissions',
+          localField: 'submissions',
+          foreignField: '_id',
+          as: 'submissionObjects'
+        }
+      },
+      {
+        $addFields: {
+          upvotes: {
+            $reduce: {
+              input: '$submissionObjects.upvotes',
+              initialValue: [],
+              in: { $concatArrays: ['$$value', '$$this'] }
+            }
+          }
+        }
+      },
+      {
+        $addFields: {
+          upvoteTotal: { $size: '$upvotes' }
+        }
+      },
+      {
+        $project: {
+          name: true,
+          submissionCount: true,
+          upvoteTotal: true
         }
       }
     ])

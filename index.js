@@ -23,7 +23,7 @@ const apiRoutes = require('./api-routes')
 const publicApiRoutes = ['/api/login', '/api/register', '/api/recover', '/api/password', '/api/tag']
 const unless = function (paths, middleware) {
   return function (req, res, next) {
-    if ((req.method === 'GET') && (req.path.startsWith('/api/submission') || req.path.startsWith('/api/method') || req.path.startsWith('/api/task'))) {
+    if ((req.method === 'GET') && (req.path.startsWith('/api/submission') || req.path.startsWith('/api/method') || req.path.startsWith('/api/task') || req.path.startsWith('/api/result'))) {
       return next()
     }
     for (let i = 0; i < paths.length; i++) {
