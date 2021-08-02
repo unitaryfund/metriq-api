@@ -11,15 +11,11 @@ const tagSchema = mongoose.Schema({
     unique: true,
     index: true
   },
-  submissionCount: {
-    type: Number,
-    required: true,
-    default: 0
-  },
   deletedDate: {
     type: Date,
     default: null
-  }
+  },
+  submissions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'submission' }]
 }, { autoIndex: config.isDebug, optimisticConcurrency: true })
 
 tagSchema.methods.softDelete = function () {

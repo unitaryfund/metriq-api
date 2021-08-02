@@ -29,31 +29,67 @@ class TagService {
 
   async getAllNamesAndCounts () {
     const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, submissionCount: { $gte: 1 } } },
+      { $match: { deletedDate: null } },
       {
         $project: {
           name: true,
-          submissionCount: true
+          submissions: true
+        }
+      },
+      { $addFields: { submissionCount: { $size: '$submissions' } } },
+      { $match: { submissionCount: { $gte: 1 } } },
+      {
+        $lookup: {
+          from: 'submissions',
+          localField: 'submissions',
+          foreignField: '_id',
+          as: 'submissionObjects'
+        }
+      },
+      {
+        $addFields: {
+          upvotes: {
+            $reduce: {
+              input: '$submissionObjects.upvotes',
+              initialValue: [],
+              in: { $concatArrays: ['$$value', '$$this'] }
+            }
+          }
+        }
+      },
+      {
+        $addFields: {
+          upvoteTotal: { $size: '$upvotes' }
+        }
+      },
+      {
+        $project: {
+          name: true,
+          submissionCount: true,
+          upvoteTotal: true
         }
       }
     ])
     return { success: true, body: result }
   }
 
-  async incrementAndGet (tagName) {
+  async incrementAndGet (tagName, submission) {
     let toReturn = {}
     const tagGetResults = await this.getByTagName(tagName)
     if (!tagGetResults || !tagGetResults.length) {
       const tag = await this.MongooseServiceInstance.new()
       tag.name = tagName
+      tag.submissions.push(submission._id)
       toReturn = (await this.create(tag)).body
       await toReturn.save()
     } else {
       toReturn = tagGetResults[0]
+      toReturn.submissions.push(submission._id)
     }
 
-    toReturn.submissionCount++
     await toReturn.save()
+    submission.tags.push(toReturn._id)
+    await submission.save()
 
     return toReturn
   }

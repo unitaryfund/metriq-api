@@ -2,6 +2,8 @@
 
 const dbHandler = require('./db-handler')
 const TagService = require('../service/tagService')
+const SubmissionService = require('../service/submissionService')
+const UserService = require('../service/userService')
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -25,19 +27,25 @@ describe('tag', () => {
     it('can be created with reference count', async () => {
         // Initialize
         const tagService = new TagService()
+        const userId = (await (new UserService()).register(registration1)).body._id
+        const submissionService = new SubmissionService()
+        const submissionResult = await submissionService.submit(userId, submission1, false)
 
         // Act
-        const result = await tagService.incrementAndGet("test")
+        const result = await tagService.incrementAndGet("test", submissionResult.body)
 
         // Assert
-        expect(result.submissionCount)
+        expect(result.submissions.length)
             .toEqual(1)
     })
 
     it('can be listed', async () => {
         // Initialize
         const tagService = new TagService()
-        await tagService.incrementAndGet("test")
+        const userId = (await (new UserService()).register(registration1)).body._id
+        const submissionService = new SubmissionService()
+        const submissionResult = await submissionService.submit(userId, submission1, false)
+        await tagService.incrementAndGet("test", submissionResult.body)
 
         // Act
         const result = await tagService.getAllNamesAndCounts()
@@ -47,3 +55,14 @@ describe('tag', () => {
         expect(result.body.length).toEqual(1)
     })
 })
+
+const submission1 = {
+    submissionName: 'Test Submission',
+}
+
+const registration1 = {
+    username: 'Test1',
+    email:'test@test.com',
+    password:'TestUser1!',
+    passwordConfirm: 'TestUser1!'
+}

@@ -147,7 +147,7 @@ class SubmissionService {
       for (let i = 0; i < tagSplit.length; i++) {
         const tag = tagSplit[i].trim().toLowerCase()
         if (tag) {
-          const tagModel = await tagService.incrementAndGet(tag)
+          const tagModel = await tagService.incrementAndGet(tag, submission)
           tags.push(tagModel._id)
         }
       }
