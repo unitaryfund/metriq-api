@@ -36,6 +36,12 @@ class TaskService {
     }
     const task = tasks[0]
     await task.populate('submissions').execPopulate()
+    for (let i = 0; i < task.submissions.length; i++) {
+      await task.submissions[i].populate('results').execPopulate()
+      for (let j = 0; j < task.submissions[i].results.length; j++) {
+        await task.submissions[i].results[j].populate('submission').populate('method').execPopulate()
+      }
+    }
     return { success: true, body: task }
   }
 
