@@ -72,10 +72,14 @@ class SubmissionService {
     if (!result.success) {
       return result
     }
-    await result.body.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    result.body.upvotesCount = result.body.upvotes.length
+    const submission = result.body
+    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
+    for (let i = 0; i < submission.results.length; i++) {
+      await submission.results[i].populate('task').populate('method').execPopulate()
+    }
+    submission.upvotesCount = submission.upvotes.length
 
-    return { success: true, body: result.body }
+    return { success: true, body: submission }
   }
 
   async approve (submissionId) {

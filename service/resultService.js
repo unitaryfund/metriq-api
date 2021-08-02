@@ -45,6 +45,8 @@ class ResultService {
     const result = await this.MongooseServiceInstance.new()
     result.user = userId
     result.submission = submissionId
+    result.task = reqBody.task
+    result.method = reqBody.method
     result.isHigherBetter = reqBody.isHigherBetter
     result.metricName = reqBody.metricName
     result.metricValue = reqBody.metricValue
@@ -59,6 +61,9 @@ class ResultService {
     submission.results.push(result._id)
     submission.save()
     await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
+    for (let i = 0; i < submission.results.length; i++) {
+      await submission.results[i].populate('task').populate('method').execPopulate()
+    }
 
     return { success: true, body: submission }
   }

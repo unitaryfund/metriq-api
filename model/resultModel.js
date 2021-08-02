@@ -15,6 +15,16 @@ const resultSchema = mongoose.Schema({
     ref: 'submission',
     required: true
   },
+  task: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'task',
+    required: true
+  },
+  method: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'method',
+    required: true
+  },
   isHigherBetter: {
     type: Boolean,
     required: true
