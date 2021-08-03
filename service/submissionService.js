@@ -17,6 +17,11 @@ const userService = new UserService()
 const TagService = require('./tagService')
 const tagService = new TagService()
 
+// Model dependencies
+require('../model/methodModel')
+require('../model/resultModel')
+require('../model/taskModel')
+
 class SubmissionService {
   constructor () {
     this.MongooseServiceInstance = new MongooseService(SubmissionModel)
