@@ -1,9 +1,12 @@
 // submissionController.js
 
-// Service class
+// Services
 const SubmissionService = require('../service/submissionService')
-// Service instance
 const submissionService = new SubmissionService()
+const MethodService = require('../service/methodService')
+const methodService = new MethodService()
+const TaskService = require('../service/taskService')
+const taskService = new TaskService()
 
 function sendResponse (res, code, m) {
   const body = JSON.stringify({ message: m })
@@ -49,6 +52,30 @@ exports.delete = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.deleteIfOwner(req.user.id, req.params.id),
     'Successfully deleted submission.')
+}
+
+exports.newMethod = async function (req, res) {
+  routeWrapper(res,
+    async () => await methodService.addOrRemoveSubmission(true, req.params.methodId, req.params.submissionId),
+    'Successfully added method to submission.')
+}
+
+exports.deleteMethod = async function (req, res) {
+  routeWrapper(res,
+    async () => await methodService.addOrRemoveSubmission(false, req.params.methodId, req.params.submissionId),
+    'Successfully removed method from submission.')
+}
+
+exports.newTask = async function (req, res) {
+  routeWrapper(res,
+    async () => await taskService.addOrRemoveSubmission(true, req.params.taskId, req.params.submissionId),
+    'Successfully added task to submission.')
+}
+
+exports.deleteTask = async function (req, res) {
+  routeWrapper(res,
+    async () => await taskService.addOrRemoveSubmission(false, req.params.taskId, req.params.submissionId),
+    'Successfully removed task from submission.')
 }
 
 exports.upvote = async function (req, res) {

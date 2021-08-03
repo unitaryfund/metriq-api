@@ -151,6 +151,46 @@ class TaskService {
 
     return createResult
   }
+
+  async addOrRemoveSubmission (isAdd, taskId, submissionId) {
+    const tasks = await this.getById(taskId)
+    if (!tasks || !tasks.length || tasks[0].isDeleted()) {
+      return { success: false, error: 'Task not found.' }
+    }
+    const task = tasks[0]
+
+    const submissions = await submissionService.getBySubmissionId(submissionId)
+    if (!submissions || !submissions.length || submissions[0].isDeleted()) {
+      return { success: false, error: 'Submission not found.' }
+    }
+    const submission = submissions[0]
+
+    const tsi = task.submissions.indexOf(submission._id)
+    const sti = submission.tasks.indexOf(task._id)
+
+    if (isAdd) {
+      if (tsi === -1) {
+        task.submissions.push(submission._id)
+      }
+      if (sti === -1) {
+        submission.task.push(task._id)
+      }
+    } else {
+      if (tsi > -1) {
+        task.submissions.splice(tsi, 1)
+      }
+      if (sti > -1) {
+        submission.tasks.splice(sti, 1)
+      }
+    }
+
+    await task.save()
+    await submission.save()
+
+    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
+
+    return { success: true, body: submission }
+  }
 }
 
 module.exports = TaskService

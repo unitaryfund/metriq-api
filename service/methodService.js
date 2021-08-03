@@ -145,6 +145,46 @@ class MethodService {
 
     return createResult
   }
+
+  async addOrRemoveSubmission (isAdd, methodId, submissionId) {
+    const methods = await this.getById(methodId)
+    if (!methods || !methods.length || methods[0].isDeleted()) {
+      return { success: false, error: 'Method not found.' }
+    }
+    const method = methods[0]
+
+    const submissions = await submissionService.getBySubmissionId(submissionId)
+    if (!submissions || !submissions.length || submissions[0].isDeleted()) {
+      return { success: false, error: 'Submission not found.' }
+    }
+    const submission = submissions[0]
+
+    const msi = method.submissions.indexOf(submission._id)
+    const smi = submission.methods.indexOf(method._id)
+
+    if (isAdd) {
+      if (msi === -1) {
+        method.submissions.push(submission._id)
+      }
+      if (smi === -1) {
+        submission.methods.push(method._id)
+      }
+    } else {
+      if (msi > -1) {
+        method.submissions.splice(msi, 1)
+      }
+      if (smi > -1) {
+        submission.methods.splice(smi, 1)
+      }
+    }
+
+    await method.save()
+    await submission.save()
+
+    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
+
+    return { success: true, body: submission }
+  }
 }
 
 module.exports = MethodService
