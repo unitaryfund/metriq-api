@@ -19,8 +19,8 @@ class TagService {
     }
   }
 
-  async get (tagId) {
-    return await this.MongooseServiceInstance.find({ id: tagId })
+  async getById (tagId) {
+    return await this.MongooseServiceInstance.find({ _id: tagId })
   }
 
   async getByTagName (tagName) {

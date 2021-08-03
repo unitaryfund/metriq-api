@@ -173,7 +173,7 @@ class TaskService {
         task.submissions.push(submission._id)
       }
       if (sti === -1) {
-        submission.task.push(task._id)
+        submission.tasks.push(task._id)
       }
     } else {
       if (tsi > -1) {

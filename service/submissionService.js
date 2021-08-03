@@ -345,6 +345,46 @@ class SubmissionService {
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
   }
+
+  async addOrRemoveTag (isAdd, submissionId, tagId) {
+    const tags = await tagService.getById(tagId)
+    if (!tags || !tags.length || tags[0].isDeleted()) {
+      return { success: false, error: 'Tag not found.' }
+    }
+    const tag = tags[0]
+
+    const submissions = await this.getBySubmissionId(submissionId)
+    if (!submissions || !submissions.length || submissions[0].isDeleted()) {
+      return { success: false, error: 'Submission not found.' }
+    }
+    const submission = submissions[0]
+
+    const tsi = tag.submissions.indexOf(submission._id)
+    const sti = submission.tags.indexOf(tag._id)
+
+    if (isAdd) {
+      if (tsi === -1) {
+        tag.submissions.push(submission._id)
+      }
+      if (sti === -1) {
+        submission.tags.push(tag._id)
+      }
+    } else {
+      if (tsi > -1) {
+        tag.submissions.splice(tsi, 1)
+      }
+      if (sti > -1) {
+        submission.tags.splice(sti, 1)
+      }
+    }
+
+    await tag.save()
+    await submission.save()
+
+    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
+
+    return { success: true, body: submission }
+  }
 }
 
 module.exports = SubmissionService
