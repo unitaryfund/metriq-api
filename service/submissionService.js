@@ -228,6 +228,8 @@ class SubmissionService {
       await submission.save()
     }
 
+    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
+
     return { success: true, body: submission }
   }
 
