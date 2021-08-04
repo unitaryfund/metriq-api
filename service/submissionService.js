@@ -240,8 +240,14 @@ class SubmissionService {
     }
 
     await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    for (let j = 0; j < submission.results.length; j++) {
-      await submission.results[j].populate('submission').populate('method').populate('task').execPopulate()
+    let i = 0
+    while (i < submission.results.length) {
+      if (submission.results[i].isDeleted()) {
+        submission.results.splice(i, 1)
+      } else {
+        await submission.results[i].populate('task').populate('method').execPopulate()
+        i++
+      }
     }
 
     return { success: true, body: submission }
@@ -391,8 +397,14 @@ class SubmissionService {
     await submission.save()
 
     await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    for (let j = 0; j < submission.results.length; j++) {
-      await submission.results[j].populate('submission').populate('method').populate('task').execPopulate()
+    let i = 0
+    while (i < submission.results.length) {
+      if (submission.results[i].isDeleted()) {
+        submission.results.splice(i, 1)
+      } else {
+        await submission.results[i].populate('task').populate('method').execPopulate()
+        i++
+      }
     }
 
     return { success: true, body: submission }
