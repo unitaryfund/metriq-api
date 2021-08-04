@@ -45,6 +45,11 @@ class TaskService {
     return { success: true, body: task }
   }
 
+  async getAllNames () {
+    const result = await this.MongooseServiceInstance.Collection.aggregate([{ $project: { name: true } }])
+    return { success: true, body: result }
+  }
+
   async getAllNamesAndCounts () {
     const result = await this.MongooseServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null } },

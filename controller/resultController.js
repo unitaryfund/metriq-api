@@ -38,6 +38,12 @@ exports.new = async function (req, res) {
     'New result added to submission!')
 }
 
+exports.delete = async function (req, res) {
+  routeWrapper(res,
+    async () => await resultService.delete(req.params.id),
+    'Successfully deleted result.')
+}
+
 exports.readMetricNames = async function (req, res) {
   routeWrapper(res,
     async () => { return { success: true, body: await resultService.listMetricNames(req.user.id, req.body) } },

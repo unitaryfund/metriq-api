@@ -62,6 +62,11 @@ class MethodService {
     return { success: true, body: method }
   }
 
+  async getAllNames () {
+    const result = await this.MongooseServiceInstance.Collection.aggregate([{ $project: { name: true } }])
+    return { success: true, body: result }
+  }
+
   async getAllNamesAndCounts () {
     const result = await this.MongooseServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null } },

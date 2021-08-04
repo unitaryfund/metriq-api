@@ -55,3 +55,9 @@ exports.readSubmissionCounts = async function (req, res) {
     async () => await methodService.getAllNamesAndCounts(),
     'Retrieved all method names and counts.')
 }
+
+exports.readNames = async function (req, res) {
+  routeWrapper(res,
+    async () => await methodService.getAllNames(),
+    'Retrieved all task names.')
+}
