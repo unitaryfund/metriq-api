@@ -90,6 +90,8 @@ router.route('/submission/:id/result')
   .post(resultController.new)
 router.route('/result/metricNames')
   .get(resultController.readMetricNames)
+router.route('/result/:id')
+  .delete(resultController.delete)
 
 // Export API routes.
 module.exports = router

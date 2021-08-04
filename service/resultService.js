@@ -24,7 +24,7 @@ class ResultService {
   }
 
   async get (resultId) {
-    return await this.MongooseServiceInstance.find({ id: resultId })
+    return await this.MongooseServiceInstance.find({ _id: resultId })
   }
 
   async getBySubmissionId (submissionId) {
@@ -66,6 +66,29 @@ class ResultService {
     }
 
     return { success: true, body: submission }
+  }
+
+  async delete (resultId) {
+    let resultResult = []
+    try {
+      resultResult = await this.get(resultId)
+      if (!resultResult || !resultResult.length) {
+        return { success: false, error: 'Result not found.' }
+      }
+    } catch (err) {
+      return { success: false, error: err }
+    }
+
+    const resultToDelete = resultResult[0]
+
+    if (resultToDelete.isDeleted()) {
+      return { success: false, error: 'Result not found.' }
+    }
+
+    resultToDelete.softDelete()
+    await resultToDelete.save()
+
+    return { success: true, body: await resultToDelete }
   }
 }
 

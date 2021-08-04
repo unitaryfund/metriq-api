@@ -79,8 +79,14 @@ class SubmissionService {
     }
     const submission = result.body
     await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    for (let i = 0; i < submission.results.length; i++) {
-      await submission.results[i].populate('task').populate('method').execPopulate()
+    let i = 0
+    while (i < submission.results.length) {
+      if (submission.results[i].isDeleted()) {
+        submission.results.splice(i, 1)
+      } else {
+        await submission.results[i].populate('task').populate('method').execPopulate()
+        i++
+      }
     }
     submission.upvotesCount = submission.upvotes.length
 
