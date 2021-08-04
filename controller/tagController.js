@@ -36,3 +36,9 @@ exports.read = async function (req, res) {
     async () => await tagService.getAllNamesAndCounts(),
     'Retrieved all tag names and counts.')
 }
+
+exports.readNames = async function (req, res) {
+  routeWrapper(res,
+    async () => await tagService.getAllNames(),
+    'Retrieved all task names.')
+}

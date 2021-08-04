@@ -352,18 +352,18 @@ class SubmissionService {
     return { success: true, body: result }
   }
 
-  async addOrRemoveTag (isAdd, submissionId, tagId) {
-    const tags = await tagService.getById(tagId)
-    if (!tags || !tags.length || tags[0].isDeleted()) {
-      return { success: false, error: 'Tag not found.' }
-    }
-    const tag = tags[0]
-
+  async addOrRemoveTag (isAdd, submissionId, tagName) {
     const submissions = await this.getBySubmissionId(submissionId)
     if (!submissions || !submissions.length || submissions[0].isDeleted()) {
       return { success: false, error: 'Submission not found.' }
     }
     const submission = submissions[0]
+
+    const tags = await tagService.getByName(tagName)
+    if (!tags || !tags.length || tags[0].isDeleted()) {
+      tags.push(await tagService.incrementAndGet(tagName, submission._id))
+    }
+    const tag = tags[0]
 
     const tsi = tag.submissions.indexOf(submission._id)
     const sti = submission.tags.indexOf(tag._id)
