@@ -39,7 +39,7 @@ class TaskService {
     for (let i = 0; i < task.submissions.length; i++) {
       await task.submissions[i].populate('results').execPopulate()
       for (let j = 0; j < task.submissions[i].results.length; j++) {
-        await task.submissions[i].results[j].populate('submission').populate('method').execPopulate()
+        await task.submissions[i].results[j].populate('submission').populate('method').populate('task').execPopulate()
       }
     }
     return { success: true, body: task }
@@ -193,6 +193,9 @@ class TaskService {
     await submission.save()
 
     await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
+    for (let j = 0; j < submission.results.length; j++) {
+      await submission.results[j].populate('submission').populate('method').populate('task').execPopulate()
+    }
 
     return { success: true, body: submission }
   }

@@ -240,6 +240,9 @@ class SubmissionService {
     }
 
     await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
+    for (let j = 0; j < submission.results.length; j++) {
+      await submission.results[j].populate('submission').populate('method').populate('task').execPopulate()
+    }
 
     return { success: true, body: submission }
   }
@@ -388,6 +391,9 @@ class SubmissionService {
     await submission.save()
 
     await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
+    for (let j = 0; j < submission.results.length; j++) {
+      await submission.results[j].populate('submission').populate('method').populate('task').execPopulate()
+    }
 
     return { success: true, body: submission }
   }
