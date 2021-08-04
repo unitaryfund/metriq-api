@@ -23,8 +23,13 @@ class TagService {
     return await this.MongooseServiceInstance.find({ _id: tagId })
   }
 
-  async getByTagName (tagName) {
+  async getByName (tagName) {
     return await this.MongooseServiceInstance.find({ name: tagName.trim().toLowerCase() })
+  }
+
+  async getAllNames () {
+    const result = await this.MongooseServiceInstance.Collection.aggregate([{ $project: { name: true } }])
+    return { success: true, body: result }
   }
 
   async getAllNamesAndCounts () {
@@ -75,7 +80,7 @@ class TagService {
 
   async incrementAndGet (tagName, submission) {
     let toReturn = {}
-    const tagGetResults = await this.getByTagName(tagName)
+    const tagGetResults = await this.getByName(tagName)
     if (!tagGetResults || !tagGetResults.length) {
       const tag = await this.MongooseServiceInstance.new()
       tag.name = tagName

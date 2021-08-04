@@ -68,13 +68,13 @@ exports.deleteMethod = async function (req, res) {
 
 exports.newTag = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.addOrRemoveTag(true, req.params.submissionId, req.params.tagId),
+    async () => await submissionService.addOrRemoveTag(true, req.params.submissionId, req.params.tagName),
     'Successfully added tag to submission.')
 }
 
 exports.deleteTag = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.addOrRemoveTag(false, req.params.submissionId, req.params.tagId),
+    async () => await submissionService.addOrRemoveTag(false, req.params.submissionId, req.params.tagName),
     'Successfully removed tag from submission.')
 }
 

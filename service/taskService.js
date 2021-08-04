@@ -38,8 +38,14 @@ class TaskService {
     await task.populate('submissions').execPopulate()
     for (let i = 0; i < task.submissions.length; i++) {
       await task.submissions[i].populate('results').execPopulate()
-      for (let j = 0; j < task.submissions[i].results.length; j++) {
-        await task.submissions[i].results[j].populate('submission').populate('method').execPopulate()
+      let j = 0
+      while (j < task.submission.results.length) {
+        if (task.submission.results[j].isDeleted()) {
+          task.submission.results.splice(j, 1)
+        } else {
+          await task.submission.results[j].populate('task').populate('method').execPopulate()
+          j++
+        }
       }
     }
     return { success: true, body: task }
@@ -193,6 +199,15 @@ class TaskService {
     await submission.save()
 
     await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
+    let i = 0
+    while (i < submission.results.length) {
+      if (submission.results[i].isDeleted()) {
+        submission.results.splice(i, 1)
+      } else {
+        await submission.results[i].populate('task').populate('method').execPopulate()
+        i++
+      }
+    }
 
     return { success: true, body: submission }
   }
