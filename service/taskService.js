@@ -39,11 +39,11 @@ class TaskService {
     for (let i = 0; i < task.submissions.length; i++) {
       await task.submissions[i].populate('results').execPopulate()
       let j = 0
-      while (j < task.submission.results.length) {
-        if (task.submission.results[j].isDeleted()) {
-          task.submission.results.splice(j, 1)
+      while (j < task.submissions[i].results.length) {
+        if (task.submissions[i].results[j].isDeleted()) {
+          task.submissions[i].results.splice(j, 1)
         } else {
-          await task.submission.results[j].populate('task').populate('method').execPopulate()
+          await task.submissions[i].results[j].populate('submission').populate('task').populate('method').execPopulate()
           j++
         }
       }
