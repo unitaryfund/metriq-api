@@ -368,11 +368,16 @@ class SubmissionService {
     }
     const submission = submissions[0]
 
-    const tags = await tagService.getByName(tagName)
-    if (!tags || !tags.length || tags[0].isDeleted()) {
-      tags.push(await tagService.incrementAndGet(tagName, submission._id))
+    let tag = {}
+    if (isAdd) {
+      tag = await tagService.incrementAndGet(tagName, submission)
+    } else {
+      const tags = await tagService.getByName(tagName)
+      if (!tags || !tags.length || tags[0].isDeleted()) {
+        return { success: false, error: 'Tag not found.' }
+      }
+      tag = tags[0]
     }
-    const tag = tags[0]
 
     const tsi = tag.submissions.indexOf(submission._id)
     const sti = submission.tags.indexOf(tag._id)
