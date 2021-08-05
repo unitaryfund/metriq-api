@@ -61,34 +61,34 @@ class ResultService {
     submission.results.push(result._id)
     submission.save()
     await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    for (let i = 0; i < submission.results.length; i++) {
-      await submission.results[i].populate('task').populate('method').execPopulate()
+    let i = 0
+    while (i < submission.results.length) {
+      if (submission.results[i].isDeleted()) {
+        submission.results.splice(i, 1)
+      } else {
+        await submission.results[i].populate('task').populate('method').execPopulate()
+        i++
+      }
     }
 
     return { success: true, body: submission }
   }
 
   async delete (resultId) {
-    let resultResult = []
-    try {
-      resultResult = await this.get(resultId)
-      if (!resultResult || !resultResult.length) {
-        return { success: false, error: 'Result not found.' }
-      }
-    } catch (err) {
-      return { success: false, error: err }
+    const resultResult = await this.get(resultId)
+    if (!resultResult || !resultResult.length) {
+      return { success: false, error: 'Result not found.' }
     }
+    const result = resultResult[0]
 
-    const resultToDelete = resultResult[0]
-
-    if (resultToDelete.isDeleted()) {
+    if (result.isDeleted()) {
       return { success: false, error: 'Result not found.' }
     }
 
-    resultToDelete.softDelete()
-    await resultToDelete.save()
+    result.softDelete()
+    await result.save()
 
-    return { success: true, body: await resultToDelete }
+    return { success: true, body: await result }
   }
 }
 
