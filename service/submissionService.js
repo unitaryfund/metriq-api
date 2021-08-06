@@ -305,7 +305,7 @@ class SubmissionService {
   async getTrendingByTag (tagName, startIndex, count) {
     const millisPerHour = 1000 * 60 * 60
 
-    const tag = await tagService.getByTagName(tagName)
+    const tag = await tagService.getByName(tagName)
     if (!tag || !tag.length) {
       return { success: false, error: 'Category not found' }
     }
@@ -329,7 +329,7 @@ class SubmissionService {
   }
 
   async getPopularByTag (tagName, startIndex, count) {
-    const tag = await tagService.getByTagName(tagName)
+    const tag = await tagService.getByName(tagName)
     if (!tag || !tag.length) {
       return { success: false, error: 'Category not found' }
     }
@@ -348,7 +348,7 @@ class SubmissionService {
   }
 
   async getLatestByTag (tagName, startIndex, count) {
-    const tag = await tagService.getByTagName(tagName)
+    const tag = await tagService.getByName(tagName)
     if (!tag || !tag.length) {
       return { success: false, error: 'Category not found' }
     }
