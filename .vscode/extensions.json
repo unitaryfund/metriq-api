@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "shd101wyy.markdown-preview-enhanced",
+        "dbaeumer.vscode-eslint",
+        "mongodb.mongodb-vscode",
+        "eg2.vscode-npm-script",
+        "christian-kohler.npm-intellisense",
+        "ms-vscode-remote.remote-containers"
+    ]
+}

@@ -2,7 +2,7 @@
 route.http
 
 # VSCode
-*.vscode
+#*.vscode
 
 # Logs
 logs
