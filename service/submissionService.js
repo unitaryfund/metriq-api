@@ -178,6 +178,11 @@ class SubmissionService {
       return { success: true, body: result.body }
     }
 
+    if (!config.supportEmail.service) {
+      console.log('Skipping email - account info not set.')
+      return { success: true, body: result.body }
+    }
+
     const transporter = nodemailer.createTransport({
       service: config.supportEmail.service,
       auth: {

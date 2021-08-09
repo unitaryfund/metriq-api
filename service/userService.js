@@ -251,11 +251,15 @@ class UserService {
   }
 
   async sendRecoveryEmail (usernameOrEmail) {
+    if (!config.supportEmail.service) {
+      console.log('Skipping email - account info not set.')
+      return { success: false, error: 'Support email not available.' }
+    }
+
     const users = await this.getByUsernameOrEmail(usernameOrEmail)
     if (!users || !users.length) {
       return { success: false, error: 'User not found.' }
     }
-
     const user = users[0]
     user.generateRecovery()
 
