@@ -149,12 +149,7 @@ class SubmissionService {
     submission.submissionName = reqBody.submissionName.trim()
     submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
     submission.submittedDate = new Date()
-
-    if (reqBody.submissionThumbnailUrl) {
-      submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl
-    } else {
-      submission.submissionThumbnailUrl = config.defaultSubmissionThumbnailUrl
-    }
+    submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl ? reqBody.submissionThumbnailUrl.trim() : null
 
     const tags = []
     if (reqBody.tags) {
