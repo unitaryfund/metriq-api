@@ -203,6 +203,35 @@ class SubmissionService {
     return { success: true, body: result.body }
   }
 
+  async update (submissionId, reqBody) {
+    const submissions = await this.getBySubmissionId(submissionId)
+    if (!submissions || !submissions.length) {
+      return { success: false, error: 'Submission not found.' }
+    }
+    const submission = submissions[0]
+
+    if (reqBody.submissionThumbnailUrl !== undefined) {
+      submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl.trim() ? reqBody.submissionThumbnailUrl.trim() : null
+    }
+    if (reqBody.description !== undefined) {
+      submission.description = reqBody.description.trim() ? reqBody.description.trim() : ''
+    }
+    submission.save()
+
+    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
+    let i = 0
+    while (i < submission.results.length) {
+      if (submission.results[i].isDeleted()) {
+        submission.results.splice(i, 1)
+      } else {
+        await submission.results[i].populate('task').populate('method').execPopulate()
+        i++
+      }
+    }
+
+    return { success: true, body: submission }
+  }
+
   async validateSubmission (reqBody) {
     if (!reqBody.submissionName) {
       return { success: false, error: 'Submission name cannot be blank.' }
