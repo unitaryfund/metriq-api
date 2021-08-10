@@ -216,7 +216,7 @@ class SubmissionService {
     if (reqBody.description !== undefined) {
       submission.description = reqBody.description.trim() ? reqBody.description.trim() : ''
     }
-    submission.save()
+    await submission.save()
 
     await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
     let i = 0

@@ -128,8 +128,8 @@ class TaskService {
   async submit (userId, reqBody) {
     let task = await this.MongooseServiceInstance.new()
     task.user = userId
-    task.name = reqBody.name
-    task.description = reqBody.description
+    task.name = reqBody.name.trim()
+    task.description = reqBody.description.trim()
 
     // Get an ObjectId for the new object, first.
     const createResult = await this.create(task)
@@ -156,6 +156,25 @@ class TaskService {
     // Save all save() calls for the last step, after we're 100% sure that the request schema was entirely valid.
     for (let i = 0; i < submissionModels.length; i++) {
       await submissionModels[i].save()
+    }
+
+    await task.save()
+
+    return createResult
+  }
+
+  async update (taskId, reqBody) {
+    const tasks = await this.getById(taskId)
+    if (!tasks || !tasks.length) {
+      return { success: false, error: 'Task not found.' }
+    }
+    const task = tasks[0]
+
+    if (reqBody.name !== undefined) {
+      task.name = reqBody.name.trim()
+    }
+    if (reqBody.description !== undefined) {
+      task.description = reqBody.description.trim()
     }
 
     await task.save()
