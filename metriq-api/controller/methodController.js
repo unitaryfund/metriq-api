@@ -47,7 +47,7 @@ exports.read = async function (req, res) {
 exports.update = async function (req, res) {
   routeWrapper(res,
     async () => await methodService.update(req.params.id, req.body),
-    'New method added to submission!')
+    'Updated method.')
 }
 
 exports.delete = async function (req, res) {

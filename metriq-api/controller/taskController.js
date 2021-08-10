@@ -47,7 +47,7 @@ exports.read = async function (req, res) {
 exports.update = async function (req, res) {
   routeWrapper(res,
     async () => await taskService.update(req.params.id, req.body),
-    'New task added to submission!')
+    'Updated task.')
 }
 
 exports.delete = async function (req, res) {
