@@ -29,12 +29,7 @@ class TaskService {
     return await this.MongooseServiceInstance.find({ _id: taskId })
   }
 
-  async getSanitized (taskId) {
-    const tasks = await this.getById(taskId)
-    if (!tasks || !tasks.length || tasks[0].isDeleted()) {
-      return { success: false, error: 'Task not found.' }
-    }
-    const task = tasks[0]
+  async populate (task) {
     await task.populate('submissions').execPopulate()
     for (let i = 0; i < task.submissions.length; i++) {
       await task.submissions[i].populate('results').execPopulate()
@@ -48,6 +43,16 @@ class TaskService {
         }
       }
     }
+  }
+
+  async getSanitized (taskId) {
+    const tasks = await this.getById(taskId)
+    if (!tasks || !tasks.length || tasks[0].isDeleted()) {
+      return { success: false, error: 'Task not found.' }
+    }
+    const task = tasks[0]
+    await this.populate(task)
+
     return { success: true, body: task }
   }
 
@@ -178,8 +183,9 @@ class TaskService {
     }
 
     await task.save()
+    await this.populate(task)
 
-    return createResult
+    return { success: true, body: task }
   }
 
   async addOrRemoveSubmission (isAdd, taskId, submissionId) {

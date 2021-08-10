@@ -78,16 +78,7 @@ class SubmissionService {
       return result
     }
     const submission = result.body
-    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    let i = 0
-    while (i < submission.results.length) {
-      if (submission.results[i].isDeleted()) {
-        submission.results.splice(i, 1)
-      } else {
-        await submission.results[i].populate('task').populate('method').execPopulate()
-        i++
-      }
-    }
+    await this.populate(submission)
     submission.upvotesCount = submission.upvotes.length
 
     return { success: true, body: submission }
@@ -130,6 +121,19 @@ class SubmissionService {
     await submissionToDelete.save()
 
     return { success: true, body: await submissionToDelete }
+  }
+
+  async populate (submission) {
+    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
+    let i = 0
+    while (i < submission.results.length) {
+      if (submission.results[i].isDeleted()) {
+        submission.results.splice(i, 1)
+      } else {
+        await submission.results[i].populate('task').populate('method').execPopulate()
+        i++
+      }
+    }
   }
 
   async submit (userId, reqBody, sendEmail) {
@@ -218,16 +222,7 @@ class SubmissionService {
     }
     await submission.save()
 
-    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    let i = 0
-    while (i < submission.results.length) {
-      if (submission.results[i].isDeleted()) {
-        submission.results.splice(i, 1)
-      } else {
-        await submission.results[i].populate('task').populate('method').execPopulate()
-        i++
-      }
-    }
+    await this.populate(submission)
 
     return { success: true, body: submission }
   }
@@ -268,16 +263,7 @@ class SubmissionService {
       await submission.save()
     }
 
-    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    let i = 0
-    while (i < submission.results.length) {
-      if (submission.results[i].isDeleted()) {
-        submission.results.splice(i, 1)
-      } else {
-        await submission.results[i].populate('task').populate('method').execPopulate()
-        i++
-      }
-    }
+    await this.populate(submission)
 
     return { success: true, body: submission }
   }
@@ -429,17 +415,7 @@ class SubmissionService {
 
     await tag.save()
     await submission.save()
-
-    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    let i = 0
-    while (i < submission.results.length) {
-      if (submission.results[i].isDeleted()) {
-        submission.results.splice(i, 1)
-      } else {
-        await submission.results[i].populate('task').populate('method').execPopulate()
-        i++
-      }
-    }
+    await this.populate(submission)
 
     return { success: true, body: submission }
   }
