@@ -50,7 +50,7 @@ exports.read = async function (req, res) {
 exports.update = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.update(req.params.id, req.body),
-    'New submission created!')
+    'Updated submission!')
 }
 
 // Validate the delete request and delete the submission.
