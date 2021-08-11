@@ -134,6 +134,7 @@ class TaskService {
     let task = await this.MongooseServiceInstance.new()
     task.user = userId
     task.name = reqBody.name.trim()
+    task.fullName = reqBody.fullName.trim()
     task.description = reqBody.description.trim()
 
     // Get an ObjectId for the new object, first.
@@ -177,6 +178,9 @@ class TaskService {
 
     if (reqBody.name !== undefined) {
       task.name = reqBody.name.trim()
+    }
+    if (reqBody.fullName !== undefined) {
+      task.fullName = reqBody.fullName.trim()
     }
     if (reqBody.description !== undefined) {
       task.description = reqBody.description.trim()
