@@ -22,9 +22,7 @@ const submissionSchema = mongoose.Schema({
     unique: true
   },
   description: {
-    type: String,
-    required: true,
-    default: ''
+    type: String
   },
   submittedDate: {
     type: Date,

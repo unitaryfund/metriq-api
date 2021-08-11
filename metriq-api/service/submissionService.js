@@ -154,6 +154,7 @@ class SubmissionService {
     submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
     submission.submittedDate = new Date()
     submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl ? reqBody.submissionThumbnailUrl.trim() : null
+    submission.description = reqBody.description ? reqBody.description.trim() : ''
 
     const tags = []
     if (reqBody.tags) {
@@ -174,12 +175,12 @@ class SubmissionService {
     }
 
     if (!sendEmail) {
-      return { success: true, body: result.body }
+      return result
     }
 
     if (!config.supportEmail.service) {
       console.log('Skipping email - account info not set.')
-      return { success: true, body: result.body }
+      return result
     }
 
     const transporter = nodemailer.createTransport({
@@ -204,7 +205,7 @@ class SubmissionService {
       return { success: false, message: 'Could not send email.' }
     }
 
-    return { success: true, body: result.body }
+    return result
   }
 
   async update (submissionId, reqBody) {
