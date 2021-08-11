@@ -52,13 +52,17 @@ class MethodService {
     return await this.MongooseServiceInstance.find({ _id: methodId })
   }
 
+  async populate (method) {
+    await method.populate('submissions').execPopulate()
+  }
+
   async getSanitized (methodId) {
     const methods = await this.getById(methodId)
     if (!methods || !methods.length || methods[0].isDeleted()) {
       return { success: false, error: 'Method not found.' }
     }
     const method = methods[0]
-    await method.populate('submissions').execPopulate()
+    await this.populate(method)
     return { success: true, body: method }
   }
 
@@ -149,6 +153,29 @@ class MethodService {
     await method.save()
 
     return createResult
+  }
+
+  async update (methodId, reqBody) {
+    const methods = await this.getById(methodId)
+    if (!methods || !methods.length) {
+      return { success: false, error: 'Method not found.' }
+    }
+    const method = methods[0]
+
+    if (reqBody.name !== undefined) {
+      method.name = reqBody.name.trim()
+    }
+    if (reqBody.fullName !== undefined) {
+      method.fullName = reqBody.fullName.trim()
+    }
+    if (reqBody.description !== undefined) {
+      method.description = reqBody.description.trim()
+    }
+
+    await method.save()
+    await this.populate(method)
+
+    return { success: true, body: method }
   }
 
   async addOrRemoveSubmission (isAdd, methodId, submissionId) {

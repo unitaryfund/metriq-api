@@ -47,6 +47,12 @@ exports.read = async function (req, res) {
     'Retrieved submission by Id.')
 }
 
+exports.update = async function (req, res) {
+  routeWrapper(res,
+    async () => await submissionService.update(req.params.id, req.body),
+    'Updated submission!')
+}
+
 // Validate the delete request and delete the submission.
 exports.delete = async function (req, res) {
   routeWrapper(res,

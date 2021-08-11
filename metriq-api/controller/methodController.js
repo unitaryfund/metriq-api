@@ -38,16 +38,22 @@ exports.new = async function (req, res) {
     'New method added to submission!')
 }
 
-exports.delete = async function (req, res) {
-  routeWrapper(res,
-    async () => await methodService.delete(req.params.id),
-    'Successfully deleted method.')
-}
-
 exports.read = async function (req, res) {
   routeWrapper(res,
     async () => await methodService.getSanitized(req.params.id),
     'Retrieved method by Id.')
+}
+
+exports.update = async function (req, res) {
+  routeWrapper(res,
+    async () => await methodService.update(req.params.id, req.body),
+    'Updated method.')
+}
+
+exports.delete = async function (req, res) {
+  routeWrapper(res,
+    async () => await methodService.delete(req.params.id),
+    'Successfully deleted method.')
 }
 
 exports.readSubmissionCounts = async function (req, res) {

@@ -78,16 +78,7 @@ class SubmissionService {
       return result
     }
     const submission = result.body
-    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    let i = 0
-    while (i < submission.results.length) {
-      if (submission.results[i].isDeleted()) {
-        submission.results.splice(i, 1)
-      } else {
-        await submission.results[i].populate('task').populate('method').execPopulate()
-        i++
-      }
-    }
+    await this.populate(submission)
     submission.upvotesCount = submission.upvotes.length
 
     return { success: true, body: submission }
@@ -132,6 +123,19 @@ class SubmissionService {
     return { success: true, body: await submissionToDelete }
   }
 
+  async populate (submission) {
+    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
+    let i = 0
+    while (i < submission.results.length) {
+      if (submission.results[i].isDeleted()) {
+        submission.results.splice(i, 1)
+      } else {
+        await submission.results[i].populate('task').populate('method').execPopulate()
+        i++
+      }
+    }
+  }
+
   async submit (userId, reqBody, sendEmail) {
     const validationResult = await this.validateSubmission(reqBody)
     if (!validationResult.success) {
@@ -150,6 +154,7 @@ class SubmissionService {
     submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
     submission.submittedDate = new Date()
     submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl ? reqBody.submissionThumbnailUrl.trim() : null
+    submission.description = reqBody.description ? reqBody.description.trim() : ''
 
     const tags = []
     if (reqBody.tags) {
@@ -170,12 +175,12 @@ class SubmissionService {
     }
 
     if (!sendEmail) {
-      return { success: true, body: result.body }
+      return result
     }
 
     if (!config.supportEmail.service) {
       console.log('Skipping email - account info not set.')
-      return { success: true, body: result.body }
+      return result
     }
 
     const transporter = nodemailer.createTransport({
@@ -200,7 +205,27 @@ class SubmissionService {
       return { success: false, message: 'Could not send email.' }
     }
 
-    return { success: true, body: result.body }
+    return result
+  }
+
+  async update (submissionId, reqBody) {
+    const submissions = await this.getBySubmissionId(submissionId)
+    if (!submissions || !submissions.length) {
+      return { success: false, error: 'Submission not found.' }
+    }
+    const submission = submissions[0]
+
+    if (reqBody.submissionThumbnailUrl !== undefined) {
+      submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl.trim() ? reqBody.submissionThumbnailUrl.trim() : null
+    }
+    if (reqBody.description !== undefined) {
+      submission.description = reqBody.description.trim() ? reqBody.description.trim() : ''
+    }
+    await submission.save()
+
+    await this.populate(submission)
+
+    return { success: true, body: submission }
   }
 
   async validateSubmission (reqBody) {
@@ -239,16 +264,7 @@ class SubmissionService {
       await submission.save()
     }
 
-    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    let i = 0
-    while (i < submission.results.length) {
-      if (submission.results[i].isDeleted()) {
-        submission.results.splice(i, 1)
-      } else {
-        await submission.results[i].populate('task').populate('method').execPopulate()
-        i++
-      }
-    }
+    await this.populate(submission)
 
     return { success: true, body: submission }
   }
@@ -400,17 +416,7 @@ class SubmissionService {
 
     await tag.save()
     await submission.save()
-
-    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    let i = 0
-    while (i < submission.results.length) {
-      if (submission.results[i].isDeleted()) {
-        submission.results.splice(i, 1)
-      } else {
-        await submission.results[i].populate('task').populate('method').execPopulate()
-        i++
-      }
-    }
+    await this.populate(submission)
 
     return { success: true, body: submission }
   }
