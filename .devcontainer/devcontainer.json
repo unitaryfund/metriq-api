@@ -23,7 +23,7 @@
 	"forwardPorts": [3000, 27017],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "cd /workspace/metriq-db; mongoimport --db metriq --collection methods methods.json; mongoimport --db metriq --collection results results.json; mongoimport --db metriq --collection submissions submissions.json; mongoimport --db metriq --collection tags tags.json; mongoimport --db metriq --collection tasks tasks.json; mongoimport --db metriq --collection users users.json; cd /workspace/metriq-api; npm i; cd /workspace/metriq-app; npm i",
+	"postCreateCommand": "./metriq-start.sh",
 
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "node"
