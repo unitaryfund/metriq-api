@@ -61,5 +61,6 @@ const registration1 = {
 
 const task1 = {
     name: 'Task',
+    fullName: 'Task',
     description: 'Description'
 }
