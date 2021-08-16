@@ -190,14 +190,16 @@ describe('submission', () => {
 
 const submission1 = {
     submissionName: 'Test Submission',
+    submissionContentUrl: 'https://github.com'
 }
 
 const submission2 = {
     submissionName: 'Test Submission 2',
+    submissionContentUrl: 'https://github.com'
+    
 }
 
 const submissionResponse1 = {
-    submissionName: 'Test Submission',
     submissionName: 'Test Submission',
     submissionNameNormal: 'test submission'
 }

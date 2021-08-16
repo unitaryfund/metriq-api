@@ -73,6 +73,7 @@ const result1 = {
 
 const submission1 = {
     submissionName: 'Test Submission',
+    submissionContentUrl: 'https://github.com'
 }
 
 const task1 = {

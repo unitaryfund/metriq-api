@@ -153,6 +153,7 @@ class SubmissionService {
     submission.submissionName = reqBody.submissionName.trim()
     submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
     submission.submittedDate = new Date()
+    submission.submissionContentUrl = reqBody.submissionContentUrl.trim()
     submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl ? reqBody.submissionThumbnailUrl.trim() : null
     submission.description = reqBody.description ? reqBody.description.trim() : ''
 
@@ -231,6 +232,10 @@ class SubmissionService {
   async validateSubmission (reqBody) {
     if (!reqBody.submissionName) {
       return { success: false, error: 'Submission name cannot be blank.' }
+    }
+
+    if (!reqBody.submissionContentUrl || !reqBody.submissionContentUrl.trim()) {
+      return { success: false, error: 'Submission content URL cannot be blank.' }
     }
 
     const tlSubmissionName = reqBody.submissionName.trim().toLowerCase()

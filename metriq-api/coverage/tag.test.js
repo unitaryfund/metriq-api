@@ -58,6 +58,7 @@ describe('tag', () => {
 
 const submission1 = {
     submissionName: 'Test Submission',
+    submissionContentUrl: 'https://github.com'
 }
 
 const registration1 = {
