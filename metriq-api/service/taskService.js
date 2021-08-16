@@ -71,7 +71,6 @@ class TaskService {
         }
       },
       { $addFields: { submissionCount: { $size: '$submissions' } } },
-      { $match: { submissionCount: { $gte: 1 } } },
       {
         $lookup: {
           from: 'submissions',
