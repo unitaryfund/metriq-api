@@ -71,7 +71,6 @@ class TaskService {
         }
       },
       { $addFields: { submissionCount: { $size: '$submissions' } } },
-      { $match: { submissionCount: { $gte: 1 } } },
       {
         $lookup: {
           from: 'submissions',
@@ -136,6 +135,7 @@ class TaskService {
     task.name = reqBody.name.trim()
     task.fullName = reqBody.fullName.trim()
     task.description = reqBody.description.trim()
+    task.submissions = []
 
     // Get an ObjectId for the new object, first.
     const createResult = await this.create(task)
