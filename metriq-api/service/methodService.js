@@ -122,6 +122,7 @@ class MethodService {
     method.name = reqBody.name
     method.fullName = reqBody.fullName
     method.description = reqBody.description
+    method.submissions = []
 
     // Get an ObjectId for the new object, first.
     const createResult = await this.create(method)
