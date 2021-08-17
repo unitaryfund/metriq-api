@@ -39,7 +39,7 @@ const resultSchema = mongoose.Schema({
   },
   evaluatedDate: {
     type: Date,
-    required: true
+    required: false
   },
   submittedDate: {
     type: Date,
