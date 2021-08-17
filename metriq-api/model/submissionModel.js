@@ -30,7 +30,7 @@ const submissionSchema = mongoose.Schema({
   },
   submissionContentUrl: {
     type: String,
-    required: true,
+    required: true
   },
   submissionThumbnailUrl: {
     type: String,

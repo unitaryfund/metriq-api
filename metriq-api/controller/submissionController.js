@@ -102,7 +102,7 @@ exports.upvote = async function (req, res) {
     'Up-voted submission!')
 }
 
-const itemsPerPage = 10
+const itemsPerPage = 5
 
 exports.trending = async function (req, res) {
   routeWrapper(res,
