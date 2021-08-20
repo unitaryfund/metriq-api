@@ -174,7 +174,7 @@ class UserService {
   }
 
   validatePassword (password) {
-    return password && (password.length >= 8)
+    return password && (password.length >= 12)
   }
 
   async validateRegistration (reqBody) {
