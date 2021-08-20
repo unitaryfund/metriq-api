@@ -75,21 +75,21 @@ describe('login', () => {
 const registration1 = {
     username: 'Test1',
     email:'test@test.com',
-    password:'TestUser1!',
+    password:'TestUserSuper1!',
     passwordConfirm: 'TestUser1!'
 }
 
 const loginUsername1 = {
   username: 'Test1',
-  password: 'TestUser1!'
+  password: 'TestUserSuper1!'
 }
 
 const loginEmail1 = {
   username: 'test@test.com',
-  password: 'TestUser1!'
+  password: 'TestUserSuper1!'
 }
 
 const incorrectPassword = {
   username: 'Test1',
-  password: 'TestUser2!'
+  password: 'TestUserSuper2!'
 }

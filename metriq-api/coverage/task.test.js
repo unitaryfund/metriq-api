@@ -55,8 +55,8 @@ describe('task', () => {
 const registration1 = {
     username: 'Test1',
     email:'test@test.com',
-    password:'TestUser1!',
-    passwordConfirm: 'TestUser1!'
+    password:'TestUserSuper1!',
+    passwordConfirm: 'TestUserSuper1!'
 }
 
 const task1 = {
