@@ -143,7 +143,7 @@ const undefinedUserId = {
 
 const recovery2 = {
     username: 'Test2',
-    password:'TestUser1!',
+    password:'TestUserSuper1!',
     passwordConfirm: 'TestUserSuper1!',
     uuid: ''
 }

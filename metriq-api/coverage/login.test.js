@@ -76,7 +76,7 @@ const registration1 = {
     username: 'Test1',
     email:'test@test.com',
     password:'TestUserSuper1!',
-    passwordConfirm: 'TestUser1!'
+    passwordConfirm: 'TestUserSuper1!'
 }
 
 const loginUsername1 = {
