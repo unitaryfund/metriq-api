@@ -115,20 +115,20 @@ describe('user', () => {
 const registration1 = {
     username: 'Test1',
     email:'test@test.com',
-    password:'TestUser1!',
-    passwordConfirm: 'TestUser1!'
+    password:'TestUserSuper1!',
+    passwordConfirm: 'TestUserSuper1!'
 }
 
 const registration2 = {
     username: 'Test2',
     email:'test2@test.com',
-    password:'TestUser1!',
-    passwordConfirm: 'TestUser1!'
+    password:'TestUserSuper1!',
+    passwordConfirm: 'TestUserSuper1!'
 }
 
 const login1 = {
     username: 'Test1',
-    password: 'TestUser1!'
+    password: 'TestUserSuper1!'
 }
 
 const profile1 = {
@@ -143,7 +143,7 @@ const undefinedUserId = {
 
 const recovery2 = {
     username: 'Test2',
-    password:'TestUser1!',
-    passwordConfirm: 'TestUser1!',
+    password:'TestUserSuper1!',
+    passwordConfirm: 'TestUserSuper1!',
     uuid: ''
 }

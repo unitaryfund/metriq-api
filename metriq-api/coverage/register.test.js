@@ -111,8 +111,8 @@ describe('register', () => {
 const registration1 = {
   username: 'Test1',
   email: 'test@test.com',
-  password: 'TestUser1!',
-  passwordConfirm: 'TestUser1!'
+  password: 'TestUserSuper1!',
+  passwordConfirm: 'TestUserSuper1!'
 }
 
 const registration1Response = {
@@ -126,15 +126,15 @@ const registration1Response = {
 const registration2 = {
   username: 'Test2',
   email: 'test2@test.com',
-  password: 'TestUser1!',
-  passwordConfirm: 'TestUser1!'
+  password: 'TestUserSuper1!',
+  passwordConfirm: 'TestUserSuper1!'
 }
 
 const invalidEmail = {
   username: 'Test1',
   email: 'test',
-  password: 'TestUser1!',
-  passwordConfirm: 'TestUser1!'
+  password: 'TestUserSuper1!',
+  passwordConfirm: 'TestUserSuper1!'
 }
 
 const invalidPassword = {
