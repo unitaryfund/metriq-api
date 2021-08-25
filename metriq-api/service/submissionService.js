@@ -72,14 +72,13 @@ class SubmissionService {
     return { success: true, body: submission }
   }
 
-  async getSanitized (submissionNameOrId) {
+  async getSanitized (submissionNameOrId, userId) {
     const result = await this.get(submissionNameOrId)
     if (!result.success) {
       return result
     }
-    const submission = result.body
-    await this.populate(submission)
-    submission.upvotesCount = submission.upvotes.length
+    let submission = result.body
+    submission = await this.populate(submission, userId)
 
     return { success: true, body: submission }
   }
@@ -123,7 +122,7 @@ class SubmissionService {
     return { success: true, body: await submissionToDelete }
   }
 
-  async populate (submission) {
+  async populate (submission, userId) {
     await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
     let i = 0
     while (i < submission.results.length) {
@@ -134,6 +133,27 @@ class SubmissionService {
         i++
       }
     }
+
+    const toRet = {
+      _id: submission._id,
+      submissionThumbnailUrl: submission.submissionThumbnailUrl,
+      approvedDate: submission.approvedDate,
+      deletedDate: submission.deletedDate,
+      tags: submission.tags,
+      methods: submission.methods,
+      tasks: submission.methods,
+      results: submission.results,
+      user: submission.user,
+      submissionName: submission.submissionName,
+      submissionNameNormal: submission.submissionNameNormal,
+      description: submission.description,
+      submittedDate: submission.submittedDate,
+      submissionContentUrl: submission.submissionContentUrl,
+      isUpvoted: submission.upvotes.includes(mongoose.Types.ObjectId(userId)),
+      upvotesCount: submission.upvotes.length
+    }
+
+    return toRet
   }
 
   async submit (userId, reqBody, sendEmail) {
@@ -209,12 +229,12 @@ class SubmissionService {
     return result
   }
 
-  async update (submissionId, reqBody) {
+  async update (submissionId, reqBody, userId) {
     const submissions = await this.getBySubmissionId(submissionId)
     if (!submissions || !submissions.length) {
       return { success: false, error: 'Submission not found.' }
     }
-    const submission = submissions[0]
+    let submission = submissions[0]
 
     if (reqBody.submissionThumbnailUrl !== undefined) {
       submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl.trim() ? reqBody.submissionThumbnailUrl.trim() : null
@@ -224,7 +244,7 @@ class SubmissionService {
     }
     await submission.save()
 
-    await this.populate(submission)
+    submission = await this.populate(submission, userId)
 
     return { success: true, body: submission }
   }
@@ -256,7 +276,7 @@ class SubmissionService {
     if (!submissions || !submissions.length) {
       return { success: false, error: 'Submission not found.' }
     }
-    const submission = submissions[0]
+    let submission = submissions[0]
 
     const userResponse = await userService.get(userId)
     if (!userResponse.success) {
@@ -264,12 +284,15 @@ class SubmissionService {
     }
     const user = userResponse.body
 
-    if (!submission.upvotes.includes(user._id)) {
+    const index = submission.upvotes.indexOf(user._id)
+    if (index >= 0) {
+      submission.upvotes.splice(index, 1)
+    } else {
       submission.upvotes.push(user._id)
-      await submission.save()
     }
+    await submission.save()
 
-    await this.populate(submission)
+    submission = await this.populate(submission, user._id)
 
     return { success: true, body: submission }
   }
@@ -283,12 +306,16 @@ class SubmissionService {
     return { success: true, body: result }
   }
 
-  async getTrending (startIndex, count) {
+  async getTrending (startIndex, count, userId) {
     const millisPerHour = 1000 * 60 * 60
+    const oid = userId ? mongoose.Types.ObjectId(userId) : null
+    console.log(oid)
     const result = await this.MongooseServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null, approvedDate: { $ne: null } } },
       {
         $addFields: {
+          upvotesCount: { $size: '$upvotes' },
+          isUpvoted: { $in: [oid, '$upvotes'] },
           upvotesPerHour: {
             $divide: [
               { $multiply: [{ $size: '$upvotes' }, millisPerHour] },
@@ -297,34 +324,47 @@ class SubmissionService {
           }
         }
       },
+      { $project: { upvotes: 0 } },
       { $sort: { upvotesPerHour: -1 } }
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
   }
 
-  async getLatest (startIndex, count) {
+  async getLatest (startIndex, count, userId) {
+    const oid = userId ? mongoose.Types.ObjectId(userId) : null
     const result = await this.MongooseServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null, approvedDate: { $ne: null } } },
+      {
+        $addFields: {
+          upvotesCount: { $size: '$upvotes' },
+          isUpvoted: { $in: [oid, '$upvotes'] }
+        }
+      },
+      { $project: { upvotes: 0 } },
       { $sort: { submittedDate: -1 } }
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
   }
 
-  async getPopular (startIndex, count) {
+  async getPopular (startIndex, count, userId) {
+    const oid = userId ? mongoose.Types.ObjectId(userId) : null
     const result = await this.MongooseServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null, approvedDate: { $ne: null } } },
       {
         $addFields: {
-          upvotesCount: { $size: '$upvotes' }
+          upvotesCount: { $size: '$upvotes' },
+          isUpvoted: { $in: [oid, '$upvotes'] }
         }
       },
+      { $project: { upvotes: 0 } },
       { $sort: { upvotesCount: -1 } }
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
   }
 
-  async getTrendingByTag (tagName, startIndex, count) {
+  async getTrendingByTag (tagName, startIndex, count, userId) {
     const millisPerHour = 1000 * 60 * 60
+    const oid = userId ? mongoose.Types.ObjectId(userId) : null
 
     const tag = await tagService.getByName(tagName)
     if (!tag || !tag.length) {
@@ -336,6 +376,8 @@ class SubmissionService {
       { $match: { deletedDate: null, approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
       {
         $addFields: {
+          upvotesCount: { $size: '$upvotes' },
+          isUpvoted: { $in: [oid, '$upvotes'] },
           upvotesPerHour: {
             $divide: [
               { $multiply: [{ $size: '$upvotes' }, millisPerHour] },
@@ -344,50 +386,64 @@ class SubmissionService {
           }
         }
       },
+      { $project: { upvotes: 0 } },
       { $sort: { upvotesPerHour: -1 } }
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
   }
 
-  async getPopularByTag (tagName, startIndex, count) {
+  async getPopularByTag (tagName, startIndex, count, userId) {
     const tag = await tagService.getByName(tagName)
     if (!tag || !tag.length) {
       return { success: false, error: 'Category not found' }
     }
     const tagId = tag[0]._id
+
+    const oid = userId ? mongoose.Types.ObjectId(userId) : null
 
     const result = await this.MongooseServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null, approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
       {
         $addFields: {
-          upvotesCount: { $size: '$upvotes' }
+          upvotesCount: { $size: '$upvotes' },
+          isUpvoted: { $in: [oid, '$upvotes'] }
         }
       },
+      { $project: { upvotes: 0 } },
       { $sort: { upvotesCount: -1 } }
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
   }
 
-  async getLatestByTag (tagName, startIndex, count) {
+  async getLatestByTag (tagName, startIndex, count, userId) {
     const tag = await tagService.getByName(tagName)
     if (!tag || !tag.length) {
       return { success: false, error: 'Category not found' }
     }
     const tagId = tag[0]._id
 
+    const oid = userId ? mongoose.Types.ObjectId(userId) : null
+
     const result = await this.MongooseServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null, approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
+      {
+        $addFields: {
+          upvotesCount: { $size: '$upvotes' },
+          isUpvoted: { $in: [oid, '$upvotes'] }
+        }
+      },
+      { $project: { upvotes: 0 } },
       { $sort: { submittedDate: -1 } }
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
   }
 
-  async addOrRemoveTag (isAdd, submissionId, tagName) {
+  async addOrRemoveTag (isAdd, submissionId, tagName, userId) {
     const submissions = await this.getBySubmissionId(submissionId)
     if (!submissions || !submissions.length || submissions[0].isDeleted()) {
       return { success: false, error: 'Submission not found.' }
     }
-    const submission = submissions[0]
+    let submission = submissions[0]
 
     let tag = {}
     if (isAdd) {
@@ -421,7 +477,7 @@ class SubmissionService {
 
     await tag.save()
     await submission.save()
-    await this.populate(submission)
+    submission = await this.populate(submission, userId)
 
     return { success: true, body: submission }
   }

@@ -43,13 +43,13 @@ exports.new = async function (req, res) {
 
 exports.read = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.getSanitized(req.params.id),
+    async () => await submissionService.getSanitized(req.params.id, req.user.id),
     'Retrieved submission by Id.')
 }
 
 exports.update = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.update(req.params.id, req.body),
+    async () => await submissionService.update(req.params.id, req.body, req.user.id),
     'Updated submission!')
 }
 
@@ -74,13 +74,13 @@ exports.deleteMethod = async function (req, res) {
 
 exports.newTag = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.addOrRemoveTag(true, req.params.submissionId, req.params.tagName),
+    async () => await submissionService.addOrRemoveTag(true, req.params.submissionId, req.params.tagName, req.user.id),
     'Successfully added tag to submission.')
 }
 
 exports.deleteTag = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.addOrRemoveTag(false, req.params.submissionId, req.params.tagName),
+    async () => await submissionService.addOrRemoveTag(false, req.params.submissionId, req.params.tagName, req.user.id),
     'Successfully removed tag from submission.')
 }
 
@@ -106,36 +106,36 @@ const itemsPerPage = 5
 
 exports.trending = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.getTrending(parseInt(req.params.page) * itemsPerPage, itemsPerPage),
+    async () => await submissionService.getTrending(parseInt(req.params.page) * itemsPerPage, itemsPerPage, req.user ? req.user.id : null),
     'Retrieved top results.')
 }
 
 exports.latest = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.getLatest(parseInt(req.params.page) * itemsPerPage, itemsPerPage),
+    async () => await submissionService.getLatest(parseInt(req.params.page) * itemsPerPage, itemsPerPage, req.user ? req.user.id : null),
     'Retrieved top results.')
 }
 
 exports.popular = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.getPopular(parseInt(req.params.page) * itemsPerPage, itemsPerPage),
+    async () => await submissionService.getPopular(parseInt(req.params.page) * itemsPerPage, itemsPerPage, req.user ? req.user.id : null),
     'Retrieved top results.')
 }
 
 exports.tagTrending = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.getTrendingByTag(req.params.tag, parseInt(req.params.page) * itemsPerPage, itemsPerPage),
+    async () => await submissionService.getTrendingByTag(req.params.tag, parseInt(req.params.page) * itemsPerPage, itemsPerPage, req.user ? req.user.id : null),
     'Retrieved top results.')
 }
 
 exports.tagPopular = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.getPopularByTag(req.params.tag, parseInt(req.params.page) * itemsPerPage, itemsPerPage),
+    async () => await submissionService.getPopularByTag(req.params.tag, parseInt(req.params.page) * itemsPerPage, itemsPerPage, req.user ? req.user.id : null),
     'Retrieved top results.')
 }
 
 exports.tagLatest = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.getLatestByTag(req.params.tag, parseInt(req.params.page) * itemsPerPage, itemsPerPage),
+    async () => await submissionService.getLatestByTag(req.params.tag, parseInt(req.params.page) * itemsPerPage, itemsPerPage, req.user ? req.user.id : null),
     'Retrieved top results.')
 }
