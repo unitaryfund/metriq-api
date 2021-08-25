@@ -309,7 +309,6 @@ class SubmissionService {
   async getTrending (startIndex, count, userId) {
     const millisPerHour = 1000 * 60 * 60
     const oid = userId ? mongoose.Types.ObjectId(userId) : null
-    console.log(oid)
     const result = await this.MongooseServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null, approvedDate: { $ne: null } } },
       {
