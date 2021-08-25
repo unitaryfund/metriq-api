@@ -92,7 +92,7 @@ describe('submission', () => {
         expect(result.success).toBe(false)
     })
 
-    it('can be upvoted (only once)', async () => {
+    it('can be upvoted (and toggled)', async () => {
         // Initialize
         const userId = (await (new UserService()).register(registration1)).body._id
         const submissionService = new SubmissionService()
@@ -101,11 +101,12 @@ describe('submission', () => {
         await userService.register(registration1)
 
         // Act
-        await submissionService.upvote(submissionResult.body._id, userId)
-        const result = await submissionService.upvote(submissionResult.body._id, userId)
+        const result1 = await submissionService.upvote(submissionResult.body._id, userId)
+        const result2 = await submissionService.upvote(submissionResult.body._id, userId)
 
         // Assert
-        expect(result.body.upvotes.length).toBe(1)
+        expect(result1.body.upvotesCount).toBe(1)
+        expect(result2.body.upvotesCount).toBe(0)
     })
 
     it('cannot be upvoted by a deleted user', async () => {
