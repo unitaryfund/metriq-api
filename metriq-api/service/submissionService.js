@@ -446,7 +446,7 @@ class SubmissionService {
 
     let tag = {}
     if (isAdd) {
-      tag = await tagService.incrementAndGet(tagName, submission)
+      tag = await tagService.createOrFetch(tagName)
     } else {
       const tags = await tagService.getByName(tagName)
       if (!tags || !tags.length || tags[0].isDeleted()) {
