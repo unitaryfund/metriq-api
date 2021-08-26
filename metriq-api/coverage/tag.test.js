@@ -27,7 +27,6 @@ describe('tag', () => {
     it('can be created with reference count', async () => {
         // Initialize
         const tagService = new TagService()
-        const userId = (await (new UserService()).register(registration1)).body._id
 
         // Act
         const result = await tagService.createOrFetch("test")
