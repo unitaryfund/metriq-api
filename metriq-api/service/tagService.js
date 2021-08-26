@@ -78,23 +78,17 @@ class TagService {
     return { success: true, body: result }
   }
 
-  async incrementAndGet (tagName, submission) {
+  async createOrFetch (tagName) {
     let toReturn = {}
     const tagGetResults = await this.getByName(tagName)
     if (!tagGetResults || !tagGetResults.length) {
       const tag = await this.MongooseServiceInstance.new()
       tag.name = tagName
-      tag.submissions.push(submission._id)
       toReturn = (await this.create(tag)).body
       await toReturn.save()
     } else {
       toReturn = tagGetResults[0]
-      toReturn.submissions.push(submission._id)
     }
-
-    await toReturn.save()
-    submission.tags.push(toReturn._id)
-    await submission.save()
 
     return toReturn
   }

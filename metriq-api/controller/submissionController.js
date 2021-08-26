@@ -43,7 +43,7 @@ exports.new = async function (req, res) {
 
 exports.read = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.getSanitized(req.params.id, req.user.id),
+    async () => await submissionService.getSanitized(req.params.id, req.user ? req.user.id : null),
     'Retrieved submission by Id.')
 }
 
