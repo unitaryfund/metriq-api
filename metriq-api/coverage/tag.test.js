@@ -28,42 +28,24 @@ describe('tag', () => {
         // Initialize
         const tagService = new TagService()
         const userId = (await (new UserService()).register(registration1)).body._id
-        const submissionService = new SubmissionService()
-        const submissionResult = await submissionService.submit(userId, submission1, false)
 
         // Act
-        const result = await tagService.incrementAndGet("test", submissionResult.body)
+        const result = await tagService.createOrFetch("test")
 
         // Assert
-        expect(result.submissions.length)
-            .toEqual(1)
+        expect(result.name).toEqual("test")
     })
 
     it('can be listed', async () => {
         // Initialize
         const tagService = new TagService()
-        const userId = (await (new UserService()).register(registration1)).body._id
-        const submissionService = new SubmissionService()
-        const submissionResult = await submissionService.submit(userId, submission1, false)
-        await tagService.incrementAndGet("test", submissionResult.body)
+        await tagService.createOrFetch("test")
 
         // Act
         const result = await tagService.getAllNamesAndCounts()
 
         // Assert
         expect(result.success).toEqual(true)
-        expect(result.body.length).toEqual(1)
+        expect(result.body.length).toEqual(0)
     })
 })
-
-const submission1 = {
-    submissionName: 'Test Submission',
-    submissionContentUrl: 'https://github.com'
-}
-
-const registration1 = {
-    username: 'Test1',
-    email:'test@test.com',
-    password:'TestUserSuper1!',
-    passwordConfirm: 'TestUserSuper1!'
-}
