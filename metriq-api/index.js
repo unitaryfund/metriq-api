@@ -25,20 +25,24 @@ const unless = function (paths, middleware) {
   return function (req, res, next) {
     if ((req.method === 'GET') && (req.path.startsWith('/api/submission') || req.path.startsWith('/api/method') || req.path.startsWith('/api/task') || req.path.startsWith('/api/result'))) {
       if (req.cookies && req.cookies.token) {
-        const decoded = jwtDecode(req.cookies.token)
-        if (decoded.id) {
-          req.user = { id: decoded.id }
-        }
+        try {
+          const decoded = jwtDecode(req.cookies.token)
+          if (decoded && decoded.id) {
+            req.user = { id: decoded.id }
+          }
+        } catch {}
       }
       return next()
     }
     for (let i = 0; i < paths.length; i++) {
       if (req.path.startsWith(paths[i])) {
         if (req.cookies && req.cookies.token) {
-          const decoded = jwtDecode(req.cookies.token)
-          if (decoded.id) {
-            req.user = { id: decoded.id }
-          }
+          try {
+            const decoded = jwtDecode(req.cookies.token)
+            if (decoded && decoded.id) {
+              req.user = { id: decoded.id }
+            }
+          } catch {}
         }
         return next()
       }
