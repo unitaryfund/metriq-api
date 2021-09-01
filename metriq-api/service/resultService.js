@@ -8,6 +8,10 @@ const ResultModel = require('../model/resultModel')
 // Service dependencies
 const SubmissionService = require('../service/submissionService')
 const submissionService = new SubmissionService()
+const TaskService = require('../service/taskService')
+const taskService = new TaskService()
+const MethodService = require('../service/methodService')
+const methodService = new MethodService()
 
 class ResultService {
   constructor () {
@@ -52,6 +56,26 @@ class ResultService {
     result.metricValue = reqBody.metricValue
     result.evaluatedDate = reqBody.evaluatedDate
     result.submittedDate = new Date()
+
+    // Task must be not null and valid (present in database) for a valid result object.
+    if (result.task == null) {
+      return { success: false, error: 'Result requires task to be defined.' }
+    }
+    try {
+      taskService.getById(result.task)
+    } catch (err) {
+      return { success: false, error: 'Result requires task to be present in database.' }
+    }
+
+    // Method must be not null and valid (present in database) for a valid result object.
+    if (result.method == null) {
+      return { success: false, error: 'Result requires method to be defined.' }
+    }
+    try {
+      methodService.getById(result.method)
+    } catch (err) {
+      return { success: false, error: 'Result requires method to be present in database.' }
+    }
 
     const nResult = await this.create(result)
     if (!nResult.success) {
