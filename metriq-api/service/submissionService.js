@@ -141,7 +141,7 @@ class SubmissionService {
       deletedDate: submission.deletedDate,
       tags: submission.tags,
       methods: submission.methods,
-      tasks: submission.methods,
+      tasks: submission.tasks,
       results: submission.results,
       user: submission.user,
       submissionName: submission.submissionName,
