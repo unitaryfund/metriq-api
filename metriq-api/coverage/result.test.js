@@ -27,6 +27,24 @@ afterAll(async () => await dbHandler.closeDatabase());
  */
 describe('result', () => {
 
+    it('cannot be created if method or task is not defined', async () => {
+        // Initialize
+        const userId = (await (new UserService()).register(registration1)).body._id
+
+        const submissionService = new SubmissionService()
+        const submissionResult = await submissionService.submit(userId, submission1, false)
+
+        const submissionId = submissionResult.body._id
+
+        const resultService = new ResultService()
+
+        // Act
+       const result = await resultService.submit(userId, submissionId, result1)
+
+        // Assert
+        expect(result.success).toBe(false)
+    })
+
     it('can be created', async () => {
         // Initialize
         const userId = (await (new UserService()).register(registration1)).body._id
@@ -46,24 +64,6 @@ describe('result', () => {
 
         result1.task = taskId
         result1.method = methodId
-
-        const resultService = new ResultService()
-
-        // Act
-       const result = await resultService.submit(userId, submissionId, result1)
-
-        // Assert
-        expect(result.success).toBe(true)
-    })
-
-    it('can be created if method or task is not defined', async () => {
-        // Initialize
-        const userId = (await (new UserService()).register(registration1)).body._id
-
-        const submissionService = new SubmissionService()
-        const submissionResult = await submissionService.submit(userId, submission1, false)
-
-        const submissionId = submissionResult.body._id
 
         const resultService = new ResultService()
 
