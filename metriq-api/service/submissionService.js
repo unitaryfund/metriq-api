@@ -177,23 +177,26 @@ class SubmissionService {
     submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl ? reqBody.submissionThumbnailUrl.trim() : null
     submission.description = reqBody.description ? reqBody.description.trim() : ''
 
+    const result = await this.create(submission)
+    if (!result.success) {
+      return result
+    }
+
     const tags = []
     if (reqBody.tags) {
       const tagSplit = reqBody.tags.split(',')
       for (let i = 0; i < tagSplit.length; i++) {
         const tag = tagSplit[i].trim().toLowerCase()
         if (tag) {
-          const tagModel = await tagService.incrementAndGet(tag, submission)
+          const tagModel = await tagService.createOrFetch(tag)
+          tagModel.submissions.push(submission._id)
+          await tagModel.save()
           tags.push(tagModel._id)
         }
       }
     }
     submission.tags = tags
-
-    const result = await this.create(submission)
-    if (!result.success) {
-      return result
-    }
+    await submission.save()
 
     if (!sendEmail) {
       return result
