@@ -1,13 +1,14 @@
-// resultModel.js
+// submissionMethodRefModel.js
 
 const config = require('../config')
 const { Sequelize, Model, DataTypes, Deferrable } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString)
 const User = require('./userModel').User
-const SubmissionMethodRef = require('./submissionMethodRefModel').SubmissionMethodRef
+const Submission = require('./submissionModel').Submission
+const Method = require('./methodModel').Method
 
-class Result extends Model {}
-Result.init({
+class SubmissionMethodRef extends Model {}
+SubmissionMethodRef.init({
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -17,31 +18,28 @@ Result.init({
       deferrable: Deferrable.INITIALLY_IMMEDIATE
     }
   },
-  submissionMethodRefId: {
+  submissionId: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: SubmissionMethodRef,
+      model: Submission,
       key: 'id',
       deferrable: Deferrable.INITIALLY_IMMEDIATE
     }
   },
-  isHigherBetter: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false
-  },
-  metricName: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  metricValue: {
-    type: DataTypes.FLOAT,
-    allowNull: false
+  methodId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Method,
+      key: 'id',
+      deferrable: Deferrable.INITIALLY_IMMEDIATE
+    }
   }
-}, { sequelize, paranoid: true, modelName: 'result' })
+}, { sequelize, paranoid: true, modelName: 'submissionMethodRef' })
 
-Result.sync()
+SubmissionMethodRef.sync()
 
 module.exports = function () {
-  return Result
+  return SubmissionMethodRef
 }

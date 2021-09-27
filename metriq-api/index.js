@@ -1,9 +1,9 @@
 // Get the connection string.
 const config = require('./config')
-// Import Mongoose
-const mongoose = require('mongoose')
 // Import express
 const express = require('express')
+// Import Sequelize
+const { Sequelize } = require('sequelize')
 // Import CORS
 const cors = require('cors')
 // Import express JWT auth
@@ -124,22 +124,20 @@ app.use(unless(publicApiRoutes, async function (req, res, next) {
   next()
 }))
 
-// Fix mongoose deprecation warnings.
-// See https://stackoverflow.com/questions/51960171/node63208-deprecationwarning-collection-ensureindex-is-deprecated-use-creat.
-mongoose.set('useNewUrlParser', true)
-mongoose.set('useFindAndModify', false)
-mongoose.set('useCreateIndex', true)
-
-// Connect to Mongoose and set the connection variable.
-mongoose.connect(config.db.url, { useNewUrlParser: true, useUnifiedTopology: true })
-const db = mongoose.connection
+// Connect to PostgreSQL
+console.log(config.pgConnectionString)
+const sequelize = new Sequelize(config.pgConnectionString)
 
 // Add a check for DB connection.
-if (!db) {
-  console.log('Error while connecting to db')
-} else {
-  console.log('Db connection successful')
+const testSqlConnection = async function () {
+  try {
+    await sequelize.authenticate()
+    console.log('Connection has been established successfully.')
+  } catch (error) {
+    console.error('Unable to connect to the database:', error)
+  }
 }
+testSqlConnection()
 
 if (config.isDebug && !process.env.METRIQ_SECRET_KEY) {
   console.log('Debugging session secret: ' + config.api.token.secretKey)

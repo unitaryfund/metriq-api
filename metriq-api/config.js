@@ -39,4 +39,14 @@ config.supportEmail.address = process.env.METRIQ_SUPPORT_EMAIL_ADDRESS
 
 config.defaultSubmissionThumbnailUrl = config.api.protocol + config.api.url + '/default.jpg'
 
+config.pgPool = {
+  user: 'metriq',
+  host: 'localhost',
+  database: 'metriq',
+  password: process.env.PGPASSWORD,
+  port: 5432
+}
+
+config.pgConnectionString = 'postgres://' + config.pgPool.user + ':' + config.pgPool.password + '@' + config.pgPool.host + ':' + config.pgPool.port + '/' + config.pgPool.database
+
 module.exports = config

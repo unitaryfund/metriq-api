@@ -26,6 +26,9 @@
     "mongodb-memory-server": "^6.9.6",
     "mongoose": "^5.12.12",
     "nodemailer": "^6.6.2",
+    "pg": "^8.7.1",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.6.5",
     "standard": "^16.0.3",
     "uuid": "^8.3.2"
   },

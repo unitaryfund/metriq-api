@@ -1,76 +1,45 @@
 // userModel.js
 
-const config = require('./../config')
-const mongoose = require('mongoose')
-const { v4: uuidv4 } = require('uuid')
+const config = require('../config')
+const { Sequelize, Model, DataTypes } = require('sequelize')
+const sequelize = new Sequelize(config.pgConnectionString)
 
-const recoveryExpirationMinutes = 30
-const millisPerMinute = 60000
-
-// Set up schema.
-const userSchema = mongoose.Schema({
+class User extends Model {}
+User.init({
   username: {
-    type: String,
-    required: true,
-    unique: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   usernameNormal: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   passwordHash: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   email: {
-    type: String,
-    required: true,
-    unique: true,
-    match: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-    index: true
-  },
-  dateJoined: {
-    type: Date,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   clientToken: {
-    type: String,
-    default: ''
-  },
-  clientTokenCreated: {
-    type: Date,
-    default: null
-  },
-  deletedDate: {
-    type: Date,
-    default: null
+    type: DataTypes.STRING
   },
   recoveryToken: {
-    type: String,
-    default: null
+    type: DataTypes.STRING
+  },
+  clientTokenCreated: {
+    type: DataTypes.DATE,
+    allowNull: false
   },
   recoveryTokenExpiration: {
-    type: Date,
-    default: null
+    type: DataTypes.DATE,
+    allowNull: false
   }
-}, { autoIndex: config.isDebug, optimisticConcurrency: true })
+}, { sequelize, paranoid: true, modelName: 'user' })
 
-userSchema.methods.softDelete = function () {
-  this.deletedDate = new Date()
-  this.clientToken = ''
-}
-userSchema.methods.isDeleted = function () {
-  return !!(this.deletedDate)
-}
-userSchema.methods.generateRecovery = function () {
-  this.recoveryToken = uuidv4()
-  this.recoveryTokenExpiration = new Date((new Date()).getTime() + recoveryExpirationMinutes * millisPerMinute)
-}
+User.sync()
 
-// Export User model.
-const User = module.exports = mongoose.model('user', userSchema)
-module.exports.get = function (callback, limit) {
-  User.find(callback).limit(limit)
+module.exports = function () {
+  return User
 }

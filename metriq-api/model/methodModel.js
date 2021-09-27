@@ -1,48 +1,37 @@
 // methodModel.js
 
-const config = require('./../config')
-const mongoose = require('mongoose')
+const config = require('../config')
+const { Sequelize, Model, DataTypes, Deferrable } = require('sequelize')
+const sequelize = new Sequelize(config.pgConnectionString)
+const User = require('./userModel').User
 
-// Set up schema.
-const methodSchema = mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
-    required: true
+class Method extends Model {}
+Method.init({
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: User,
+      key: 'id',
+      deferrable: Deferrable.INITIALLY_IMMEDIATE
+    }
   },
   name: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   fullName: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   description: {
-    type: String,
-    required: true
-  },
-  submittedDate: {
-    type: Date,
-    required: true,
-    default: new Date()
-  },
-  deletedDate: {
-    type: Date,
-    default: null
-  },
-  submissions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'submission' }]
-}, { autoIndex: config.isDebug, optimisticConcurrency: true })
+    type: DataTypes.STRING,
+    allowNull: false
+  }
+}, { sequelize, modelName: 'method' })
 
-methodSchema.methods.softDelete = function () {
-  this.deletedDate = new Date()
-}
-methodSchema.methods.isDeleted = function () {
-  return !!(this.deletedDate)
-}
+Method.sync()
 
-// Export Method model.
-const Method = module.exports = mongoose.model('method', methodSchema)
-module.exports.get = function (callback, limit) {
-  Method.find(callback).limit(limit)
+module.exports = function () {
+  return Method
 }

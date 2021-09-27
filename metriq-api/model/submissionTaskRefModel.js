@@ -1,13 +1,14 @@
-// resultModel.js
+// submissionTaskRefModel.js
 
 const config = require('../config')
 const { Sequelize, Model, DataTypes, Deferrable } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString)
 const User = require('./userModel').User
-const SubmissionMethodRef = require('./submissionMethodRefModel').SubmissionMethodRef
+const Submission = require('./submissionModel').Submission
+const Task = require('./taskModel').Task
 
-class Result extends Model {}
-Result.init({
+class SubmissionTaskRef extends Model {}
+SubmissionTaskRef.init({
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -17,31 +18,28 @@ Result.init({
       deferrable: Deferrable.INITIALLY_IMMEDIATE
     }
   },
-  submissionMethodRefId: {
+  submissionId: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: SubmissionMethodRef,
+      model: Submission,
       key: 'id',
       deferrable: Deferrable.INITIALLY_IMMEDIATE
     }
   },
-  isHigherBetter: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false
-  },
-  metricName: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  metricValue: {
-    type: DataTypes.FLOAT,
-    allowNull: false
+  taskId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Task,
+      key: 'id',
+      deferrable: Deferrable.INITIALLY_IMMEDIATE
+    }
   }
-}, { sequelize, paranoid: true, modelName: 'result' })
+}, { sequelize, paranoid: true, modelName: 'submissionTaskRef' })
 
-Result.sync()
+SubmissionTaskRef.sync()
 
 module.exports = function () {
-  return Result
+  return SubmissionTaskRef
 }
