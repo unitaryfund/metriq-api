@@ -40,4 +40,8 @@ Submission.init({
   }
 }, { sequelize, modelName: 'submission' })
 
+Submission.delete = async function () {
+  await Submission.destroy({ where: { id: this.id } })
+}
+
 module.exports.Submission = Submission

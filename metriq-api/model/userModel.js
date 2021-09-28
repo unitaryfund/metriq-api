@@ -38,4 +38,8 @@ User.init({
   }
 }, { sequelize, paranoid: true, modelName: 'users' })
 
+User.delete = async function () {
+  await User.destroy({ where: { id: this.id } })
+}
+
 module.exports.User = User

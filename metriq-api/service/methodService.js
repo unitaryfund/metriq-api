@@ -36,12 +36,7 @@ class MethodService {
 
     const methodToDelete = methodResult[0]
 
-    if (methodToDelete.isDeleted()) {
-      return { success: false, error: 'Method not found.' }
-    }
-
-    methodToDelete.softDelete()
-    await methodToDelete.save()
+    await methodToDelete.delete()
 
     return { success: true, body: await methodToDelete }
   }
@@ -56,7 +51,7 @@ class MethodService {
 
   async getSanitized (methodId) {
     const methods = await this.getById(methodId)
-    if (!methods || !methods.length || methods[0].isDeleted()) {
+    if (!methods || !methods.length) {
       return { success: false, error: 'Method not found.' }
     }
     const method = methods[0]
@@ -71,7 +66,6 @@ class MethodService {
 
   async getAllNamesAndCounts () {
     const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null } },
       {
         $project: {
           name: true,
@@ -179,13 +173,13 @@ class MethodService {
 
   async addOrRemoveSubmission (isAdd, methodId, submissionId) {
     const methods = await this.getById(methodId)
-    if (!methods || !methods.length || methods[0].isDeleted()) {
+    if (!methods || !methods.length) {
       return { success: false, error: 'Method not found.' }
     }
     const method = methods[0]
 
     const submissions = await submissionService.getBySubmissionId(submissionId)
-    if (!submissions || !submissions.length || submissions[0].isDeleted()) {
+    if (!submissions || !submissions.length) {
       return { success: false, error: 'Submission not found.' }
     }
     const submission = submissions[0]
@@ -213,14 +207,8 @@ class MethodService {
     await submission.save()
 
     await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    let i = 0
-    while (i < submission.results.length) {
-      if (submission.results[i].isDeleted()) {
-        submission.results.splice(i, 1)
-      } else {
-        await submission.results[i].populate('task').populate('method').execPopulate()
-        i++
-      }
+    for (let i = 0; i < submission.results.length; i++) {
+      await submission.results[i].populate('task').populate('method').execPopulate()
     }
 
     return { success: true, body: submission }

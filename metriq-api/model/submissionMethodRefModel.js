@@ -40,4 +40,8 @@ SubmissionMethodRef.init({
   }
 }, { sequelize, paranoid: true, modelName: 'submissionMethodRef' })
 
+SubmissionMethodRef.delete = async function () {
+  await SubmissionMethodRef.destroy({ where: { id: this.id } })
+}
+
 module.exports.SubmissionMethodRef = SubmissionMethodRef

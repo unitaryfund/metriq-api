@@ -30,4 +30,8 @@ Task.init({
   }
 }, { sequelize, modelName: 'task' })
 
+Task.delete = async function () {
+  await Task.destroy({ where: { id: this.id } })
+}
+
 module.exports.Task = Task

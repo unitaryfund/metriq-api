@@ -30,4 +30,8 @@ Method.init({
   }
 }, { sequelize, modelName: 'method' })
 
+Method.delete = async function () {
+  await Method.destroy({ where: { id: this.id } })
+}
+
 module.exports.Method = Method

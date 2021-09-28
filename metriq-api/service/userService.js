@@ -92,10 +92,6 @@ class UserService {
 
     const user = userResult[0]
 
-    if (user.isDeleted()) {
-      return { success: false, error: 'User not found.' }
-    }
-
     return { success: true, body: user }
   }
 
@@ -120,12 +116,7 @@ class UserService {
 
     const userToDelete = userResult[0]
 
-    if (userToDelete.isDeleted()) {
-      return { success: false, error: 'User not found.' }
-    }
-
-    userToDelete.softDelete()
-    await userToDelete.save()
+    await userToDelete.delete()
 
     return { success: true, body: await this.sanitize(userToDelete) }
   }
@@ -142,7 +133,6 @@ class UserService {
     user.email = reqBody.email.trim().toLowerCase()
     user.dateJoined = new Date()
     user.passwordHash = await bcrypt.hash(reqBody.password, saltRounds)
-    user.deletedDate = null
 
     const result = await this.create(user)
     if (!result.success) {
@@ -154,7 +144,7 @@ class UserService {
 
   async login (reqBody) {
     const userResult = await this.getByUsernameOrEmail(reqBody.username)
-    if (!userResult || !userResult.length || userResult[0].isDeleted()) {
+    if (!userResult || !userResult.length) {
       return { success: false, error: 'User not found.' }
     }
 
@@ -299,7 +289,7 @@ class UserService {
     }
 
     const userResult = await this.getByUsernameOrEmail(reqBody.username)
-    if (!userResult || !userResult.length || userResult[0].isDeleted()) {
+    if (!userResult || !userResult.length) {
       return { success: false, error: 'User not found.' }
     }
 

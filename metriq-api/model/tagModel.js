@@ -22,4 +22,8 @@ Tag.init({
   }
 }, { sequelize, modelName: 'tag' })
 
+Tag.delete = async function () {
+  await Tag.destroy({ where: { id: this.id } })
+}
+
 module.exports.Tag = Tag

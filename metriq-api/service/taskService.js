@@ -31,21 +31,15 @@ class TaskService {
     await task.populate('submissions').execPopulate()
     for (let i = 0; i < task.submissions.length; i++) {
       await task.submissions[i].populate('results').execPopulate()
-      let j = 0
-      while (j < task.submissions[i].results.length) {
-        if (task.submissions[i].results[j].isDeleted()) {
-          task.submissions[i].results.splice(j, 1)
-        } else {
-          await task.submissions[i].results[j].populate('submission').populate('task').populate('method').execPopulate()
-          j++
-        }
+      for (let j = 0; j < task.submissions[i].results.length; j++) {
+        await task.submissions[i].results[j].populate('submission').populate('task').populate('method').execPopulate()
       }
     }
   }
 
   async getSanitized (taskId) {
     const tasks = await this.getById(taskId)
-    if (!tasks || !tasks.length || tasks[0].isDeleted()) {
+    if (!tasks || !tasks.length) {
       return { success: false, error: 'Task not found.' }
     }
     const task = tasks[0]
@@ -61,7 +55,6 @@ class TaskService {
 
   async getAllNamesAndCounts () {
     const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null } },
       {
         $project: {
           name: true,
@@ -117,12 +110,7 @@ class TaskService {
 
     const taskToDelete = taskResult[0]
 
-    if (taskToDelete.isDeleted()) {
-      return { success: false, error: 'Task not found.' }
-    }
-
-    taskToDelete.softDelete()
-    await taskToDelete.save()
+    await taskToDelete.delete()
 
     return { success: true, body: await taskToDelete }
   }
@@ -192,13 +180,13 @@ class TaskService {
 
   async addOrRemoveSubmission (isAdd, taskId, submissionId) {
     const tasks = await this.getById(taskId)
-    if (!tasks || !tasks.length || tasks[0].isDeleted()) {
+    if (!tasks || !tasks.length) {
       return { success: false, error: 'Task not found.' }
     }
     const task = tasks[0]
 
     const submissions = await submissionService.getBySubmissionId(submissionId)
-    if (!submissions || !submissions.length || submissions[0].isDeleted()) {
+    if (!submissions || !submissions.length) {
       return { success: false, error: 'Submission not found.' }
     }
     const submission = submissions[0]
@@ -226,14 +214,8 @@ class TaskService {
     await submission.save()
 
     await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    let i = 0
-    while (i < submission.results.length) {
-      if (submission.results[i].isDeleted()) {
-        submission.results.splice(i, 1)
-      } else {
-        await submission.results[i].populate('task').populate('method').execPopulate()
-        i++
-      }
+    for (let i = 0; i < submission.results.length; i++) {
+      await submission.results[i].populate('task').populate('method').execPopulate()
     }
 
     return { success: true, body: submission }

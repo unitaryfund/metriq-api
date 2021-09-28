@@ -63,10 +63,6 @@ class SubmissionService {
 
     const submission = submissionResult[0]
 
-    if (submission.isDeleted()) {
-      return { success: false, error: 'Submission not found.' }
-    }
-
     return { success: true, body: submission }
   }
 
@@ -106,37 +102,25 @@ class SubmissionService {
 
     const submissionToDelete = submissionResult[0]
 
-    if (submissionToDelete.isDeleted()) {
-      return { success: false, error: 'Submission not found.' }
-    }
-
     if (toString(submissionToDelete.user) !== toString(userId)) {
       return { success: false, error: 'Insufficient privileges to delete submission.' }
     }
 
-    submissionToDelete.softDelete()
-    await submissionToDelete.save()
+    await submissionToDelete.delete()
 
     return { success: true, body: await submissionToDelete }
   }
 
   async populate (submission, userId) {
     await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    let i = 0
-    while (i < submission.results.length) {
-      if (submission.results[i].isDeleted()) {
-        submission.results.splice(i, 1)
-      } else {
-        await submission.results[i].populate('task').populate('method').execPopulate()
-        i++
-      }
+    for (let i = 0; i < submission.results.length; i++) {
+      await submission.results[i].populate('task').populate('method').execPopulate()
     }
 
     const toRet = {
       id: submission.id,
       submissionThumbnailUrl: submission.submissionThumbnailUrl,
       approvedDate: submission.approvedDate,
-      deletedDate: submission.deletedDate,
       tags: submission.tags,
       methods: submission.methods,
       tasks: submission.tasks,
@@ -301,7 +285,7 @@ class SubmissionService {
   async getByUserId (userId, startIndex, count) {
     const oid = mongoose.Types.ObjectId(userId)
     const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { user: oid, deletedDate: null } },
+      { $match: { user: oid } },
       { $sort: { submittedDate: -1 } }
     ]).skip(startIndex).limit(count)
     return { success: true, body: result }
@@ -311,7 +295,7 @@ class SubmissionService {
     const millisPerHour = 1000 * 60 * 60
     const oid = userId ? mongoose.Types.ObjectId(userId) : null
     const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, approvedDate: { $ne: null } } },
+      { $match: { approvedDate: { $ne: null } } },
       {
         $addFields: {
           upvotesCount: { $size: '$upvotes' },
@@ -333,7 +317,7 @@ class SubmissionService {
   async getLatest (startIndex, count, userId) {
     const oid = userId ? mongoose.Types.ObjectId(userId) : null
     const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, approvedDate: { $ne: null } } },
+      { $match: { approvedDate: { $ne: null } } },
       {
         $addFields: {
           upvotesCount: { $size: '$upvotes' },
@@ -349,7 +333,7 @@ class SubmissionService {
   async getPopular (startIndex, count, userId) {
     const oid = userId ? mongoose.Types.ObjectId(userId) : null
     const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, approvedDate: { $ne: null } } },
+      { $match: { approvedDate: { $ne: null } } },
       {
         $addFields: {
           upvotesCount: { $size: '$upvotes' },
@@ -373,7 +357,7 @@ class SubmissionService {
     const tagId = tag[0].id
 
     const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
+      { $match: { approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
       {
         $addFields: {
           upvotesCount: { $size: '$upvotes' },
@@ -402,7 +386,7 @@ class SubmissionService {
     const oid = userId ? mongoose.Types.ObjectId(userId) : null
 
     const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
+      { $match: { approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
       {
         $addFields: {
           upvotesCount: { $size: '$upvotes' },
@@ -425,7 +409,7 @@ class SubmissionService {
     const oid = userId ? mongoose.Types.ObjectId(userId) : null
 
     const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
+      { $match: { approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
       {
         $addFields: {
           upvotesCount: { $size: '$upvotes' },
@@ -440,7 +424,7 @@ class SubmissionService {
 
   async addOrRemoveTag (isAdd, submissionId, tagName, userId) {
     const submissions = await this.getBySubmissionId(submissionId)
-    if (!submissions || !submissions.length || submissions[0].isDeleted()) {
+    if (!submissions || !submissions.length) {
       return { success: false, error: 'Submission not found.' }
     }
     let submission = submissions[0]
@@ -450,7 +434,7 @@ class SubmissionService {
       tag = await tagService.createOrFetch(tagName)
     } else {
       const tags = await tagService.getByName(tagName)
-      if (!tags || !tags.length || tags[0].isDeleted()) {
+      if (!tags || !tags.length) {
         return { success: false, error: 'Tag not found.' }
       }
       tag = tags[0]

@@ -34,7 +34,6 @@ class TagService {
 
   async getAllNamesAndCounts () {
     const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null } },
       {
         $project: {
           name: true,

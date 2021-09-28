@@ -40,4 +40,8 @@ SubmissionTagRef.init({
   }
 }, { sequelize, paranoid: true, modelName: 'submissionTagRef' })
 
+SubmissionTagRef.delete = async function () {
+  await SubmissionTagRef.destroy({ where: { id: this.id } })
+}
+
 module.exports.SubmissionTagRef = SubmissionTagRef

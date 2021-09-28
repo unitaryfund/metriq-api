@@ -40,4 +40,8 @@ Result.init({
   }
 }, { sequelize, paranoid: true, modelName: 'result' })
 
+Result.delete = async function () {
+  await Result.destroy({ where: { id: this.id } })
+}
+
 module.exports.Result = Result
