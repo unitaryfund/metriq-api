@@ -23,6 +23,4 @@ Submission.hasMany(SubmissionTagRef)
 SubmissionTagRef.belongsTo(Tag)
 Tag.hasMany(SubmissionTagRef)
 
-SubmissionTagRef.sync()
-
 module.exports.SubmissionTagRef = SubmissionTagRef

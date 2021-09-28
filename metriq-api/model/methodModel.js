@@ -28,6 +28,4 @@ Method.init({
 Method.belongsTo(User)
 User.hasMany(Method)
 
-Method.sync()
-
 module.exports.Method = Method

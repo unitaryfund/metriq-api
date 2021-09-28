@@ -38,6 +38,4 @@ Submission.init({
 Submission.belongsTo(User)
 User.hasMany(Submission)
 
-Submission.sync()
-
 module.exports.Submission = Submission

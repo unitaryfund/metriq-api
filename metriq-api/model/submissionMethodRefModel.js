@@ -23,6 +23,4 @@ Submission.hasMany(SubmissionMethodRef)
 SubmissionMethodRef.belongsTo(Method)
 Method.hasMany(SubmissionMethodRef)
 
-SubmissionMethodRef.sync()
-
 module.exports.SubmissionMethodRef = SubmissionMethodRef

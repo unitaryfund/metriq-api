@@ -32,6 +32,4 @@ User.hasMany(Result)
 Result.belongsTo(SubmissionMethodRef)
 SubmissionMethodRef.hasMany(Result)
 
-Result.sync()
-
 module.exports.Result = Result

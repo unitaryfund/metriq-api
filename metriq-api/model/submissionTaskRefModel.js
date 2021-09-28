@@ -23,6 +23,4 @@ Submission.hasMany(SubmissionTaskRef)
 SubmissionTaskRef.belongsTo(Task)
 Task.hasMany(SubmissionTaskRef)
 
-SubmissionTaskRef.sync()
-
 module.exports.SubmissionTaskRef = SubmissionTaskRef

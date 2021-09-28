@@ -20,6 +20,4 @@ Tag.init({
 Tag.belongsTo(User)
 User.hasMany(Tag)
 
-Tag.sync()
-
 module.exports.Tag = Tag
