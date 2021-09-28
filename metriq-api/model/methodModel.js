@@ -1,21 +1,16 @@
 // methodModel.js
 
 const config = require('../config')
-const { Sequelize, Model, DataTypes, Deferrable } = require('sequelize')
+const { Sequelize, Model, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString)
 const User = require('./userModel').User
 
-class Method extends Model {}
+class Method extends Model {
+  async delete () {
+    await Method.destroy({ where: { id: this.id } })
+  }
+}
 Method.init({
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: User,
-      key: 'id',
-      deferrable: Deferrable.INITIALLY_IMMEDIATE
-    }
-  },
   name: {
     type: DataTypes.TEXT,
     allowNull: false
@@ -30,8 +25,9 @@ Method.init({
   }
 }, { sequelize, modelName: 'method' })
 
-Method.delete = async function () {
-  await Method.destroy({ where: { id: this.id } })
-}
+Method.belongsTo(User)
+User.hasMany(Method)
+
+Method.sync()
 
 module.exports.Method = Method

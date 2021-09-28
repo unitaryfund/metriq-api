@@ -1,31 +1,17 @@
 // resultModel.js
 
 const config = require('../config')
-const { Sequelize, Model, DataTypes, Deferrable } = require('sequelize')
+const { Sequelize, Model, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString)
 const User = require('./userModel').User
 const SubmissionMethodRef = require('./submissionMethodRefModel').SubmissionMethodRef
 
-class Result extends Model {}
+class Result extends Model {
+  async delete () {
+    await Result.destroy({ where: { id: this.id } })
+  }
+}
 Result.init({
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: User,
-      key: 'id',
-      deferrable: Deferrable.INITIALLY_IMMEDIATE
-    }
-  },
-  submissionMethodRefId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: SubmissionMethodRef,
-      key: 'id',
-      deferrable: Deferrable.INITIALLY_IMMEDIATE
-    }
-  },
   isHigherBetter: {
     type: DataTypes.BOOLEAN,
     allowNull: false
@@ -40,8 +26,12 @@ Result.init({
   }
 }, { sequelize, paranoid: true, modelName: 'result' })
 
-Result.delete = async function () {
-  await Result.destroy({ where: { id: this.id } })
-}
+Result.belongsTo(User)
+User.hasMany(Result)
+
+Result.belongsTo(SubmissionMethodRef)
+SubmissionMethodRef.hasMany(Result)
+
+Result.sync()
 
 module.exports.Result = Result

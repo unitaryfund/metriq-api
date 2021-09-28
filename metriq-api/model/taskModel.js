@@ -1,21 +1,16 @@
 // taskModel.js
 
 const config = require('../config')
-const { Sequelize, Model, DataTypes, Deferrable } = require('sequelize')
+const { Sequelize, Model, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString)
 const User = require('./userModel').User
 
-class Task extends Model {}
+class Task extends Model {
+  async delete () {
+    await Task.destroy({ where: { id: this.id } })
+  }
+}
 Task.init({
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: User,
-      key: 'id',
-      deferrable: Deferrable.INITIALLY_IMMEDIATE
-    }
-  },
   name: {
     type: DataTypes.TEXT,
     allowNull: false
@@ -30,8 +25,9 @@ Task.init({
   }
 }, { sequelize, modelName: 'task' })
 
-Task.delete = async function () {
-  await Task.destroy({ where: { id: this.id } })
-}
+Task.belongsTo(User)
+User.hasMany(Task)
+
+Task.sync()
 
 module.exports.Task = Task

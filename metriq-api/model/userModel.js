@@ -4,7 +4,11 @@ const config = require('../config')
 const { Sequelize, Model, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString)
 
-class User extends Model {}
+class User extends Model {
+  async delete () {
+    await User.destroy({ where: { id: this.id } })
+  }
+}
 User.init({
   username: {
     type: DataTypes.TEXT,
@@ -36,10 +40,8 @@ User.init({
     type: DataTypes.DATE,
     allowNull: false
   }
-}, { sequelize, paranoid: true, modelName: 'users' })
+}, { sequelize, paranoid: true, modelName: 'user' })
 
-User.delete = async function () {
-  await User.destroy({ where: { id: this.id } })
-}
+User.sync()
 
 module.exports.User = User

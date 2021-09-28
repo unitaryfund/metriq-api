@@ -1,21 +1,16 @@
 // submissionModel.js
 
 const config = require('../config')
-const { Sequelize, Model, DataTypes, Deferrable } = require('sequelize')
+const { Sequelize, Model, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString)
 const User = require('./userModel').User
 
-class Submission extends Model {}
+class Submission extends Model {
+  async delete () {
+    await Submission.destroy({ where: { id: this.id } })
+  }
+}
 Submission.init({
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: User,
-      key: 'id',
-      deferrable: Deferrable.INITIALLY_IMMEDIATE
-    }
-  },
   name: {
     type: DataTypes.TEXT,
     allowNull: false
@@ -40,8 +35,9 @@ Submission.init({
   }
 }, { sequelize, modelName: 'submission' })
 
-Submission.delete = async function () {
-  await Submission.destroy({ where: { id: this.id } })
-}
+Submission.belongsTo(User)
+User.hasMany(Submission)
+
+Submission.sync()
 
 module.exports.Submission = Submission

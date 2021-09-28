@@ -1,47 +1,28 @@
 // submissionTagRefModel.js
 
 const config = require('../config')
-const { Sequelize, Model, DataTypes, Deferrable } = require('sequelize')
+const { Sequelize, Model } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString)
 const User = require('./userModel').User
 const Submission = require('./submissionModel').Submission
 const Tag = require('./tagModel').Tag
 
-class SubmissionTagRef extends Model {}
-SubmissionTagRef.init({
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: User,
-      key: 'id',
-      deferrable: Deferrable.INITIALLY_IMMEDIATE
-    }
-  },
-  submissionId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: Submission,
-      key: 'id',
-      deferrable: Deferrable.INITIALLY_IMMEDIATE,
-      unique: 'submissionTagRefs_submissionId_tagId_unique'
-    }
-  },
-  tagId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: Tag,
-      key: 'id',
-      deferrable: Deferrable.INITIALLY_IMMEDIATE,
-      unique: 'submissionTagRefs_submissionId_tagId_unique'
-    }
+class SubmissionTagRef extends Model {
+  async delete () {
+    await SubmissionTagRef.destroy({ where: { id: this.id } })
   }
-}, { sequelize, paranoid: true, modelName: 'submissionTagRef' })
-
-SubmissionTagRef.delete = async function () {
-  await SubmissionTagRef.destroy({ where: { id: this.id } })
 }
+SubmissionTagRef.init({}, { sequelize, paranoid: true, modelName: 'submissionTagRef' })
+
+SubmissionTagRef.belongsTo(User)
+User.hasMany(SubmissionTagRef)
+
+SubmissionTagRef.belongsTo(Submission)
+Submission.hasMany(SubmissionTagRef)
+
+SubmissionTagRef.belongsTo(Tag)
+Tag.hasMany(SubmissionTagRef)
+
+SubmissionTagRef.sync()
 
 module.exports.SubmissionTagRef = SubmissionTagRef
