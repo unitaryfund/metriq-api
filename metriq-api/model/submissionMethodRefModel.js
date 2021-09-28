@@ -40,6 +40,4 @@ SubmissionMethodRef.init({
 
 SubmissionMethodRef.sync()
 
-module.exports = function () {
-  return SubmissionMethodRef
-}
+module.exports.SubmissionMethodRef = SubmissionMethodRef

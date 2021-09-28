@@ -17,13 +17,11 @@ Tag.init({
     }
   },
   name: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   }
 }, { sequelize, modelName: 'tag' })
 
 Tag.sync()
 
-module.exports = function () {
-  return Tag
-}
+module.exports.Tag = Tag

@@ -40,6 +40,4 @@ SubmissionTaskRef.init({
 
 SubmissionTaskRef.sync()
 
-module.exports = function () {
-  return SubmissionTaskRef
-}
+module.exports.SubmissionTaskRef = SubmissionTaskRef

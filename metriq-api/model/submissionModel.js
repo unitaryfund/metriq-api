@@ -17,23 +17,23 @@ Submission.init({
     }
   },
   name: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   },
   nameNormal: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   },
   description: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   },
   contentUrl: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   },
   thumbnailUrl: {
-    type: DataTypes.STRING
+    type: DataTypes.TEXT
   },
   approvedAt: {
     type: DataTypes.DATE
@@ -42,6 +42,4 @@ Submission.init({
 
 Submission.sync()
 
-module.exports = function () {
-  return Submission
-}
+module.exports.Submission = Submission

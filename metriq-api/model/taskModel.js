@@ -17,21 +17,19 @@ Task.init({
     }
   },
   name: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   },
   fullName: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   },
   description: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   }
 }, { sequelize, modelName: 'task' })
 
 Task.sync()
 
-module.exports = function () {
-  return Task
-}
+module.exports.Task = Task

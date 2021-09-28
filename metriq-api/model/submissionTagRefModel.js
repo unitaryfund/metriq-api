@@ -40,6 +40,4 @@ SubmissionTagRef.init({
 
 SubmissionTagRef.sync()
 
-module.exports = function () {
-  return SubmissionTagRef
-}
+module.exports.SubmissionTagRef = SubmissionTagRef

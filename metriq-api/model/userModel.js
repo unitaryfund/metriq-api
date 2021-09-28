@@ -7,26 +7,26 @@ const sequelize = new Sequelize(config.pgConnectionString)
 class User extends Model {}
 User.init({
   username: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   },
   usernameNormal: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   },
   passwordHash: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   },
   email: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   },
   clientToken: {
-    type: DataTypes.STRING
+    type: DataTypes.TEXT
   },
   recoveryToken: {
-    type: DataTypes.STRING
+    type: DataTypes.TEXT
   },
   clientTokenCreated: {
     type: DataTypes.DATE,
@@ -36,10 +36,8 @@ User.init({
     type: DataTypes.DATE,
     allowNull: false
   }
-}, { sequelize, paranoid: true, modelName: 'user' })
+}, { sequelize, paranoid: true, modelName: 'users' })
 
 User.sync()
 
-module.exports = function () {
-  return User
-}
+module.exports.User = User

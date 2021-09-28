@@ -17,21 +17,19 @@ Method.init({
     }
   },
   name: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   },
   fullName: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   },
   description: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   }
 }, { sequelize, modelName: 'method' })
 
 Method.sync()
 
-module.exports = function () {
-  return Method
-}
+module.exports.Method = Method

@@ -31,7 +31,7 @@ Result.init({
     allowNull: false
   },
   metricName: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   },
   metricValue: {
@@ -42,6 +42,4 @@ Result.init({
 
 Result.sync()
 
-module.exports = function () {
-  return Result
-}
+module.exports.Result = Result
