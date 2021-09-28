@@ -1,11 +1,9 @@
 // methodService.js
 
-const mongoose = require('mongoose')
-
 // Data Access Layer
-const MongooseService = require('./mongooseService')
+const SequelizeService = require('./sequelizeService')
 // Database Model
-const MethodModel = require('../model/methodModel')
+const Method = require('../model/methodModel').Method
 
 // Service dependencies
 const SubmissionService = require('./submissionService')
@@ -13,12 +11,12 @@ const submissionService = new SubmissionService()
 
 class MethodService {
   constructor () {
-    this.MongooseServiceInstance = new MongooseService(MethodModel)
+    this.SequelizeServiceInstance = new SequelizeService(Method)
   }
 
   async create (methodToCreate) {
     try {
-      const result = await this.MongooseServiceInstance.create(methodToCreate)
+      const result = await this.SequelizeServiceInstance.create(methodToCreate)
       return { success: true, body: result }
     } catch (err) {
       return { success: false, error: err }
@@ -49,7 +47,7 @@ class MethodService {
   }
 
   async getById (methodId) {
-    return await this.MongooseServiceInstance.find({ _id: methodId })
+    return await this.SequelizeServiceInstance.find({ id: methodId })
   }
 
   async populate (method) {
@@ -67,12 +65,12 @@ class MethodService {
   }
 
   async getAllNames () {
-    const result = await this.MongooseServiceInstance.Collection.aggregate([{ $project: { name: true } }])
+    const result = await this.SequelizeServiceInstance.projectAll(['name'])
     return { success: true, body: result }
   }
 
   async getAllNamesAndCounts () {
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
+    const result = await this.SequelizeServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null } },
       {
         $project: {
@@ -85,7 +83,7 @@ class MethodService {
         $lookup: {
           from: 'submissions',
           localField: 'submissions',
-          foreignField: '_id',
+          foreignField: 'id',
           as: 'submissionObjects'
         }
       },
@@ -117,7 +115,7 @@ class MethodService {
   }
 
   async submit (userId, reqBody) {
-    let method = await this.MongooseServiceInstance.new()
+    let method = await this.SequelizeServiceInstance.new()
     method.user = userId
     method.name = reqBody.name
     method.fullName = reqBody.fullName
@@ -141,7 +139,7 @@ class MethodService {
         }
         const submissionModel = submissionResult[0]
         // Reference to method goes in reference collection on submission
-        submissionModel.methods.push(method._id)
+        submissionModel.methods.push(method.id)
         submissionModels.push(submissionModel)
       }
     }
@@ -192,15 +190,15 @@ class MethodService {
     }
     const submission = submissions[0]
 
-    const msi = method.submissions.indexOf(submission._id)
-    const smi = submission.methods.indexOf(method._id)
+    const msi = method.submissions.indexOf(submission.id)
+    const smi = submission.methods.indexOf(method.id)
 
     if (isAdd) {
       if (msi === -1) {
-        method.submissions.push(submission._id)
+        method.submissions.push(submission.id)
       }
       if (smi === -1) {
-        submission.methods.push(method._id)
+        submission.methods.push(method.id)
       }
     } else {
       if (msi > -1) {

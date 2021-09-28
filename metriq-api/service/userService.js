@@ -1,9 +1,9 @@
 // userService.js
 
 // Data Access Layer
-const MongooseService = require('./mongooseService')
+const SequelizeService = require('./sequelizeService')
 // Database Model
-const UserModel = require('../model/userModel')
+const User = require('../model/userModel').User
 
 // Password hasher
 const bcrypt = require('bcrypt')
@@ -17,12 +17,12 @@ const nodemailer = require('nodemailer')
 
 class UserService {
   constructor () {
-    this.MongooseServiceInstance = new MongooseService(UserModel)
+    this.SequelizeServiceInstance = new SequelizeService(User)
   }
 
   async create (userToCreate) {
     try {
-      const result = await this.MongooseServiceInstance.create(userToCreate)
+      const result = await this.SequelizeServiceInstance.create(userToCreate)
       return { success: true, body: result }
     } catch (err) {
       return { success: false, error: err }
@@ -32,7 +32,7 @@ class UserService {
   async sanitize (user) {
     return {
       __v: user.__v,
-      _id: user._id,
+      id: user.id,
       clientToken: '[REDACTED]',
       clientTokenCreated: user.clientTokenCreated,
       dateJoined: user.dateJoined,
@@ -60,15 +60,15 @@ class UserService {
   }
 
   async getByUserId (userId) {
-    return await this.MongooseServiceInstance.find({ _id: userId })
+    return await this.SequelizeServiceInstance.find({ id: userId })
   }
 
   async getByUsername (username) {
-    return await this.MongooseServiceInstance.find({ usernameNormal: username.trim().toLowerCase() })
+    return await this.SequelizeServiceInstance.find({ usernameNormal: username.trim().toLowerCase() })
   }
 
   async getByEmail (email) {
-    return await this.MongooseServiceInstance.find({ email: email.trim().toLowerCase() })
+    return await this.SequelizeServiceInstance.find({ email: email.trim().toLowerCase() })
   }
 
   async getByUsernameOrEmail (usernameOrEmail) {
@@ -136,7 +136,7 @@ class UserService {
       return validationResult
     }
 
-    const user = await this.MongooseServiceInstance.new()
+    const user = await this.SequelizeServiceInstance.new()
     user.username = reqBody.username.trim()
     user.usernameNormal = reqBody.username.trim().toLowerCase()
     user.email = reqBody.email.trim().toLowerCase()

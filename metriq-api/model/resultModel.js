@@ -40,6 +40,4 @@ Result.init({
   }
 }, { sequelize, paranoid: true, modelName: 'result' })
 
-Result.sync()
-
 module.exports.Result = Result

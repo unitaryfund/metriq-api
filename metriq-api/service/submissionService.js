@@ -1,11 +1,9 @@
 // submissionService.js
 
-const mongoose = require('mongoose')
-
 // Data Access Layer
-const MongooseService = require('./mongooseService')
+const SequelizeService = require('./sequelizeService')
 // Database Model
-const SubmissionModel = require('../model/submissionModel')
+const Submission = require('../model/submissionModel').Submission
 
 // For email
 const config = require('./../config')
@@ -24,12 +22,12 @@ require('../model/taskModel')
 
 class SubmissionService {
   constructor () {
-    this.MongooseServiceInstance = new MongooseService(SubmissionModel)
+    this.SequelizeServiceInstance = new SequelizeService(Submission)
   }
 
   async create (submissionToCreate) {
     try {
-      const result = await this.MongooseServiceInstance.create(submissionToCreate)
+      const result = await this.SequelizeServiceInstance.create(submissionToCreate)
       return { success: true, body: result }
     } catch (err) {
       return { success: false, error: err }
@@ -37,11 +35,11 @@ class SubmissionService {
   }
 
   async getBySubmissionId (submissionId) {
-    return await this.MongooseServiceInstance.find({ _id: submissionId })
+    return await this.SequelizeServiceInstance.find({ id: submissionId })
   }
 
   async getBySubmissionName (submissionName) {
-    return await this.MongooseServiceInstance.find({ submissionNameNormal: submissionName.trim().toLowerCase() })
+    return await this.SequelizeServiceInstance.find({ submissionNameNormal: submissionName.trim().toLowerCase() })
   }
 
   async getBySubmissionNameOrId (submissionNameOrId) {
@@ -135,7 +133,7 @@ class SubmissionService {
     }
 
     const toRet = {
-      _id: submission._id,
+      id: submission.id,
       submissionThumbnailUrl: submission.submissionThumbnailUrl,
       approvedDate: submission.approvedDate,
       deletedDate: submission.deletedDate,
@@ -168,7 +166,7 @@ class SubmissionService {
     }
     const user = users[0]
 
-    const submission = await this.MongooseServiceInstance.new()
+    const submission = await this.SequelizeServiceInstance.new()
     submission.user = userId
     submission.submissionName = reqBody.submissionName.trim()
     submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
@@ -189,9 +187,9 @@ class SubmissionService {
         const tag = tagSplit[i].trim().toLowerCase()
         if (tag) {
           const tagModel = await tagService.createOrFetch(tag)
-          tagModel.submissions.push(submission._id)
+          tagModel.submissions.push(submission.id)
           await tagModel.save()
-          tags.push(tagModel._id)
+          tags.push(tagModel.id)
         }
       }
     }
@@ -287,22 +285,22 @@ class SubmissionService {
     }
     const user = userResponse.body
 
-    const index = submission.upvotes.indexOf(user._id)
+    const index = submission.upvotes.indexOf(user.id)
     if (index >= 0) {
       submission.upvotes.splice(index, 1)
     } else {
-      submission.upvotes.push(user._id)
+      submission.upvotes.push(user.id)
     }
     await submission.save()
 
-    submission = await this.populate(submission, user._id)
+    submission = await this.populate(submission, user.id)
 
     return { success: true, body: submission }
   }
 
   async getByUserId (userId, startIndex, count) {
     const oid = mongoose.Types.ObjectId(userId)
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
+    const result = await this.SequelizeServiceInstance.Collection.aggregate([
       { $match: { user: oid, deletedDate: null } },
       { $sort: { submittedDate: -1 } }
     ]).skip(startIndex).limit(count)
@@ -312,7 +310,7 @@ class SubmissionService {
   async getTrending (startIndex, count, userId) {
     const millisPerHour = 1000 * 60 * 60
     const oid = userId ? mongoose.Types.ObjectId(userId) : null
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
+    const result = await this.SequelizeServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null, approvedDate: { $ne: null } } },
       {
         $addFields: {
@@ -334,7 +332,7 @@ class SubmissionService {
 
   async getLatest (startIndex, count, userId) {
     const oid = userId ? mongoose.Types.ObjectId(userId) : null
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
+    const result = await this.SequelizeServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null, approvedDate: { $ne: null } } },
       {
         $addFields: {
@@ -350,7 +348,7 @@ class SubmissionService {
 
   async getPopular (startIndex, count, userId) {
     const oid = userId ? mongoose.Types.ObjectId(userId) : null
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
+    const result = await this.SequelizeServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null, approvedDate: { $ne: null } } },
       {
         $addFields: {
@@ -372,9 +370,9 @@ class SubmissionService {
     if (!tag || !tag.length) {
       return { success: false, error: 'Category not found' }
     }
-    const tagId = tag[0]._id
+    const tagId = tag[0].id
 
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
+    const result = await this.SequelizeServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null, approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
       {
         $addFields: {
@@ -399,11 +397,11 @@ class SubmissionService {
     if (!tag || !tag.length) {
       return { success: false, error: 'Category not found' }
     }
-    const tagId = tag[0]._id
+    const tagId = tag[0].id
 
     const oid = userId ? mongoose.Types.ObjectId(userId) : null
 
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
+    const result = await this.SequelizeServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null, approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
       {
         $addFields: {
@@ -422,11 +420,11 @@ class SubmissionService {
     if (!tag || !tag.length) {
       return { success: false, error: 'Category not found' }
     }
-    const tagId = tag[0]._id
+    const tagId = tag[0].id
 
     const oid = userId ? mongoose.Types.ObjectId(userId) : null
 
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
+    const result = await this.SequelizeServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null, approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
       {
         $addFields: {
@@ -458,15 +456,15 @@ class SubmissionService {
       tag = tags[0]
     }
 
-    const tsi = tag.submissions.indexOf(submission._id)
-    const sti = submission.tags.indexOf(tag._id)
+    const tsi = tag.submissions.indexOf(submission.id)
+    const sti = submission.tags.indexOf(tag.id)
 
     if (isAdd) {
       if (tsi === -1) {
-        tag.submissions.push(submission._id)
+        tag.submissions.push(submission.id)
       }
       if (sti === -1) {
-        submission.tags.push(tag._id)
+        submission.tags.push(tag.id)
       }
     } else {
       if (tsi > -1) {

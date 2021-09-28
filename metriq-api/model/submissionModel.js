@@ -40,6 +40,4 @@ Submission.init({
   }
 }, { sequelize, modelName: 'submission' })
 
-Submission.sync()
-
 module.exports.Submission = Submission

@@ -24,7 +24,8 @@ SubmissionTaskRef.init({
     references: {
       model: Submission,
       key: 'id',
-      deferrable: Deferrable.INITIALLY_IMMEDIATE
+      deferrable: Deferrable.INITIALLY_IMMEDIATE,
+      unique: 'submissionTaskRefs_submissionId_taskId_unique'
     }
   },
   taskId: {
@@ -33,11 +34,10 @@ SubmissionTaskRef.init({
     references: {
       model: Task,
       key: 'id',
-      deferrable: Deferrable.INITIALLY_IMMEDIATE
+      deferrable: Deferrable.INITIALLY_IMMEDIATE,
+      unique: 'submissionTaskRefs_submissionId_taskId_unique'
     }
   }
 }, { sequelize, paranoid: true, modelName: 'submissionTaskRef' })
-
-SubmissionTaskRef.sync()
 
 module.exports.SubmissionTaskRef = SubmissionTaskRef

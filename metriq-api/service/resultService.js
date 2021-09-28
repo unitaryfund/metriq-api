@@ -1,9 +1,9 @@
 // resultService.js
 
 // Data Access Layer
-const MongooseService = require('./mongooseService')
+const SequelizeService = require('./sequelizeService')
 // Database Model
-const ResultModel = require('../model/resultModel')
+const Result = require('../model/resultModel').Result
 
 // Service dependencies
 const SubmissionService = require('../service/submissionService')
@@ -15,12 +15,12 @@ const methodService = new MethodService()
 
 class ResultService {
   constructor () {
-    this.MongooseServiceInstance = new MongooseService(ResultModel)
+    this.SequelizeServiceInstance = new SequelizeService(Result)
   }
 
   async create (resultToCreate) {
     try {
-      const result = await this.MongooseServiceInstance.create(resultToCreate)
+      const result = await this.SequelizeServiceInstance.create(resultToCreate)
       return { success: true, body: result }
     } catch (err) {
       return { success: false, error: err }
@@ -28,15 +28,15 @@ class ResultService {
   }
 
   async get (resultId) {
-    return await this.MongooseServiceInstance.find({ _id: resultId })
+    return await this.SequelizeServiceInstance.find({ id: resultId })
   }
 
   async getBySubmissionId (submissionId) {
-    return await this.MongooseServiceInstance.find({ submission: submissionId })
+    return await this.SequelizeServiceInstance.find({ submission: submissionId })
   }
 
   async listMetricNames () {
-    return this.MongooseServiceInstance.Collection.distinct('metricName', {})
+    return this.SequelizeServiceInstance.distinctAll('metricName')
   }
 
   async submit (userId, submissionId, reqBody) {
@@ -46,7 +46,7 @@ class ResultService {
     }
     const submission = submissions[0]
 
-    const result = await this.MongooseServiceInstance.new()
+    const result = await this.SequelizeServiceInstance.new()
     result.user = userId
     result.submission = submissionId
     result.task = reqBody.task
@@ -82,7 +82,7 @@ class ResultService {
       return nResult
     }
 
-    submission.results.push(result._id)
+    submission.results.push(result.id)
     submission.save()
     await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
     let i = 0

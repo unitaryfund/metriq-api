@@ -1,11 +1,9 @@
 // taskService.js
 
-const mongoose = require('mongoose')
-
 // Data Access Layer
-const MongooseService = require('./mongooseService')
+const SequelizeService = require('./sequelizeService')
 // Database Model
-const TaskModel = require('../model/taskModel')
+const Task = require('../model/taskModel').Task
 
 // Service dependencies
 const SubmissionService = require('./submissionService')
@@ -13,12 +11,12 @@ const submissionService = new SubmissionService()
 
 class TaskService {
   constructor () {
-    this.MongooseServiceInstance = new MongooseService(TaskModel)
+    this.SequelizeServiceInstance = new SequelizeService(Task)
   }
 
   async create (taskToCreate) {
     try {
-      const result = await this.MongooseServiceInstance.create(taskToCreate)
+      const result = await this.SequelizeServiceInstance.create(taskToCreate)
       return { success: true, body: result }
     } catch (err) {
       return { success: false, error: err }
@@ -26,7 +24,7 @@ class TaskService {
   }
 
   async getById (taskId) {
-    return await this.MongooseServiceInstance.find({ _id: taskId })
+    return await this.SequelizeServiceInstance.find({ id: taskId })
   }
 
   async populate (task) {
@@ -57,12 +55,12 @@ class TaskService {
   }
 
   async getAllNames () {
-    const result = await this.MongooseServiceInstance.Collection.aggregate([{ $project: { name: true } }])
+    const result = await this.SequelizeServiceInstance.projectAll(['name'])
     return { success: true, body: result }
   }
 
   async getAllNamesAndCounts () {
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
+    const result = await this.SequelizeServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null } },
       {
         $project: {
@@ -75,7 +73,7 @@ class TaskService {
         $lookup: {
           from: 'submissions',
           localField: 'submissions',
-          foreignField: '_id',
+          foreignField: 'id',
           as: 'submissionObjects'
         }
       },
@@ -130,7 +128,7 @@ class TaskService {
   }
 
   async submit (userId, reqBody) {
-    let task = await this.MongooseServiceInstance.new()
+    let task = await this.SequelizeServiceInstance.new()
     task.user = userId
     task.name = reqBody.name.trim()
     task.fullName = reqBody.fullName.trim()
@@ -154,7 +152,7 @@ class TaskService {
         }
         const submissionModel = submissionResult[0]
         // Reference to task goes in reference collection on submission
-        submissionModel.tasks.push(task._id)
+        submissionModel.tasks.push(task.id)
         submissionModels.push(submissionModel)
       }
     }
@@ -205,15 +203,15 @@ class TaskService {
     }
     const submission = submissions[0]
 
-    const tsi = task.submissions.indexOf(submission._id)
-    const sti = submission.tasks.indexOf(task._id)
+    const tsi = task.submissions.indexOf(submission.id)
+    const sti = submission.tasks.indexOf(task.id)
 
     if (isAdd) {
       if (tsi === -1) {
-        task.submissions.push(submission._id)
+        task.submissions.push(submission.id)
       }
       if (sti === -1) {
-        submission.tasks.push(task._id)
+        submission.tasks.push(task.id)
       }
     } else {
       if (tsi > -1) {

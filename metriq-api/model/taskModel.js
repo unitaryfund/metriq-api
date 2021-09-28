@@ -30,6 +30,4 @@ Task.init({
   }
 }, { sequelize, modelName: 'task' })
 
-Task.sync()
-
 module.exports.Task = Task

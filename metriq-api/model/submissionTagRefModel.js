@@ -24,7 +24,8 @@ SubmissionTagRef.init({
     references: {
       model: Submission,
       key: 'id',
-      deferrable: Deferrable.INITIALLY_IMMEDIATE
+      deferrable: Deferrable.INITIALLY_IMMEDIATE,
+      unique: 'submissionTagRefs_submissionId_tagId_unique'
     }
   },
   tagId: {
@@ -33,11 +34,10 @@ SubmissionTagRef.init({
     references: {
       model: Tag,
       key: 'id',
-      deferrable: Deferrable.INITIALLY_IMMEDIATE
+      deferrable: Deferrable.INITIALLY_IMMEDIATE,
+      unique: 'submissionTagRefs_submissionId_tagId_unique'
     }
   }
 }, { sequelize, paranoid: true, modelName: 'submissionTagRef' })
-
-SubmissionTagRef.sync()
 
 module.exports.SubmissionTagRef = SubmissionTagRef

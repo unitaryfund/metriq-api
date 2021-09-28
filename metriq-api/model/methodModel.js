@@ -30,6 +30,4 @@ Method.init({
   }
 }, { sequelize, modelName: 'method' })
 
-Method.sync()
-
 module.exports.Method = Method

@@ -1,18 +1,18 @@
 // tagService.js
 
 // Data Access Layer
-const MongooseService = require('./mongooseService')
+const SequelizeService = require('./sequelizeService')
 // Database Model
-const TagModel = require('../model/tagModel')
+const Tag = require('../model/tagModel').Tag
 
 class TagService {
   constructor () {
-    this.MongooseServiceInstance = new MongooseService(TagModel)
+    this.SequelizeServiceInstance = new SequelizeService(Tag)
   }
 
   async create (tagToCreate) {
     try {
-      const result = await this.MongooseServiceInstance.create(tagToCreate)
+      const result = await this.SequelizeServiceInstance.create(tagToCreate)
       return { success: true, body: result }
     } catch (err) {
       return { success: false, error: err }
@@ -20,20 +20,20 @@ class TagService {
   }
 
   async getById (tagId) {
-    return await this.MongooseServiceInstance.find({ _id: tagId })
+    return await this.SequelizeServiceInstance.find({ id: tagId })
   }
 
   async getByName (tagName) {
-    return await this.MongooseServiceInstance.find({ name: tagName.trim().toLowerCase() })
+    return await this.SequelizeServiceInstance.find({ name: tagName.trim().toLowerCase() })
   }
 
   async getAllNames () {
-    const result = await this.MongooseServiceInstance.Collection.aggregate([{ $project: { name: true } }])
+    const result = await this.SequelizeServiceInstance.projetAll(['name'])
     return { success: true, body: result }
   }
 
   async getAllNamesAndCounts () {
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
+    const result = await this.SequelizeServiceInstance.Collection.aggregate([
       { $match: { deletedDate: null } },
       {
         $project: {
@@ -47,7 +47,7 @@ class TagService {
         $lookup: {
           from: 'submissions',
           localField: 'submissions',
-          foreignField: '_id',
+          foreignField: 'id',
           as: 'submissionObjects'
         }
       },
@@ -82,7 +82,7 @@ class TagService {
     let toReturn = {}
     const tagGetResults = await this.getByName(tagName)
     if (!tagGetResults || !tagGetResults.length) {
-      const tag = await this.MongooseServiceInstance.new()
+      const tag = await this.SequelizeServiceInstance.new()
       tag.name = tagName
       toReturn = (await this.create(tag)).body
       await toReturn.save()

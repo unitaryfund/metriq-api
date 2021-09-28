@@ -22,6 +22,4 @@ Tag.init({
   }
 }, { sequelize, modelName: 'tag' })
 
-Tag.sync()
-
 module.exports.Tag = Tag

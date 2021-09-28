@@ -24,7 +24,8 @@ SubmissionMethodRef.init({
     references: {
       model: Submission,
       key: 'id',
-      deferrable: Deferrable.INITIALLY_IMMEDIATE
+      deferrable: Deferrable.INITIALLY_IMMEDIATE,
+      unique: 'submissionMethodRefs_submissionId_methodId_unique'
     }
   },
   methodId: {
@@ -33,11 +34,10 @@ SubmissionMethodRef.init({
     references: {
       model: Method,
       key: 'id',
-      deferrable: Deferrable.INITIALLY_IMMEDIATE
+      deferrable: Deferrable.INITIALLY_IMMEDIATE,
+      unique: 'submissionMethodRefs_submissionId_methodId_unique'
     }
   }
 }, { sequelize, paranoid: true, modelName: 'submissionMethodRef' })
-
-SubmissionMethodRef.sync()
 
 module.exports.SubmissionMethodRef = SubmissionMethodRef
