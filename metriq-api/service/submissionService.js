@@ -31,7 +31,7 @@ class SubmissionService {
         '    WHERE submissions."approvedAt" IS NOT NULL ' +
         '    GROUP BY submissions.id) as sl ' +
         'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
-        'ORDER BY ' + sortColumn + (isDesc ? 'DESC ' : 'ASC ') +
+        'ORDER BY ' + sortColumn + (isDesc ? ' DESC ' : ' ASC ') +
         'LIMIT ' + limit + ' OFFSET ' + offset
   }
 
