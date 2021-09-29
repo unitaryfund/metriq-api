@@ -35,6 +35,18 @@ class SubmissionService {
         'LIMIT ' + limit + ' OFFSET ' + offset
   }
 
+  sqlTagLike (tagId, userId, sortColumn, isDesc, limit, offset) {
+    return 'SELECT submissions.*, "upvotesCount", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
+        '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
+        '    LEFT JOIN submissions on likes."submissionId" = submissions.id ' +
+        '    LEFT JOIN "submissionTagRefs" on "submissionTagRefs"."submissionId" = submissions.id AND "submissionTagRefs"."tagId" = ' + tagId + ' ' +
+        '    WHERE submissions."approvedAt" IS NOT NULL and "submissionTagRefs".id IS NOT NULL ' +
+        '    GROUP BY submissions.id) as sl ' +
+        'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
+        'ORDER BY ' + sortColumn + (isDesc ? ' DESC ' : ' ASC ') +
+        'LIMIT ' + limit + ' OFFSET ' + offset
+  }
+
   async create (submissionToCreate) {
     try {
       const result = await this.SequelizeServiceInstance.create(submissionToCreate)
@@ -326,7 +338,7 @@ class SubmissionService {
   }
 
   async getPopular (startIndex, count, userId) {
-    const result = await sequelize.query(this.sqlLike(userId, '"upvotesCount', true, count, startIndex))[0]
+    const result = await sequelize.query(this.sqlLike(userId, '"upvotesCount"', true, count, startIndex))[0]
     return { success: true, body: result }
   }
 
@@ -360,29 +372,6 @@ class SubmissionService {
     return { success: true, body: result }
   }
 
-  async getPopularByTag (tagName, startIndex, count, userId) {
-    const tag = await tagService.getByName(tagName)
-    if (!tag || !tag.length) {
-      return { success: false, error: 'Category not found' }
-    }
-    const tagId = tag[0].id
-
-    const oid = userId ? mongoose.Types.ObjectId(userId) : null
-
-    const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
-      {
-        $addFields: {
-          upvotesCount: { $size: '$upvotes' },
-          isUpvoted: { $in: [oid, '$upvotes'] }
-        }
-      },
-      { $project: { upvotes: 0 } },
-      { $sort: { upvotesCount: -1 } }
-    ]).skip(startIndex).limit(count)
-    return { success: true, body: result }
-  }
-
   async getLatestByTag (tagName, startIndex, count, userId) {
     const tag = await tagService.getByName(tagName)
     if (!tag || !tag.length) {
@@ -390,19 +379,18 @@ class SubmissionService {
     }
     const tagId = tag[0].id
 
-    const oid = userId ? mongoose.Types.ObjectId(userId) : null
+    const result = await sequelize.query(this.sqlTagLike(tagId, userId, 'submissions."createdAt"', true, count, startIndex))[0]
+    return { success: true, body: result }
+  }
 
-    const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
-      {
-        $addFields: {
-          upvotesCount: { $size: '$upvotes' },
-          isUpvoted: { $in: [oid, '$upvotes'] }
-        }
-      },
-      { $project: { upvotes: 0 } },
-      { $sort: { submittedDate: -1 } }
-    ]).skip(startIndex).limit(count)
+  async getPopularByTag (tagName, startIndex, count, userId) {
+    const tag = await tagService.getByName(tagName)
+    if (!tag || !tag.length) {
+      return { success: false, error: 'Category not found' }
+    }
+    const tagId = tag[0].id
+
+    const result = await sequelize.query(this.sqlTagLike(tagId, userId, '"upvotesCount"', true, count, startIndex))[0]
     return { success: true, body: result }
   }
 
