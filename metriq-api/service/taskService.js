@@ -9,6 +9,11 @@ const Task = require('../model/taskModel').Task
 const SubmissionService = require('./submissionService')
 const submissionService = new SubmissionService()
 
+// Aggregation
+const { Sequelize } = require('sequelize')
+const config = require('../config')
+const sequelize = new Sequelize(config.pgConnectionString)
+
 class TaskService {
   constructor () {
     this.SequelizeServiceInstance = new SequelizeService(Task)
@@ -54,46 +59,12 @@ class TaskService {
   }
 
   async getAllNamesAndCounts () {
-    const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      {
-        $project: {
-          name: true,
-          submissions: true
-        }
-      },
-      { $addFields: { submissionCount: { $size: '$submissions' } } },
-      {
-        $lookup: {
-          from: 'submissions',
-          localField: 'submissions',
-          foreignField: 'id',
-          as: 'submissionObjects'
-        }
-      },
-      {
-        $addFields: {
-          upvotes: {
-            $reduce: {
-              input: '$submissionObjects.upvotes',
-              initialValue: [],
-              in: { $concatArrays: ['$$value', '$$this'] }
-            }
-          }
-        }
-      },
-      {
-        $addFields: {
-          upvoteTotal: { $size: '$upvotes' }
-        }
-      },
-      {
-        $project: {
-          name: true,
-          submissionCount: true,
-          upvoteTotal: true
-        }
-      }
-    ])
+    const result = await sequelize.query(
+      'SELECT tasks.name as name, COUNT("submissionTaskRefs".*) as "submissionCount", COUNT(likes.*) as "upvoteTotal" from "submissionTaskRefs" ' +
+      'LEFT JOIN tasks on tasks.id = "submissionTaskRefs"."taskId" ' +
+      'LEFT JOIN likes on likes."submissionId" = "submissionTaskRefs"."submissionId" ' +
+      'GROUP BY tasks.id;'
+    )[0]
     return { success: true, body: result }
   }
 
@@ -133,7 +104,7 @@ class TaskService {
       const submissionId = submissionsSplit[i].trim()
       if (submissionId) {
         // Reference to submission goes in reference collection on task
-        task.submissions.push(mongoose.Types.ObjectId(submissionId))
+        task.submissions.push(submissionId)
         const submissionResult = await submissionService.getBySubmissionId(submissionId)
         if (!submissionResult || !submissionResult.length) {
           return { success: false, error: 'Submission reference in Task collection not found.' }

@@ -5,6 +5,11 @@ const SequelizeService = require('./sequelizeService')
 // Database Model
 const Tag = require('../model/tagModel').Tag
 
+// Aggregation
+const { Sequelize } = require('sequelize')
+const config = require('../config')
+const sequelize = new Sequelize(config.pgConnectionString)
+
 class TagService {
   constructor () {
     this.SequelizeServiceInstance = new SequelizeService(Tag)
@@ -33,47 +38,12 @@ class TagService {
   }
 
   async getAllNamesAndCounts () {
-    const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      {
-        $project: {
-          name: true,
-          submissions: true
-        }
-      },
-      { $addFields: { submissionCount: { $size: '$submissions' } } },
-      { $match: { submissionCount: { $gte: 1 } } },
-      {
-        $lookup: {
-          from: 'submissions',
-          localField: 'submissions',
-          foreignField: 'id',
-          as: 'submissionObjects'
-        }
-      },
-      {
-        $addFields: {
-          upvotes: {
-            $reduce: {
-              input: '$submissionObjects.upvotes',
-              initialValue: [],
-              in: { $concatArrays: ['$$value', '$$this'] }
-            }
-          }
-        }
-      },
-      {
-        $addFields: {
-          upvoteTotal: { $size: '$upvotes' }
-        }
-      },
-      {
-        $project: {
-          name: true,
-          submissionCount: true,
-          upvoteTotal: true
-        }
-      }
-    ])
+    const result = await sequelize.query(
+      'SELECT tags.name as name, COUNT("submissionTagRefs".*) as "submissionCount", COUNT(likes.*) as "upvoteTotal" from "submissionTagRefs" ' +
+      'LEFT JOIN tags on tags.id = "submissionTagRefs"."tagId" ' +
+      'LEFT JOIN likes on likes."submissionId" = "submissionTagRefs"."submissionId" ' +
+      'GROUP BY tags.id;'
+    )[0]
     return { success: true, body: result }
   }
 

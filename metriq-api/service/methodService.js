@@ -9,6 +9,11 @@ const Method = require('../model/methodModel').Method
 const SubmissionService = require('./submissionService')
 const submissionService = new SubmissionService()
 
+// Aggregation
+const { Sequelize } = require('sequelize')
+const config = require('../config')
+const sequelize = new Sequelize(config.pgConnectionString)
+
 class MethodService {
   constructor () {
     this.SequelizeServiceInstance = new SequelizeService(Method)
@@ -65,46 +70,12 @@ class MethodService {
   }
 
   async getAllNamesAndCounts () {
-    const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      {
-        $project: {
-          name: true,
-          submissions: true
-        }
-      },
-      { $addFields: { submissionCount: { $size: '$submissions' } } },
-      {
-        $lookup: {
-          from: 'submissions',
-          localField: 'submissions',
-          foreignField: 'id',
-          as: 'submissionObjects'
-        }
-      },
-      {
-        $addFields: {
-          upvotes: {
-            $reduce: {
-              input: '$submissionObjects.upvotes',
-              initialValue: [],
-              in: { $concatArrays: ['$$value', '$$this'] }
-            }
-          }
-        }
-      },
-      {
-        $addFields: {
-          upvoteTotal: { $size: '$upvotes' }
-        }
-      },
-      {
-        $project: {
-          name: true,
-          submissionCount: true,
-          upvoteTotal: true
-        }
-      }
-    ])
+    const result = await sequelize.query(
+      'SELECT methods.name as name, COUNT("submissionMethodRefs".*) as "submissionCount", COUNT(likes.*) as "upvoteTotal" from "submissionMethodRefs" ' +
+      'LEFT JOIN methods on methods.id = "submissionMethodRefs"."methodId" ' +
+      'LEFT JOIN likes on likes."submissionId" = "submissionMethodRefs"."submissionId" ' +
+      'GROUP BY methods.id;'
+    )[0]
     return { success: true, body: result }
   }
 
@@ -126,7 +97,7 @@ class MethodService {
       const submissionId = submissionsSplit[i].trim()
       if (submissionId) {
         // Reference to submission goes in reference collection on method
-        method.submissions.push(mongoose.Types.ObjectId(submissionId))
+        method.submissions.push(submissionId)
         const submissionResult = await submissionService.getBySubmissionId(submissionId)
         if (!submissionResult || !submissionResult.length) {
           return { success: false, error: 'Submission reference in Method collection not found.' }

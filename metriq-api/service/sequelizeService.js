@@ -25,6 +25,10 @@ class SequelizeService {
     return await this.Collection.findAll({ where: keyValuePair, attributes: attributes })
   }
 
+  async findAndSort (keyValuePair, sortValues, startIndex, count) {
+    return await this.Collection.findAll({ where: keyValuePair, order: sortValues, offset: startIndex, limit: count })
+  }
+
   async distinctAll (attribute) {
     return await this.Collection.aggregate(attribute, 'DISTINCT', { plain: false })
   }

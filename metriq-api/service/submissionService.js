@@ -283,11 +283,7 @@ class SubmissionService {
   }
 
   async getByUserId (userId, startIndex, count) {
-    const oid = mongoose.Types.ObjectId(userId)
-    const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { user: oid } },
-      { $sort: { submittedDate: -1 } }
-    ]).skip(startIndex).limit(count)
+    const result = await this.SequelizeServiceInstance.findAndSort({ userId: userId }, [['createdAt', 'DESC']], startIndex, count)
     return { success: true, body: result }
   }
 
