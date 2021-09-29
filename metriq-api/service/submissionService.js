@@ -15,14 +15,24 @@ const userService = new UserService()
 const TagService = require('./tagService')
 const tagService = new TagService()
 
-// Model dependencies
-require('../model/methodModel')
-require('../model/resultModel')
-require('../model/taskModel')
+// Aggregation
+const { Sequelize } = require('sequelize')
+const sequelize = new Sequelize(config.pgConnectionString)
 
 class SubmissionService {
   constructor () {
     this.SequelizeServiceInstance = new SequelizeService(Submission)
+  }
+
+  sqlLike (userId, sortColumn, isDesc, limit, offset) {
+    return 'SELECT submissions.*, "upvotesCount", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
+        '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
+        '    LEFT JOIN submissions on likes."submissionId" = submissions.id ' +
+        '    WHERE submissions."approvedAt" IS NOT NULL ' +
+        '    GROUP BY submissions.id) as sl ' +
+        'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
+        'ORDER BY ' + sortColumn + (isDesc ? 'DESC ' : 'ASC ') +
+        'LIMIT ' + limit + ' OFFSET ' + offset
   }
 
   async create (submissionToCreate) {
@@ -311,34 +321,12 @@ class SubmissionService {
   }
 
   async getLatest (startIndex, count, userId) {
-    const oid = userId ? mongoose.Types.ObjectId(userId) : null
-    const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { approvedDate: { $ne: null } } },
-      {
-        $addFields: {
-          upvotesCount: { $size: '$upvotes' },
-          isUpvoted: { $in: [oid, '$upvotes'] }
-        }
-      },
-      { $project: { upvotes: 0 } },
-      { $sort: { submittedDate: -1 } }
-    ]).skip(startIndex).limit(count)
+    const result = await sequelize.query(this.sqlLike(userId, 'submissions."createdAt"', true, count, startIndex))[0]
     return { success: true, body: result }
   }
 
   async getPopular (startIndex, count, userId) {
-    const oid = userId ? mongoose.Types.ObjectId(userId) : null
-    const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { approvedDate: { $ne: null } } },
-      {
-        $addFields: {
-          upvotesCount: { $size: '$upvotes' },
-          isUpvoted: { $in: [oid, '$upvotes'] }
-        }
-      },
-      { $project: { upvotes: 0 } },
-      { $sort: { upvotesCount: -1 } }
-    ]).skip(startIndex).limit(count)
+    const result = await sequelize.query(this.sqlLike(userId, '"upvotesCount', true, count, startIndex))[0]
     return { success: true, body: result }
   }
 
