@@ -33,12 +33,10 @@ User.init({
     type: DataTypes.TEXT
   },
   clientTokenCreated: {
-    type: DataTypes.DATE,
-    allowNull: false
+    type: DataTypes.DATE
   },
   recoveryTokenExpiration: {
-    type: DataTypes.DATE,
-    allowNull: false
+    type: DataTypes.DATE
   }
 }, { sequelize, paranoid: true, modelName: 'user' })
 
