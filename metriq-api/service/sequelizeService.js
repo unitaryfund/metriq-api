@@ -13,8 +13,16 @@ class SequelizeService {
     return await data.save()
   }
 
-  async find (keyValuePair) {
+  async findAll (keyValuePair) {
     return await this.Collection.findAll({ where: keyValuePair })
+  }
+
+  async findAllEager (keyValuePair, keys) {
+    return await this.Collection.findAll({ where: keyValuePair, include: keys })
+  }
+
+  async findOne (keyValuePair) {
+    return await this.Collection.findOne({ where: keyValuePair })
   }
 
   async projectAll (attributes) {

@@ -33,11 +33,11 @@ class TaskService {
   }
 
   async getById (taskId) {
-    return await this.SequelizeServiceInstance.find({ where: { id: taskId } })
+    return await this.SequelizeServiceInstance.findOne({ id: taskId })
   }
 
   async getEagerById (taskId) {
-    return await this.SequelizeServiceInstance.find({ where: { id: taskId }, include: [{ model: Submission, include: [{ model: Tag }, { model: Task }, { model: Method }, { model: Result, include: [{ model: Task }, { model: Method }] }] }] })
+    return await this.SequelizeServiceInstance.findOne({ id: taskId }, [{ model: Submission, include: [{ model: Tag }, { model: Task }, { model: Method }, { model: Result, include: [{ model: Task }, { model: Method }] }] }])
   }
 
   async getSanitized (taskId) {

@@ -26,7 +26,7 @@ async function routeWrapper (res, serviceFn, successMessage, isUserLogin) {
       const jsonResponse = { message: successMessage, data: result.body }
       if (isUserLogin) {
         // If this route should log in a web user, also generate a token and set a cookie for it.
-        const token = await userService.generateWebJwt(result.body._id)
+        const token = await userService.generateWebJwt(result.body.id)
         setJwtCookie(res, token)
         jsonResponse.token = token
       }

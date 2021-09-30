@@ -1,5 +1,7 @@
 // userService.js
 
+const { Op } = require('sequelize')
+
 // Data Access Layer
 const SequelizeService = require('./sequelizeService')
 // Database Model
@@ -60,37 +62,29 @@ class UserService {
   }
 
   async getByUserId (userId) {
-    return await this.SequelizeServiceInstance.find({ id: userId })
+    return await this.SequelizeServiceInstance.findOne({ id: userId })
   }
 
   async getByUsername (username) {
-    return await this.SequelizeServiceInstance.find({ usernameNormal: username.trim().toLowerCase() })
+    return await this.SequelizeServiceInstance.findOne({ usernameNormal: username.trim().toLowerCase() })
   }
 
   async getByEmail (email) {
-    return await this.SequelizeServiceInstance.find({ email: email.trim().toLowerCase() })
+    return await this.SequelizeServiceInstance.findOne({ email: email.trim().toLowerCase() })
   }
 
   async getByUsernameOrEmail (usernameOrEmail) {
-    let users = await this.getByUsername(usernameOrEmail)
-    if (!users || !users.length) {
-      users = await this.getByEmail(usernameOrEmail)
-    }
-    return users
+    const usernameOrEmailNormal = usernameOrEmail.trim().toLowerCase()
+    return await this.SequelizeServiceInstance.findOne({ [Op.or]: [{ usernameNormal: usernameOrEmailNormal }, { email: usernameOrEmailNormal }] })
   }
 
   async get (userId) {
-    let userResult = []
+    let user = []
     try {
-      userResult = await this.getByUserId(userId)
-      if (!userResult || !userResult.length) {
-        return { success: false, error: 'User not found.' }
-      }
+      user = await this.getByUserId(userId)
     } catch (err) {
       return { success: false, error: err }
     }
-
-    const user = userResult[0]
 
     return { success: true, body: user }
   }
@@ -143,12 +137,10 @@ class UserService {
   }
 
   async login (reqBody) {
-    const userResult = await this.getByUsernameOrEmail(reqBody.username)
-    if (!userResult || !userResult.length) {
+    const user = await this.getByUsernameOrEmail(reqBody.username)
+    if (!user) {
       return { success: false, error: 'User not found.' }
     }
-
-    const user = userResult[0]
 
     const isPasswordValid = bcrypt.compareSync(reqBody.password, user.passwordHash)
     if (!isPasswordValid) {
@@ -246,11 +238,10 @@ class UserService {
       return { success: false, error: 'Support email not available.' }
     }
 
-    const users = await this.getByUsernameOrEmail(usernameOrEmail)
-    if (!users || !users.length) {
+    const user = await this.getByUsernameOrEmail(usernameOrEmail)
+    if (!user) {
       return { success: false, error: 'User not found.' }
     }
-    const user = users[0]
     user.generateRecovery()
 
     const transporter = nodemailer.createTransport({
@@ -288,12 +279,11 @@ class UserService {
       return { success: false, error: 'Password and confirmation do not match.' }
     }
 
-    const userResult = await this.getByUsernameOrEmail(reqBody.username)
-    if (!userResult || !userResult.length) {
+    const user = await this.getByUsernameOrEmail(reqBody.username)
+    if (!user) {
       return { success: false, error: 'User not found.' }
     }
 
-    const user = userResult[0]
     if (!user.recoveryToken || (user.recoveryToken !== reqBody.uuid) || (user.recoveryTokenExpiration < new Date())) {
       return { success: false, error: 'Supplied bad recovery token.' }
     }

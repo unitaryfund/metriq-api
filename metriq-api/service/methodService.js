@@ -47,7 +47,7 @@ class MethodService {
   }
 
   async getById (methodId) {
-    return await this.SequelizeServiceInstance.find({ where: { id: methodId } })
+    return await this.SequelizeServiceInstance.findOne({ id: methodId })
   }
 
   async populate (method) {

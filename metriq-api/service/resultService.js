@@ -28,11 +28,11 @@ class ResultService {
   }
 
   async get (resultId) {
-    return await this.SequelizeServiceInstance.find({ where: { id: resultId } })
+    return await this.SequelizeServiceInstance.findOne({ id: resultId })
   }
 
   async getBySubmissionId (submissionId) {
-    return await this.SequelizeServiceInstance.find({ where: { submission: submissionId } })
+    return await this.SequelizeServiceInstance.findOne({ submission: submissionId })
   }
 
   async listMetricNames () {

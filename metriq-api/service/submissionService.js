@@ -1,5 +1,7 @@
 // submissionService.js
 
+const { Op } = require('sequelize')
+
 // Data Access Layer
 const SequelizeService = require('./sequelizeService')
 // Database Model
@@ -84,38 +86,24 @@ class SubmissionService {
   }
 
   async getBySubmissionId (submissionId) {
-    return await this.SequelizeServiceInstance.find({ where: { id: submissionId } })
+    return await this.SequelizeServiceInstance.findOne({ id: submissionId })
   }
 
   async getEagerBySubmissionId (submissionId) {
-    return await this.SequelizeServiceInstance.find({ where: { id: submissionId }, include: [{ model: Tag }, { model: Task }, { model: Method }, { model: Result, include: [{ model: Task }, { model: Method }] }] })
+    return await this.SequelizeServiceInstance.findOne({ id: submissionId }, [{ model: Tag }, { model: Task }, { model: Method }, { model: Result, include: [{ model: Task }, { model: Method }] }])
   }
 
   async getBySubmissionName (submissionName) {
-    return await this.SequelizeServiceInstance.find({ where: { submissionNameNormal: submissionName.trim().toLowerCase() } })
+    const nameNormal = submissionName.trim().toLowerCase()
+    return await this.SequelizeServiceInstance.findOne({ nameNormal: nameNormal })
   }
 
   async getBySubmissionNameOrId (submissionNameOrId) {
-    let submission = await this.getBySubmissionId(submissionNameOrId)
-    if (!submission || !submission.length) {
-      submission = await this.getBySubmissionName(submissionNameOrId)
-    }
-    return submission
+    return await this.SequelizeServiceInstance.findOne({ [Op.or]: [{ id: submissionNameOrId }, { nameNormal: submissionNameOrId.trim().toLowerCase() }] })
   }
 
   async get (submissionNameOrId) {
-    let submissionResult = []
-    try {
-      submissionResult = await this.getBySubmissionNameOrId(submissionNameOrId)
-      if (!submissionResult || !submissionResult.length) {
-        return { success: false, error: 'Submission not found' }
-      }
-    } catch (err) {
-      return { success: false, error: err }
-    }
-
-    const submission = submissionResult[0]
-
+    const submission = await this.getBySubmissionNameOrId(submissionNameOrId)
     return { success: true, body: submission }
   }
 
@@ -192,19 +180,17 @@ class SubmissionService {
       return validationResult
     }
 
-    const users = await userService.getByUserId(userId)
-    if (!users || !users.length) {
+    const user = await userService.getByUserId(userId)
+    if (!user) {
       return { success: false, error: 'User not found.' }
     }
-    const user = users[0]
 
     const submission = await this.SequelizeServiceInstance.new()
     submission.user = userId
-    submission.submissionName = reqBody.submissionName.trim()
-    submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
-    submission.submittedDate = new Date()
-    submission.submissionContentUrl = reqBody.submissionContentUrl.trim()
-    submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl ? reqBody.submissionThumbnailUrl.trim() : null
+    submission.name = reqBody.submissionName.trim()
+    submission.nameNormal = reqBody.submissionName.trim().toLowerCase()
+    submission.contentUrl = reqBody.submissionContentUrl.trim()
+    submission.thumbnailUrl = reqBody.submissionThumbnailUrl ? reqBody.submissionThumbnailUrl.trim() : null
     submission.description = reqBody.description ? reqBody.description.trim() : ''
 
     const result = await this.create(submission)
@@ -294,10 +280,13 @@ class SubmissionService {
       return { success: false, error: 'Submission name cannot be blank.' }
     }
 
+    console.log('before')
     const submissionNameMatch = await this.getBySubmissionName(tlSubmissionName)
-    if (submissionNameMatch.length > 0) {
+    console.log('after')
+    if (submissionNameMatch) {
       return { success: false, error: 'Submission name already in use.' }
     }
+    console.log('success')
 
     return { success: true }
   }
