@@ -47,6 +47,29 @@ class SubmissionService {
         'LIMIT ' + limit + ' OFFSET ' + offset
   }
 
+  sqlTrending (userId, sortColumn, isDesc, limit, offset) {
+    return 'SELECT submissions.*, "upvotesCount", ("upvotesCount" * 3600000) / (CURRENT_DATE::DATE - "createdAt"::DATE) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
+        '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
+        '    LEFT JOIN submissions on likes."submissionId" = submissions.id ' +
+        '    WHERE submissions."approvedAt" IS NOT NULL ' +
+        '    GROUP BY submissions.id) as sl ' +
+        'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
+        'ORDER BY ' + sortColumn + (isDesc ? ' DESC ' : ' ASC ') +
+        'LIMIT ' + limit + ' OFFSET ' + offset
+  }
+
+  sqlTagTrending (tagId, userId, sortColumn, isDesc, limit, offset) {
+    return 'SELECT submissions.*, "upvotesCount", ("upvotesCount" * 3600000) / (CURRENT_DATE::DATE - "createdAt"::DATE) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
+        '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
+        '    LEFT JOIN submissions on likes."submissionId" = submissions.id ' +
+        '    LEFT JOIN "submissionTagRefs" on "submissionTagRefs"."submissionId" = submissions.id AND "submissionTagRefs"."tagId" = ' + tagId + ' ' +
+        '    WHERE submissions."approvedAt" IS NOT NULL and "submissionTagRefs".id IS NOT NULL ' +
+        '    GROUP BY submissions.id) as sl ' +
+        'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
+        'ORDER BY ' + sortColumn + (isDesc ? ' DESC ' : ' ASC ') +
+        'LIMIT ' + limit + ' OFFSET ' + offset
+  }
+
   async create (submissionToCreate) {
     try {
       const result = await this.SequelizeServiceInstance.create(submissionToCreate)
@@ -153,7 +176,7 @@ class SubmissionService {
       description: submission.description,
       submittedDate: submission.submittedDate,
       submissionContentUrl: submission.submissionContentUrl,
-      isUpvoted: submission.upvotes.includes(mongoose.Types.ObjectId(userId)),
+      isUpvoted: submission.upvotes.includes(userId),
       upvotesCount: submission.upvotes.length
     }
 
@@ -310,25 +333,7 @@ class SubmissionService {
   }
 
   async getTrending (startIndex, count, userId) {
-    const millisPerHour = 1000 * 60 * 60
-    const oid = userId ? mongoose.Types.ObjectId(userId) : null
-    const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { approvedDate: { $ne: null } } },
-      {
-        $addFields: {
-          upvotesCount: { $size: '$upvotes' },
-          isUpvoted: { $in: [oid, '$upvotes'] },
-          upvotesPerHour: {
-            $divide: [
-              { $multiply: [{ $size: '$upvotes' }, millisPerHour] },
-              { $subtract: [new Date(), '$approvedDate'] }
-            ]
-          }
-        }
-      },
-      { $project: { upvotes: 0 } },
-      { $sort: { upvotesPerHour: -1 } }
-    ]).skip(startIndex).limit(count)
+    const result = await sequelize.query(this.sqlTrending(userId, '"upvotesPerHour"', true, count, startIndex))[0]
     return { success: true, body: result }
   }
 
@@ -343,32 +348,13 @@ class SubmissionService {
   }
 
   async getTrendingByTag (tagName, startIndex, count, userId) {
-    const millisPerHour = 1000 * 60 * 60
-    const oid = userId ? mongoose.Types.ObjectId(userId) : null
-
     const tag = await tagService.getByName(tagName)
     if (!tag || !tag.length) {
       return { success: false, error: 'Category not found' }
     }
     const tagId = tag[0].id
 
-    const result = await this.SequelizeServiceInstance.Collection.aggregate([
-      { $match: { approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
-      {
-        $addFields: {
-          upvotesCount: { $size: '$upvotes' },
-          isUpvoted: { $in: [oid, '$upvotes'] },
-          upvotesPerHour: {
-            $divide: [
-              { $multiply: [{ $size: '$upvotes' }, millisPerHour] },
-              { $subtract: [new Date(), '$approvedDate'] }
-            ]
-          }
-        }
-      },
-      { $project: { upvotes: 0 } },
-      { $sort: { upvotesPerHour: -1 } }
-    ]).skip(startIndex).limit(count)
+    const result = await sequelize.query(this.sqlTagTrending(tagId, userId, '"upvotesPerHour"', true, count, startIndex))[0]
     return { success: true, body: result }
   }
 
