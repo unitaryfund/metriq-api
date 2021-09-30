@@ -25,11 +25,11 @@ class TagService {
   }
 
   async getById (tagId) {
-    return await this.SequelizeServiceInstance.find({ id: tagId })
+    return await this.SequelizeServiceInstance.find({ where: { id: tagId } })
   }
 
   async getByName (tagName) {
-    return await this.SequelizeServiceInstance.find({ name: tagName.trim().toLowerCase() })
+    return await this.SequelizeServiceInstance.find({ where: { name: tagName.trim().toLowerCase() } })
   }
 
   async getAllNames () {

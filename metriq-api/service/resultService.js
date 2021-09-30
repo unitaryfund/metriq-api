@@ -28,11 +28,11 @@ class ResultService {
   }
 
   async get (resultId) {
-    return await this.SequelizeServiceInstance.find({ id: resultId })
+    return await this.SequelizeServiceInstance.find({ where: { id: resultId } })
   }
 
   async getBySubmissionId (submissionId) {
-    return await this.SequelizeServiceInstance.find({ submission: submissionId })
+    return await this.SequelizeServiceInstance.find({ where: { submission: submissionId } })
   }
 
   async listMetricNames () {
@@ -40,7 +40,7 @@ class ResultService {
   }
 
   async submit (userId, submissionId, reqBody) {
-    const submissions = await submissionService.getBySubmissionId(submissionId)
+    const submissions = await submissionService.getEagerBySubmissionId(submissionId)
     if (!submissions || !submissions.length) {
       return { success: false, error: 'Submission not found' }
     }
@@ -83,12 +83,7 @@ class ResultService {
     }
 
     submission.results.push(result.id)
-    submission.save()
-
-    await submission.addResults().addTags().addMethods().addTasks()
-    for (let i = 0; i < submission.results.length; i++) {
-      await submission.results[i].addTask().addMethod()
-    }
+    await submission.save()
 
     return { success: true, body: submission }
   }

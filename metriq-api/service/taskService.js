@@ -4,6 +4,10 @@
 const SequelizeService = require('./sequelizeService')
 // Database Model
 const Task = require('../model/taskModel').Task
+const Submission = require('../model/submissionModel').Submission
+const Result = require('../model/resultModel').Result
+const Tag = require('../model/tagModel').Tag
+const Method = require('../model/methodModel').Method
 
 // Service dependencies
 const SubmissionService = require('./submissionService')
@@ -29,17 +33,11 @@ class TaskService {
   }
 
   async getById (taskId) {
-    return await this.SequelizeServiceInstance.find({ id: taskId })
+    return await this.SequelizeServiceInstance.find({ where: { id: taskId } })
   }
 
-  async populate (task) {
-    await task.addSubmissions()
-    for (let i = 0; i < task.submissions.length; i++) {
-      await task.submissions[i].addResults()
-      for (let j = 0; j < task.submissions[i].results.length; j++) {
-        await task.submissions[i].results[j].addSubmission().addTask().addMethod()
-      }
-    }
+  async getEagerById (taskId) {
+    return await this.SequelizeServiceInstance.find({ where: { id: taskId }, include: [{ model: Submission, include: [{ model: Tag }, { model: Task }, { model: Method }, { model: Result, include: [{ model: Task }, { model: Method }] }] }] })
   }
 
   async getSanitized (taskId) {
@@ -48,7 +46,6 @@ class TaskService {
       return { success: false, error: 'Task not found.' }
     }
     const task = tasks[0]
-    await this.populate(task)
 
     return { success: true, body: task }
   }
@@ -144,7 +141,6 @@ class TaskService {
     }
 
     await task.save()
-    await this.populate(task)
 
     return { success: true, body: task }
   }
@@ -156,7 +152,7 @@ class TaskService {
     }
     const task = tasks[0]
 
-    const submissions = await submissionService.getBySubmissionId(submissionId)
+    const submissions = await submissionService.getEagerBySubmissionId(submissionId)
     if (!submissions || !submissions.length) {
       return { success: false, error: 'Submission not found.' }
     }
@@ -183,11 +179,6 @@ class TaskService {
 
     await task.save()
     await submission.save()
-
-    await submission.addResults().addTags().addMethods().addTasks()
-    for (let i = 0; i < submission.results.length; i++) {
-      await submission.results[i].addTask().addMethod()
-    }
 
     return { success: true, body: submission }
   }

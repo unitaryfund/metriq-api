@@ -4,6 +4,10 @@
 const SequelizeService = require('./sequelizeService')
 // Database Model
 const Submission = require('../model/submissionModel').Submission
+const Result = require('../model/resultModel').Result
+const Tag = require('../model/tagModel').Tag
+const Method = require('../model/methodModel').Method
+const Task = require('../model/taskModel').Task
 
 // For email
 const config = require('./../config')
@@ -80,11 +84,15 @@ class SubmissionService {
   }
 
   async getBySubmissionId (submissionId) {
-    return await this.SequelizeServiceInstance.find({ id: submissionId })
+    return await this.SequelizeServiceInstance.find({ where: { id: submissionId } })
+  }
+
+  async getEagerBySubmissionId (submissionId) {
+    return await this.SequelizeServiceInstance.find({ where: { id: submissionId }, include: [{ model: Tag }, { model: Task }, { model: Method }, { model: Result, include: [{ model: Task }, { model: Method }] }] })
   }
 
   async getBySubmissionName (submissionName) {
-    return await this.SequelizeServiceInstance.find({ submissionNameNormal: submissionName.trim().toLowerCase() })
+    return await this.SequelizeServiceInstance.find({ where: { submissionNameNormal: submissionName.trim().toLowerCase() } })
   }
 
   async getBySubmissionNameOrId (submissionNameOrId) {
@@ -157,11 +165,6 @@ class SubmissionService {
   }
 
   async populate (submission, userId) {
-    await submission.addResults().addTags().addMethods().addTasks()
-    for (let i = 0; i < submission.results.length; i++) {
-      await submission.results[i].addTask().addMethod()
-    }
-
     const toRet = {
       id: submission.id,
       submissionThumbnailUrl: submission.submissionThumbnailUrl,
@@ -176,8 +179,8 @@ class SubmissionService {
       description: submission.description,
       submittedDate: submission.submittedDate,
       submissionContentUrl: submission.submissionContentUrl,
-      isUpvoted: submission.upvotes.includes(userId),
-      upvotesCount: submission.upvotes.length
+      isUpvoted: submission.likes.includes(userId),
+      upvotesCount: submission.likes.length
     }
 
     return toRet
@@ -264,7 +267,7 @@ class SubmissionService {
     if (!submissions || !submissions.length) {
       return { success: false, error: 'Submission not found.' }
     }
-    let submission = submissions[0]
+    const submission = submissions[0]
 
     if (reqBody.submissionThumbnailUrl !== undefined) {
       submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl.trim() ? reqBody.submissionThumbnailUrl.trim() : null
@@ -273,8 +276,6 @@ class SubmissionService {
       submission.description = reqBody.description.trim() ? reqBody.description.trim() : ''
     }
     await submission.save()
-
-    submission = await this.populate(submission, userId)
 
     return { success: true, body: submission }
   }
@@ -306,7 +307,7 @@ class SubmissionService {
     if (!submissions || !submissions.length) {
       return { success: false, error: 'Submission not found.' }
     }
-    let submission = submissions[0]
+    const submission = submissions[0]
 
     const userResponse = await userService.get(userId)
     if (!userResponse.success) {
@@ -314,15 +315,13 @@ class SubmissionService {
     }
     const user = userResponse.body
 
-    const index = submission.upvotes.indexOf(user.id)
+    const index = submission.likes.indexOf(user.id)
     if (index >= 0) {
-      submission.upvotes.splice(index, 1)
+      submission.likes.splice(index, 1)
     } else {
-      submission.upvotes.push(user.id)
+      submission.likes.push(user.id)
     }
     await submission.save()
-
-    submission = await this.populate(submission, user.id)
 
     return { success: true, body: submission }
   }
@@ -381,11 +380,11 @@ class SubmissionService {
   }
 
   async addOrRemoveTag (isAdd, submissionId, tagName, userId) {
-    const submissions = await this.getBySubmissionId(submissionId)
+    const submissions = await this.getEagerBySubmissionId(submissionId)
     if (!submissions || !submissions.length) {
       return { success: false, error: 'Submission not found.' }
     }
-    let submission = submissions[0]
+    const submission = submissions[0]
 
     let tag = {}
     if (isAdd) {
@@ -419,7 +418,6 @@ class SubmissionService {
 
     await tag.save()
     await submission.save()
-    submission = await this.populate(submission, userId)
 
     return { success: true, body: submission }
   }

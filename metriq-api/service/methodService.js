@@ -47,11 +47,11 @@ class MethodService {
   }
 
   async getById (methodId) {
-    return await this.SequelizeServiceInstance.find({ id: methodId })
+    return await this.SequelizeServiceInstance.find({ where: { id: methodId } })
   }
 
   async populate (method) {
-    await method.addSubmissions()
+    method.submissions = await method.getSubmissions()
   }
 
   async getSanitized (methodId) {
@@ -137,7 +137,6 @@ class MethodService {
     }
 
     await method.save()
-    await this.populate(method)
 
     return { success: true, body: method }
   }
@@ -149,7 +148,7 @@ class MethodService {
     }
     const method = methods[0]
 
-    const submissions = await submissionService.getBySubmissionId(submissionId)
+    const submissions = await submissionService.getEagerBySubmissionId(submissionId)
     if (!submissions || !submissions.length) {
       return { success: false, error: 'Submission not found.' }
     }
@@ -176,11 +175,6 @@ class MethodService {
 
     await method.save()
     await submission.save()
-
-    await submission.addResults().addTags().addMethods().addTasks()
-    for (let i = 0; i < submission.results.length; i++) {
-      await submission.results[i].addTask().addMethod()
-    }
 
     return { success: true, body: submission }
   }
