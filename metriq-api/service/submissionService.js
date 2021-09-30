@@ -157,9 +157,9 @@ class SubmissionService {
   }
 
   async populate (submission, userId) {
-    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
+    await submission.addResults().addTags().addMethods().addTasks()
     for (let i = 0; i < submission.results.length; i++) {
-      await submission.results[i].populate('task').populate('method').execPopulate()
+      await submission.results[i].addTask().addMethod()
     }
 
     const toRet = {

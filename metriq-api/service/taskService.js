@@ -33,11 +33,11 @@ class TaskService {
   }
 
   async populate (task) {
-    await task.populate('submissions').execPopulate()
+    await task.addSubmissions()
     for (let i = 0; i < task.submissions.length; i++) {
-      await task.submissions[i].populate('results').execPopulate()
+      await task.submissions[i].addResults()
       for (let j = 0; j < task.submissions[i].results.length; j++) {
-        await task.submissions[i].results[j].populate('submission').populate('task').populate('method').execPopulate()
+        await task.submissions[i].results[j].addSubmission().addTask().addMethod()
       }
     }
   }
@@ -184,9 +184,9 @@ class TaskService {
     await task.save()
     await submission.save()
 
-    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
+    await submission.addResults().addTags().addMethods().addTasks()
     for (let i = 0; i < submission.results.length; i++) {
-      await submission.results[i].populate('task').populate('method').execPopulate()
+      await submission.results[i].addTask().addMethod()
     }
 
     return { success: true, body: submission }
