@@ -33,7 +33,7 @@ class TagService {
   }
 
   async getAllNames () {
-    const result = await this.SequelizeServiceInstance.projetAll(['name'])
+    const result = await this.SequelizeServiceInstance.projectAll(['name'])
     return { success: true, body: result }
   }
 
