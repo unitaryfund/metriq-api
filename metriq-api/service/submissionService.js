@@ -291,17 +291,17 @@ class SubmissionService {
   }
 
   async getTrending (startIndex, count, userId) {
-    const result = await sequelize.query(this.sqlTrending(userId, '"upvotesPerHour"', true, count, startIndex))
+    const result = (await sequelize.query(this.sqlTrending(userId, '"upvotesPerHour"', true, count, startIndex)))[0]
     return { success: true, body: result }
   }
 
   async getLatest (startIndex, count, userId) {
-    const result = await sequelize.query(this.sqlLike(userId, 'submissions."createdAt"', true, count, startIndex))
+    const result = (await sequelize.query(this.sqlLike(userId, 'submissions."createdAt"', true, count, startIndex)))[0]
     return { success: true, body: result }
   }
 
   async getPopular (startIndex, count, userId) {
-    const result = await sequelize.query(this.sqlLike(userId, '"upvotesCount"', true, count, startIndex))
+    const result = (await sequelize.query(this.sqlLike(userId, '"upvotesCount"', true, count, startIndex)))[0]
     return { success: true, body: result }
   }
 
@@ -312,7 +312,7 @@ class SubmissionService {
     }
     const tagId = tag.id
 
-    const result = await sequelize.query(this.sqlTagTrending(tagId, userId, '"upvotesPerHour"', true, count, startIndex))
+    const result = (await sequelize.query(this.sqlTagTrending(tagId, userId, '"upvotesPerHour"', true, count, startIndex)))[0]
     return { success: true, body: result }
   }
 
@@ -323,7 +323,7 @@ class SubmissionService {
     }
     const tagId = tag.id
 
-    const result = await sequelize.query(this.sqlTagLike(tagId, userId, 'submissions."createdAt"', true, count, startIndex))
+    const result = (await sequelize.query(this.sqlTagLike(tagId, userId, 'submissions."createdAt"', true, count, startIndex)))[0]
     return { success: true, body: result }
   }
 
@@ -334,7 +334,7 @@ class SubmissionService {
     }
     const tagId = tag.id
 
-    const result = await sequelize.query(this.sqlTagLike(tagId, userId, '"upvotesCount"', true, count, startIndex))
+    const result = (await sequelize.query(this.sqlTagLike(tagId, userId, '"upvotesCount"', true, count, startIndex)))[0]
     return { success: true, body: result }
   }
 
