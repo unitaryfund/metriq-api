@@ -6,10 +6,6 @@ const { Op } = require('sequelize')
 const SequelizeService = require('./sequelizeService')
 // Database Model
 const Submission = require('../model/submissionModel').Submission
-const Result = require('../model/resultModel').Result
-const Tag = require('../model/tagModel').Tag
-const Method = require('../model/methodModel').Method
-const Task = require('../model/taskModel').Task
 
 // For email
 const config = require('./../config')
@@ -90,7 +86,7 @@ class SubmissionService {
   }
 
   async getEagerBySubmissionId (submissionId) {
-    return await this.SequelizeServiceInstance.findOne({ id: submissionId }, [{ model: Tag }, { model: Task }, { model: Method }, { model: Result, include: [{ model: Task }, { model: Method }] }])
+    return await this.SequelizeServiceInstance.findOneEager({ id: submissionId }, [{ all: true, nested: true }])
   }
 
   async getBySubmissionName (submissionName) {
@@ -102,17 +98,20 @@ class SubmissionService {
     return await this.SequelizeServiceInstance.findOne({ [Op.or]: [{ id: submissionNameOrId }, { nameNormal: submissionNameOrId.trim().toLowerCase() }] })
   }
 
+  async getEagerBySubmissionNameOrId (submissionNameOrId) {
+    return await this.SequelizeServiceInstance.findOneEager({ [Op.or]: [{ id: submissionNameOrId }, { nameNormal: submissionNameOrId.trim().toLowerCase() }] }, [{ all: true, nested: true }])
+  }
+
   async get (submissionNameOrId) {
     const submission = await this.getBySubmissionNameOrId(submissionNameOrId)
     return { success: true, body: submission }
   }
 
   async getSanitized (submissionNameOrId, userId) {
-    const result = await this.get(submissionNameOrId)
-    if (!result.success) {
-      return result
+    let submission = await this.getEagerBySubmissionNameOrId(submissionNameOrId)
+    if (!submission) {
+      return { success: false, error: 'Submission name or ID not found.' }
     }
-    let submission = result.body
     submission = await this.populate(submission, userId)
 
     return { success: true, body: submission }
@@ -153,24 +152,8 @@ class SubmissionService {
   }
 
   async populate (submission, userId) {
-    const toRet = {
-      id: submission.id,
-      submissionThumbnailUrl: submission.submissionThumbnailUrl,
-      approvedDate: submission.approvedDate,
-      tags: submission.tags,
-      methods: submission.methods,
-      tasks: submission.tasks,
-      results: submission.results,
-      user: submission.user,
-      submissionName: submission.submissionName,
-      submissionNameNormal: submission.submissionNameNormal,
-      description: submission.description,
-      submittedDate: submission.submittedDate,
-      submissionContentUrl: submission.submissionContentUrl,
-      isUpvoted: submission.likes.includes(userId),
-      upvotesCount: submission.likes.length
-    }
-
+    const toRet = { ...submission }
+    toRet.isUpvoted = ('likes' in toRet) ? toRet.likes.find(like => like.userId === userId) : false
     return toRet
   }
 

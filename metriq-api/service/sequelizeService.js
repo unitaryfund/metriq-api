@@ -22,7 +22,19 @@ class SequelizeService {
   }
 
   async findOne (keyValuePair) {
-    return await this.Collection.findOne({ where: keyValuePair })
+    const result = await this.Collection.findOne({ where: keyValuePair })
+    if (result) {
+      return result.dataValues
+    }
+    return null
+  }
+
+  async findOneEager (keyValuePair, keys) {
+    const result = await this.Collection.findOne({ where: keyValuePair, include: keys })
+    if (result) {
+      return result.dataValues
+    }
+    return null
   }
 
   async projectAll (attributes) {
