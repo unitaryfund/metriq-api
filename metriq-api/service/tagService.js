@@ -24,8 +24,8 @@ class TagService {
     }
   }
 
-  async getById (tagId) {
-    return await this.SequelizeServiceInstance.findOne({ id: tagId })
+  async getPyPk (tagId) {
+    return await this.SequelizeServiceInstance.findByPk(tagId)
   }
 
   async getByName (tagName) {
@@ -48,18 +48,16 @@ class TagService {
   }
 
   async createOrFetch (tagName) {
-    let toReturn = {}
-    const tagGetResults = await this.getByName(tagName)
-    if (!tagGetResults || !tagGetResults.length) {
-      const tag = await this.SequelizeServiceInstance.new()
+    let tag = await this.getByName(tagName)
+
+    if (!tag) {
+      tag = await this.SequelizeServiceInstance.new()
       tag.name = tagName
-      toReturn = (await this.create(tag)).body
-      await toReturn.save()
-    } else {
-      toReturn = tagGetResults[0]
+      tag = (await this.create(tag)).body
+      await tag.save()
     }
 
-    return toReturn
+    return { success: true, body: tag }
   }
 }
 

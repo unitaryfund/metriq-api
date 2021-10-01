@@ -4,10 +4,6 @@
 const SequelizeService = require('./sequelizeService')
 // Database Model
 const Task = require('../model/taskModel').Task
-const Submission = require('../model/submissionModel').Submission
-const Result = require('../model/resultModel').Result
-const Tag = require('../model/tagModel').Tag
-const Method = require('../model/methodModel').Method
 
 // Service dependencies
 const SubmissionService = require('./submissionService')
@@ -32,21 +28,19 @@ class TaskService {
     }
   }
 
-  async getById (taskId) {
+  async getByPk (taskId) {
     return await this.SequelizeServiceInstance.findOne({ id: taskId })
   }
 
-  async getEagerById (taskId) {
-    return await this.SequelizeServiceInstance.findOne({ id: taskId }, [{ model: Submission, include: [{ model: Tag }, { model: Task }, { model: Method }, { model: Result, include: [{ model: Task }, { model: Method }] }] }])
+  async getEagerByPk (taskId) {
+    return await this.SequelizeServiceInstance.findOneEager({ id: taskId })
   }
 
   async getSanitized (taskId) {
-    const tasks = await this.getById(taskId)
-    if (!tasks || !tasks.length) {
+    const task = await this.getByPk(taskId)
+    if (!task) {
       return { success: false, error: 'Task not found.' }
     }
-    const task = tasks[0]
-
     return { success: true, body: task }
   }
 
@@ -68,7 +62,7 @@ class TaskService {
   async delete (taskId) {
     let taskResult = []
     try {
-      taskResult = await this.getById(taskId)
+      taskResult = await this.getByPk(taskId)
       if (!taskResult || !taskResult.length) {
         return { success: false, error: 'Task not found.' }
       }
@@ -102,14 +96,13 @@ class TaskService {
       if (submissionId) {
         // Reference to submission goes in reference collection on task
         task.submissions.push(submissionId)
-        const submissionResult = await submissionService.getBySubmissionId(submissionId)
-        if (!submissionResult || !submissionResult.length) {
+        const submission = await submissionService.getByPk(submissionId)
+        if (!submission) {
           return { success: false, error: 'Submission reference in Task collection not found.' }
         }
-        const submissionModel = submissionResult[0]
         // Reference to task goes in reference collection on submission
-        submissionModel.tasks.push(task.id)
-        submissionModels.push(submissionModel)
+        submission.tasks.push(task.id)
+        submissionModels.push(submission)
       }
     }
 
@@ -124,11 +117,10 @@ class TaskService {
   }
 
   async update (taskId, reqBody) {
-    const tasks = await this.getById(taskId)
-    if (!tasks || !tasks.length) {
+    const task = await this.getByPk(taskId)
+    if (!task) {
       return { success: false, error: 'Task not found.' }
     }
-    const task = tasks[0]
 
     if (reqBody.name !== undefined) {
       task.name = reqBody.name.trim()
@@ -146,17 +138,15 @@ class TaskService {
   }
 
   async addOrRemoveSubmission (isAdd, taskId, submissionId) {
-    const tasks = await this.getById(taskId)
-    if (!tasks || !tasks.length) {
+    const task = await this.getByPk(taskId)
+    if (!task) {
       return { success: false, error: 'Task not found.' }
     }
-    const task = tasks[0]
 
-    const submissions = await submissionService.getEagerBySubmissionId(submissionId)
-    if (!submissions || !submissions.length) {
+    const submission = await submissionService.getEagerByPk(submissionId)
+    if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
-    const submission = submissions[0]
 
     const tsi = task.submissions.indexOf(submission.id)
     const sti = submission.tasks.indexOf(task.id)

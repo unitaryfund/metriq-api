@@ -81,34 +81,34 @@ class SubmissionService {
     }
   }
 
-  async getBySubmissionId (submissionId) {
-    return await this.SequelizeServiceInstance.findOne({ id: submissionId })
+  async getByPk (submissionId) {
+    return await this.SequelizeServiceInstance.findByPk(submissionId)
   }
 
-  async getEagerBySubmissionId (submissionId) {
-    return await this.SequelizeServiceInstance.findOneEager({ id: submissionId }, [{ all: true, nested: true }])
+  async getEagerByPk (submissionId) {
+    return await this.SequelizeServiceInstance.findOneEager({ id: submissionId })
   }
 
-  async getBySubmissionName (submissionName) {
+  async getByName (submissionName) {
     const nameNormal = submissionName.trim().toLowerCase()
     return await this.SequelizeServiceInstance.findOne({ nameNormal: nameNormal })
   }
 
-  async getBySubmissionNameOrId (submissionNameOrId) {
+  async getByNameOrId (submissionNameOrId) {
     return await this.SequelizeServiceInstance.findOne({ [Op.or]: [{ id: submissionNameOrId }, { nameNormal: submissionNameOrId.trim().toLowerCase() }] })
   }
 
-  async getEagerBySubmissionNameOrId (submissionNameOrId) {
-    return await this.SequelizeServiceInstance.findOneEager({ [Op.or]: [{ id: submissionNameOrId }, { nameNormal: submissionNameOrId.trim().toLowerCase() }] }, [{ all: true, nested: true }])
+  async getEagerByNameOrId (submissionNameOrId) {
+    return await this.SequelizeServiceInstance.findOneEager({ [Op.or]: [{ id: submissionNameOrId }, { nameNormal: submissionNameOrId.trim().toLowerCase() }] })
   }
 
   async get (submissionNameOrId) {
-    const submission = await this.getBySubmissionNameOrId(submissionNameOrId)
+    const submission = await this.getByNameOrId(submissionNameOrId)
     return { success: true, body: submission }
   }
 
   async getSanitized (submissionNameOrId, userId) {
-    let submission = await this.getEagerBySubmissionNameOrId(submissionNameOrId)
+    let submission = await this.getEagerByNameOrId(submissionNameOrId)
     if (!submission) {
       return { success: false, error: 'Submission name or ID not found.' }
     }
@@ -118,11 +118,10 @@ class SubmissionService {
   }
 
   async approve (submissionId) {
-    const submissionResult = this.get(submissionId)
-    if (!submissionResult.success) {
-      return submissionResult
+    const submission = this.getByNameOrId(submissionId)
+    if (!submission) {
+      return { success: false, error: 'Submission name or ID not found.' }
     }
-    const submission = submissionResult.body
     submission.approve()
     await submission.save()
 
@@ -130,25 +129,18 @@ class SubmissionService {
   }
 
   async deleteIfOwner (userId, submissionId) {
-    let submissionResult = []
-    try {
-      submissionResult = await this.getBySubmissionId(submissionId)
-      if (!submissionResult || !submissionResult.length) {
-        return { success: false, error: 'Submission not found.' }
-      }
-    } catch (err) {
-      return { success: false, error: err }
+    const submission = await this.getByPk(submissionId)
+    if (!submission) {
+      return { success: false, error: 'Submission not found.' }
     }
 
-    const submissionToDelete = submissionResult[0]
-
-    if (toString(submissionToDelete.user) !== toString(userId)) {
+    if (toString(submission.userId) !== toString(userId)) {
       return { success: false, error: 'Insufficient privileges to delete submission.' }
     }
 
-    await submissionToDelete.delete()
+    await submission.delete()
 
-    return { success: true, body: await submissionToDelete }
+    return { success: true, body: submission }
   }
 
   async populate (submission, userId) {
@@ -163,7 +155,7 @@ class SubmissionService {
       return validationResult
     }
 
-    const user = await userService.getByUserId(userId)
+    const user = await userService.getByPk(userId)
     if (!user) {
       return { success: false, error: 'User not found.' }
     }
@@ -171,9 +163,9 @@ class SubmissionService {
     const submission = await this.SequelizeServiceInstance.new()
     submission.user = userId
     submission.name = reqBody.submissionName.trim()
-    submission.nameNormal = reqBody.submissionName.trim().toLowerCase()
-    submission.contentUrl = reqBody.submissionContentUrl.trim()
-    submission.thumbnailUrl = reqBody.submissionThumbnailUrl ? reqBody.submissionThumbnailUrl.trim() : null
+    submission.nameNormal = reqBody.name.trim().toLowerCase()
+    submission.contentUrl = reqBody.contentUrl.trim()
+    submission.thumbnailUrl = reqBody.thumbnailUrl ? reqBody.thumbnailUrl.trim() : null
     submission.description = reqBody.description ? reqBody.description.trim() : ''
 
     const result = await this.create(submission)
@@ -232,11 +224,10 @@ class SubmissionService {
   }
 
   async update (submissionId, reqBody, userId) {
-    const submissions = await this.getBySubmissionId(submissionId)
-    if (!submissions || !submissions.length) {
+    const submission = await this.getByPk(submissionId)
+    if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
-    const submission = submissions[0]
 
     if (reqBody.submissionThumbnailUrl !== undefined) {
       submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl.trim() ? reqBody.submissionThumbnailUrl.trim() : null
@@ -263,7 +254,7 @@ class SubmissionService {
       return { success: false, error: 'Submission name cannot be blank.' }
     }
 
-    const submissionNameMatch = await this.getBySubmissionName(tlSubmissionName)
+    const submissionNameMatch = await this.getByName(tlSubmissionName)
     if (submissionNameMatch) {
       return { success: false, error: 'Submission name already in use.' }
     }
@@ -272,11 +263,10 @@ class SubmissionService {
   }
 
   async upvote (submissionId, userId) {
-    const submissions = await this.getBySubmissionId(submissionId)
-    if (!submissions || !submissions.length) {
+    const submission = await this.getByPk(submissionId)
+    if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
-    const submission = submissions[0]
 
     const userResponse = await userService.get(userId)
     if (!userResponse.success) {
@@ -317,10 +307,10 @@ class SubmissionService {
 
   async getTrendingByTag (tagName, startIndex, count, userId) {
     const tag = await tagService.getByName(tagName)
-    if (!tag || !tag.length) {
+    if (!tag) {
       return { success: false, error: 'Category not found' }
     }
-    const tagId = tag[0].id
+    const tagId = tag.id
 
     const result = await sequelize.query(this.sqlTagTrending(tagId, userId, '"upvotesPerHour"', true, count, startIndex))
     return { success: true, body: result }
@@ -328,10 +318,10 @@ class SubmissionService {
 
   async getLatestByTag (tagName, startIndex, count, userId) {
     const tag = await tagService.getByName(tagName)
-    if (!tag || !tag.length) {
+    if (!tag) {
       return { success: false, error: 'Category not found' }
     }
-    const tagId = tag[0].id
+    const tagId = tag.id
 
     const result = await sequelize.query(this.sqlTagLike(tagId, userId, 'submissions."createdAt"', true, count, startIndex))
     return { success: true, body: result }
@@ -339,31 +329,29 @@ class SubmissionService {
 
   async getPopularByTag (tagName, startIndex, count, userId) {
     const tag = await tagService.getByName(tagName)
-    if (!tag || !tag.length) {
+    if (!tag) {
       return { success: false, error: 'Category not found' }
     }
-    const tagId = tag[0].id
+    const tagId = tag.id
 
     const result = await sequelize.query(this.sqlTagLike(tagId, userId, '"upvotesCount"', true, count, startIndex))
     return { success: true, body: result }
   }
 
   async addOrRemoveTag (isAdd, submissionId, tagName, userId) {
-    const submissions = await this.getEagerBySubmissionId(submissionId)
-    if (!submissions || !submissions.length) {
+    const submission = await this.getEagerByPk(submissionId)
+    if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
-    const submission = submissions[0]
 
     let tag = {}
     if (isAdd) {
       tag = await tagService.createOrFetch(tagName)
     } else {
-      const tags = await tagService.getByName(tagName)
-      if (!tags || !tags.length) {
+      tag = await tagService.getByName(tagName)
+      if (!tag) {
         return { success: false, error: 'Tag not found.' }
       }
-      tag = tags[0]
     }
 
     const tsi = tag.submissions.indexOf(submission.id)

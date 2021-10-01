@@ -13,12 +13,8 @@ class SequelizeService {
     return await data.save()
   }
 
-  async findAll (keyValuePair) {
-    return await this.Collection.findAll({ where: keyValuePair })
-  }
-
-  async findAllEager (keyValuePair, keys) {
-    return await this.Collection.findAll({ where: keyValuePair, include: keys })
+  async findByPk (key) {
+    return this.Collection.findByPk(key)
   }
 
   async findOne (keyValuePair) {
@@ -29,12 +25,20 @@ class SequelizeService {
     return null
   }
 
-  async findOneEager (keyValuePair, keys) {
-    const result = await this.Collection.findOne({ where: keyValuePair, include: keys })
+  async findOneEager (keyValuePair) {
+    const result = await this.Collection.findOne({ where: keyValuePair, include: [{ all: true, nested: true }] })
     if (result) {
       return result.dataValues
     }
     return null
+  }
+
+  async findAll (keyValuePair) {
+    return await this.Collection.findAll({ where: keyValuePair })
+  }
+
+  async findAllEager (keyValuePair) {
+    return await this.Collection.findAll({ where: keyValuePair, include: [{ all: true, nested: true }] })
   }
 
   async projectAll (attributes) {

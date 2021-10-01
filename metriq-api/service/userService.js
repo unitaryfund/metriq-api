@@ -61,8 +61,8 @@ class UserService {
     return jwt.sign({ id: userId, role: role }, config.api.token.secretKey, meta)
   }
 
-  async getByUserId (userId) {
-    return await this.SequelizeServiceInstance.findOne({ id: userId })
+  async getByPk (userId) {
+    return await this.SequelizeServiceInstance.findByPk(userId)
   }
 
   async getByUsername (username) {
@@ -79,40 +79,31 @@ class UserService {
   }
 
   async get (userId) {
-    let user = []
-    try {
-      user = await this.getByUserId(userId)
-    } catch (err) {
-      return { success: false, error: err }
+    const user = await this.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User ID not found.' }
     }
 
     return { success: true, body: user }
   }
 
   async getSanitized (userId) {
-    const result = await this.get(userId)
-    if (!result.success) {
-      return result
+    const user = await this.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User ID not found.' }
     }
-    return { success: true, body: await this.sanitize(result.body) }
+    return { success: true, body: await this.sanitize(user) }
   }
 
   async delete (userId) {
-    let userResult = []
-    try {
-      userResult = await this.getByUserId(userId)
-      if (!userResult || !userResult.length) {
-        return { success: false, error: 'User not found.' }
-      }
-    } catch (err) {
-      return { success: false, error: err }
+    const user = await this.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User ID not found.' }
     }
 
-    const userToDelete = userResult[0]
+    await user.delete()
 
-    await userToDelete.delete()
-
-    return { success: true, body: await this.sanitize(userToDelete) }
+    return { success: true, body: await this.sanitize(user) }
   }
 
   async register (reqBody) {
@@ -205,7 +196,7 @@ class UserService {
   }
 
   async saveClientTokenForUserId (userId) {
-    const users = await this.getByUserId(userId)
+    const users = await this.getByPk(userId)
     if (!users || !users.length) {
       return { success: false, error: 'User not found.' }
     }
@@ -219,7 +210,7 @@ class UserService {
   }
 
   async deleteClientTokenForUserId (userId) {
-    const users = await this.getByUserId(userId)
+    const users = await this.getByPk(userId)
     if (!users || !users.length) {
       return { success: false, error: 'User not found.' }
     }

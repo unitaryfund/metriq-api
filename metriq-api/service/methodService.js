@@ -29,25 +29,18 @@ class MethodService {
   }
 
   async delete (methodId) {
-    let methodResult = []
-    try {
-      methodResult = await this.getById(methodId)
-      if (!methodResult || !methodResult.length) {
-        return { success: false, error: 'Method not found.' }
-      }
-    } catch (err) {
-      return { success: false, error: err }
+    const method = await this.getByPk(methodId)
+    if (!method) {
+      return { success: false, error: 'Method not found.' }
     }
 
-    const methodToDelete = methodResult[0]
+    await method.delete()
 
-    await methodToDelete.delete()
-
-    return { success: true, body: await methodToDelete }
+    return { success: true, body: await method }
   }
 
-  async getById (methodId) {
-    return await this.SequelizeServiceInstance.findOne({ id: methodId })
+  async getByPk (methodId) {
+    return await this.SequelizeServiceInstance.findByPk(methodId)
   }
 
   async populate (method) {
@@ -55,12 +48,11 @@ class MethodService {
   }
 
   async getSanitized (methodId) {
-    const methods = await this.getById(methodId)
-    if (!methods || !methods.length) {
+    const method = await this.getByPk(methodId)
+    if (!method) {
       return { success: false, error: 'Method not found.' }
     }
-    const method = methods[0]
-    await this.populate(method)
+    // await this.populate(method)
     return { success: true, body: method }
   }
 
@@ -98,14 +90,13 @@ class MethodService {
       if (submissionId) {
         // Reference to submission goes in reference collection on method
         method.submissions.push(submissionId)
-        const submissionResult = await submissionService.getBySubmissionId(submissionId)
-        if (!submissionResult || !submissionResult.length) {
+        const submission = await submissionService.getByPk(submissionId)
+        if (!submission) {
           return { success: false, error: 'Submission reference in Method collection not found.' }
         }
-        const submissionModel = submissionResult[0]
         // Reference to method goes in reference collection on submission
-        submissionModel.methods.push(method.id)
-        submissionModels.push(submissionModel)
+        submission.methods.push(method)
+        submissionModels.push(submission)
       }
     }
 
@@ -120,11 +111,10 @@ class MethodService {
   }
 
   async update (methodId, reqBody) {
-    const methods = await this.getById(methodId)
-    if (!methods || !methods.length) {
+    const method = await this.getByPk(methodId)
+    if (!method) {
       return { success: false, error: 'Method not found.' }
     }
-    const method = methods[0]
 
     if (reqBody.name !== undefined) {
       method.name = reqBody.name.trim()
@@ -142,17 +132,15 @@ class MethodService {
   }
 
   async addOrRemoveSubmission (isAdd, methodId, submissionId) {
-    const methods = await this.getById(methodId)
-    if (!methods || !methods.length) {
+    const method = await this.getByPk(methodId)
+    if (!method) {
       return { success: false, error: 'Method not found.' }
     }
-    const method = methods[0]
 
-    const submissions = await submissionService.getEagerBySubmissionId(submissionId)
-    if (!submissions || !submissions.length) {
+    const submission = await submissionService.getEagerByPk(submissionId)
+    if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
-    const submission = submissions[0]
 
     const msi = method.submissions.indexOf(submission.id)
     const smi = submission.methods.indexOf(method.id)

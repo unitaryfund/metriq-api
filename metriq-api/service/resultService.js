@@ -27,8 +27,8 @@ class ResultService {
     }
   }
 
-  async get (resultId) {
-    return await this.SequelizeServiceInstance.findOne({ id: resultId })
+  async getByPk (resultId) {
+    return await this.SequelizeServiceInstance.findByPk(resultId)
   }
 
   async getBySubmissionId (submissionId) {
@@ -40,11 +40,10 @@ class ResultService {
   }
 
   async submit (userId, submissionId, reqBody) {
-    const submissions = await submissionService.getEagerBySubmissionId(submissionId)
-    if (!submissions || !submissions.length) {
+    const submission = await submissionService.getEagerByPk(submissionId)
+    if (!submission) {
       return { success: false, error: 'Submission not found' }
     }
-    const submission = submissions[0]
 
     const result = await this.SequelizeServiceInstance.new()
     result.user = userId
@@ -58,12 +57,10 @@ class ResultService {
     result.submittedDate = new Date()
 
     // Task must be not null and valid (present in database) for a valid result object.
-    if (result.task == null) {
+    if (result.task === null) {
       return { success: false, error: 'Result requires task to be defined.' }
     }
-    try {
-      taskService.getById(result.task)
-    } catch (err) {
+    if (!(await taskService.getByPk(result.task))) {
       return { success: false, error: 'Result requires task to be present in database.' }
     }
 
@@ -71,9 +68,7 @@ class ResultService {
     if (result.method == null) {
       return { success: false, error: 'Result requires method to be defined.' }
     }
-    try {
-      methodService.getById(result.method)
-    } catch (err) {
+    if (!(await methodService.getByPk(result.method))) {
       return { success: false, error: 'Result requires method to be present in database.' }
     }
 
@@ -89,11 +84,10 @@ class ResultService {
   }
 
   async delete (resultId) {
-    const resultResult = await this.get(resultId)
-    if (!resultResult || !resultResult.length) {
+    const result = await this.getByPk(resultId)
+    if (!result) {
       return { success: false, error: 'Result not found.' }
     }
-    const result = resultResult[0]
 
     await result.delete()
 
