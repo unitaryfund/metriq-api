@@ -33,7 +33,7 @@ class SubmissionService {
   sqlLike (userId, sortColumn, isDesc, limit, offset) {
     return 'SELECT submissions.*, "upvotesCount", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
-        '    LEFT JOIN submissions on likes."submissionId" = submissions.id ' +
+        '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
         '    WHERE submissions."approvedAt" IS NOT NULL ' +
         '    GROUP BY submissions.id) as sl ' +
         'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
@@ -44,7 +44,7 @@ class SubmissionService {
   sqlTagLike (tagId, userId, sortColumn, isDesc, limit, offset) {
     return 'SELECT submissions.*, "upvotesCount", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
-        '    LEFT JOIN submissions on likes."submissionId" = submissions.id ' +
+        '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
         '    LEFT JOIN "submissionTagRefs" on "submissionTagRefs"."submissionId" = submissions.id AND "submissionTagRefs"."tagId" = ' + tagId + ' ' +
         '    WHERE submissions."approvedAt" IS NOT NULL and "submissionTagRefs".id IS NOT NULL ' +
         '    GROUP BY submissions.id) as sl ' +
@@ -56,7 +56,7 @@ class SubmissionService {
   sqlTrending (userId, sortColumn, isDesc, limit, offset) {
     return 'SELECT submissions.*, "upvotesCount", ("upvotesCount" * 3600000) / (CURRENT_DATE::DATE - "createdAt"::DATE) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
-        '    LEFT JOIN submissions on likes."submissionId" = submissions.id ' +
+        '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
         '    WHERE submissions."approvedAt" IS NOT NULL ' +
         '    GROUP BY submissions.id) as sl ' +
         'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
@@ -67,7 +67,7 @@ class SubmissionService {
   sqlTagTrending (tagId, userId, sortColumn, isDesc, limit, offset) {
     return 'SELECT submissions.*, "upvotesCount", ("upvotesCount" * 3600000) / (CURRENT_DATE::DATE - "createdAt"::DATE) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
-        '    LEFT JOIN submissions on likes."submissionId" = submissions.id ' +
+        '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
         '    LEFT JOIN "submissionTagRefs" on "submissionTagRefs"."submissionId" = submissions.id AND "submissionTagRefs"."tagId" = ' + tagId + ' ' +
         '    WHERE submissions."approvedAt" IS NOT NULL and "submissionTagRefs".id IS NOT NULL ' +
         '    GROUP BY submissions.id) as sl ' +
@@ -280,13 +280,10 @@ class SubmissionService {
       return { success: false, error: 'Submission name cannot be blank.' }
     }
 
-    console.log('before')
     const submissionNameMatch = await this.getBySubmissionName(tlSubmissionName)
-    console.log('after')
     if (submissionNameMatch) {
       return { success: false, error: 'Submission name already in use.' }
     }
-    console.log('success')
 
     return { success: true }
   }
@@ -321,17 +318,17 @@ class SubmissionService {
   }
 
   async getTrending (startIndex, count, userId) {
-    const result = await sequelize.query(this.sqlTrending(userId, '"upvotesPerHour"', true, count, startIndex))[0]
+    const result = await sequelize.query(this.sqlTrending(userId, '"upvotesPerHour"', true, count, startIndex))
     return { success: true, body: result }
   }
 
   async getLatest (startIndex, count, userId) {
-    const result = await sequelize.query(this.sqlLike(userId, 'submissions."createdAt"', true, count, startIndex))[0]
+    const result = await sequelize.query(this.sqlLike(userId, 'submissions."createdAt"', true, count, startIndex))
     return { success: true, body: result }
   }
 
   async getPopular (startIndex, count, userId) {
-    const result = await sequelize.query(this.sqlLike(userId, '"upvotesCount"', true, count, startIndex))[0]
+    const result = await sequelize.query(this.sqlLike(userId, '"upvotesCount"', true, count, startIndex))
     return { success: true, body: result }
   }
 
@@ -342,7 +339,7 @@ class SubmissionService {
     }
     const tagId = tag[0].id
 
-    const result = await sequelize.query(this.sqlTagTrending(tagId, userId, '"upvotesPerHour"', true, count, startIndex))[0]
+    const result = await sequelize.query(this.sqlTagTrending(tagId, userId, '"upvotesPerHour"', true, count, startIndex))
     return { success: true, body: result }
   }
 
@@ -353,7 +350,7 @@ class SubmissionService {
     }
     const tagId = tag[0].id
 
-    const result = await sequelize.query(this.sqlTagLike(tagId, userId, 'submissions."createdAt"', true, count, startIndex))[0]
+    const result = await sequelize.query(this.sqlTagLike(tagId, userId, 'submissions."createdAt"', true, count, startIndex))
     return { success: true, body: result }
   }
 
@@ -364,7 +361,7 @@ class SubmissionService {
     }
     const tagId = tag[0].id
 
-    const result = await sequelize.query(this.sqlTagLike(tagId, userId, '"upvotesCount"', true, count, startIndex))[0]
+    const result = await sequelize.query(this.sqlTagLike(tagId, userId, '"upvotesCount"', true, count, startIndex))
     return { success: true, body: result }
   }
 
