@@ -16,6 +16,8 @@ const UserService = require('./userService')
 const userService = new UserService()
 const TagService = require('./tagService')
 const tagService = new TagService()
+const SubmissionTagRefService = require('./submissionTagRefService')
+const submissionTagRefService = new SubmissionTagRefService()
 
 // Aggregation
 const { Sequelize } = require('sequelize')
@@ -145,7 +147,8 @@ class SubmissionService {
 
   async populate (submission, userId) {
     const toRet = { ...submission }
-    toRet.isUpvoted = ('likes' in toRet) ? toRet.likes.find(like => like.userId === userId) : false
+    toRet.isUpvoted = toRet.likes.length ? toRet.likes.find(like => like.userId === userId) : false
+    console.log(toRet)
     return toRet
   }
 
@@ -344,37 +347,17 @@ class SubmissionService {
       return { success: false, error: 'Submission not found.' }
     }
 
-    let tag = {}
     if (isAdd) {
-      tag = await tagService.createOrFetch(tagName)
+      const tag = await tagService.createOrFetch(tagName)
+      await submissionTagRefService.createOrFetch(submission.id, tag.id)
     } else {
-      tag = await tagService.getByName(tagName)
+      const tag = await tagService.getByName(tagName)
       if (!tag) {
         return { success: false, error: 'Tag not found.' }
       }
+      const ref = await submissionTagRefService.getByFks(submission.id, tag.id)
+      await ref.delete()
     }
-
-    const tsi = tag.submissions.indexOf(submission.id)
-    const sti = submission.tags.indexOf(tag.id)
-
-    if (isAdd) {
-      if (tsi === -1) {
-        tag.submissions.push(submission.id)
-      }
-      if (sti === -1) {
-        submission.tags.push(tag.id)
-      }
-    } else {
-      if (tsi > -1) {
-        tag.submissions.splice(tsi, 1)
-      }
-      if (sti > -1) {
-        submission.tags.splice(sti, 1)
-      }
-    }
-
-    await tag.save()
-    await submission.save()
 
     return { success: true, body: submission }
   }

@@ -24,7 +24,7 @@ class TagService {
     }
   }
 
-  async getPyPk (tagId) {
+  async getByPk (tagId) {
     return await this.SequelizeServiceInstance.findByPk(tagId)
   }
 
