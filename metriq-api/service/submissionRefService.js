@@ -1,25 +1,12 @@
 // submissionRefService.js
 
 // Data Access Layer
-const SequelizeService = require('./sequelizeService')
+const ModelService = require('./modelService')
 
-class SubmissionRefService {
+class SubmissionRefService extends ModelService {
   constructor (foreignKey, Ref) {
+    super(Ref)
     this.foreignKey = foreignKey
-    this.SequelizeServiceInstance = new SequelizeService(Ref)
-  }
-
-  async create (tagToCreate) {
-    try {
-      const result = await this.SequelizeServiceInstance.create(tagToCreate)
-      return { success: true, body: result }
-    } catch (err) {
-      return { success: false, error: err }
-    }
-  }
-
-  async getByPk (fkId) {
-    return await this.SequelizeServiceInstance.findByPk(fkId)
   }
 
   async getByFks (submissionId, fkId) {

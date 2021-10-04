@@ -1,7 +1,7 @@
 // taskService.js
 
 // Data Access Layer
-const SequelizeService = require('./sequelizeService')
+const ModelService = require('./modelService')
 // Database Model
 const Task = require('../model/taskModel').Task
 
@@ -14,22 +14,9 @@ const { Sequelize } = require('sequelize')
 const config = require('../config')
 const sequelize = new Sequelize(config.pgConnectionString)
 
-class TaskService {
+class TaskService extends ModelService {
   constructor () {
-    this.SequelizeServiceInstance = new SequelizeService(Task)
-  }
-
-  async create (taskToCreate) {
-    try {
-      const result = await this.SequelizeServiceInstance.create(taskToCreate)
-      return { success: true, body: result }
-    } catch (err) {
-      return { success: false, error: err }
-    }
-  }
-
-  async getByPk (taskId) {
-    return await this.SequelizeServiceInstance.findOne({ id: taskId })
+    super(Task)
   }
 
   async getEagerByPk (taskId) {
@@ -57,24 +44,6 @@ class TaskService {
       'GROUP BY tasks.id;'
     )[0]
     return { success: true, body: result }
-  }
-
-  async delete (taskId) {
-    let taskResult = []
-    try {
-      taskResult = await this.getByPk(taskId)
-      if (!taskResult || !taskResult.length) {
-        return { success: false, error: 'Task not found.' }
-      }
-    } catch (err) {
-      return { success: false, error: err }
-    }
-
-    const taskToDelete = taskResult[0]
-
-    await taskToDelete.delete()
-
-    return { success: true, body: await taskToDelete }
   }
 
   async submit (userId, reqBody) {

@@ -5,11 +5,7 @@ const { Sequelize, Model, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString)
 const User = require('./userModel').User
 
-class Result extends Model {
-  async delete () {
-    await Result.destroy({ where: { id: this.id } })
-  }
-}
+class Result extends Model {}
 Result.init({
   isHigherBetter: {
     type: DataTypes.BOOLEAN,

@@ -1,7 +1,7 @@
 // tagService.js
 
 // Data Access Layer
-const SequelizeService = require('./sequelizeService')
+const ModelService = require('./modelService')
 // Database Model
 const Tag = require('../model/tagModel').Tag
 
@@ -10,22 +10,9 @@ const { Sequelize } = require('sequelize')
 const config = require('../config')
 const sequelize = new Sequelize(config.pgConnectionString)
 
-class TagService {
+class TagService extends ModelService {
   constructor () {
-    this.SequelizeServiceInstance = new SequelizeService(Tag)
-  }
-
-  async create (tagToCreate) {
-    try {
-      const result = await this.SequelizeServiceInstance.create(tagToCreate)
-      return { success: true, body: result }
-    } catch (err) {
-      return { success: false, error: err }
-    }
-  }
-
-  async getByPk (tagId) {
-    return await this.SequelizeServiceInstance.findByPk(tagId)
+    super(Tag)
   }
 
   async getByName (tagName) {

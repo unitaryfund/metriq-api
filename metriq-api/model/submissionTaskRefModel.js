@@ -6,11 +6,7 @@ const sequelize = new Sequelize(config.pgConnectionString)
 const User = require('./userModel').User
 const Task = require('./taskModel').Task
 
-class SubmissionTaskRef extends Model {
-  async delete () {
-    await SubmissionTaskRef.destroy({ where: { id: this.id } })
-  }
-}
+class SubmissionTaskRef extends Model {}
 SubmissionTaskRef.init({}, { sequelize, paranoid: true, modelName: 'submissionTaskRef' })
 
 User.hasMany(SubmissionTaskRef)

@@ -9,11 +9,7 @@ const SubmissionMethodRef = require('./submissionMethodRefModel').SubmissionMeth
 const SubmissionTaskRef = require('./submissionTaskRefModel').SubmissionTaskRef
 const SubmissionTagRef = require('./submissionTagRefModel').SubmissionTagRef
 
-class Submission extends Model {
-  async delete () {
-    await Submission.destroy({ where: { id: this.id } })
-  }
-}
+class Submission extends Model {}
 Submission.init({
   name: {
     type: DataTypes.TEXT,

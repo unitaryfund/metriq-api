@@ -4,11 +4,7 @@ const config = require('../config')
 const { Sequelize, Model, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString)
 
-class User extends Model {
-  async delete () {
-    await User.destroy({ where: { id: this.id } })
-  }
-}
+class User extends Model {}
 User.init({
   username: {
     type: DataTypes.TEXT,

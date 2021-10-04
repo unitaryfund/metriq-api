@@ -1,7 +1,7 @@
 // resultService.js
 
 // Data Access Layer
-const SequelizeService = require('./sequelizeService')
+const ModelService = require('./modelService')
 // Database Model
 const Result = require('../model/resultModel').Result
 
@@ -13,22 +13,9 @@ const taskService = new TaskService()
 const MethodService = require('../service/methodService')
 const methodService = new MethodService()
 
-class ResultService {
+class ResultService extends ModelService {
   constructor () {
-    this.SequelizeServiceInstance = new SequelizeService(Result)
-  }
-
-  async create (resultToCreate) {
-    try {
-      const result = await this.SequelizeServiceInstance.create(resultToCreate)
-      return { success: true, body: result }
-    } catch (err) {
-      return { success: false, error: err }
-    }
-  }
-
-  async getByPk (resultId) {
-    return await this.SequelizeServiceInstance.findByPk(resultId)
+    super(Result)
   }
 
   async getBySubmissionId (submissionId) {
@@ -81,17 +68,6 @@ class ResultService {
     await submission.save()
 
     return { success: true, body: submission }
-  }
-
-  async delete (resultId) {
-    const result = await this.getByPk(resultId)
-    if (!result) {
-      return { success: false, error: 'Result not found.' }
-    }
-
-    await result.delete()
-
-    return { success: true, body: await result }
   }
 }
 

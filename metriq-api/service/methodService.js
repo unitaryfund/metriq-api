@@ -1,7 +1,7 @@
 // methodService.js
 
 // Data Access Layer
-const SequelizeService = require('./sequelizeService')
+const ModelService = require('./modelService')
 // Database Model
 const Method = require('../model/methodModel').Method
 
@@ -14,33 +14,9 @@ const { Sequelize } = require('sequelize')
 const config = require('../config')
 const sequelize = new Sequelize(config.pgConnectionString)
 
-class MethodService {
+class MethodService extends ModelService {
   constructor () {
-    this.SequelizeServiceInstance = new SequelizeService(Method)
-  }
-
-  async create (methodToCreate) {
-    try {
-      const result = await this.SequelizeServiceInstance.create(methodToCreate)
-      return { success: true, body: result }
-    } catch (err) {
-      return { success: false, error: err }
-    }
-  }
-
-  async delete (methodId) {
-    const method = await this.getByPk(methodId)
-    if (!method) {
-      return { success: false, error: 'Method not found.' }
-    }
-
-    await method.delete()
-
-    return { success: true, body: await method }
-  }
-
-  async getByPk (methodId) {
-    return await this.SequelizeServiceInstance.findByPk(methodId)
+    super(Method)
   }
 
   async populate (method) {

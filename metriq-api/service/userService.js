@@ -3,7 +3,7 @@
 const { Op } = require('sequelize')
 
 // Data Access Layer
-const SequelizeService = require('./sequelizeService')
+const ModelService = require('./modelService')
 // Database Model
 const User = require('../model/userModel').User
 
@@ -17,23 +17,13 @@ const config = require('./../config')
 
 const nodemailer = require('nodemailer')
 
-class UserService {
+class UserService extends ModelService {
   constructor () {
-    this.SequelizeServiceInstance = new SequelizeService(User)
-  }
-
-  async create (userToCreate) {
-    try {
-      const result = await this.SequelizeServiceInstance.create(userToCreate)
-      return { success: true, body: result }
-    } catch (err) {
-      return { success: false, error: err }
-    }
+    super(User)
   }
 
   async sanitize (user) {
     return {
-      __v: user.__v,
       id: user.id,
       clientToken: '[REDACTED]',
       clientTokenCreated: user.clientTokenCreated,
@@ -59,10 +49,6 @@ class UserService {
       meta.expiresIn = config.api.token.expiresIn
     }
     return jwt.sign({ id: userId, role: role }, config.api.token.secretKey, meta)
-  }
-
-  async getByPk (userId) {
-    return await this.SequelizeServiceInstance.findByPk(userId)
   }
 
   async getByUsername (username) {
@@ -92,17 +78,6 @@ class UserService {
     if (!user) {
       return { success: false, error: 'User ID not found.' }
     }
-    return { success: true, body: await this.sanitize(user) }
-  }
-
-  async delete (userId) {
-    const user = await this.getByPk(userId)
-    if (!user) {
-      return { success: false, error: 'User ID not found.' }
-    }
-
-    await user.delete()
-
     return { success: true, body: await this.sanitize(user) }
   }
 

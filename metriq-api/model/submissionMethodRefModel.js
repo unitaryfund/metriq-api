@@ -7,11 +7,7 @@ const User = require('./userModel').User
 const Method = require('./methodModel').Method
 const Result = require('./resultModel').Result
 
-class SubmissionMethodRef extends Model {
-  async delete () {
-    await SubmissionMethodRef.destroy({ where: { id: this.id } })
-  }
-}
+class SubmissionMethodRef extends Model {}
 SubmissionMethodRef.init({}, { sequelize, paranoid: true, modelName: 'submissionMethodRef' })
 
 User.hasMany(SubmissionMethodRef)

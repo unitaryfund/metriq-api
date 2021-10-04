@@ -3,7 +3,7 @@
 const { Op } = require('sequelize')
 
 // Data Access Layer
-const SequelizeService = require('./sequelizeService')
+const ModelService = require('./modelService')
 // Database Model
 const Submission = require('../model/submissionModel').Submission
 
@@ -16,6 +16,8 @@ const UserService = require('./userService')
 const userService = new UserService()
 const TagService = require('./tagService')
 const tagService = new TagService()
+const LikeService = require('./likeService')
+const likeService = new LikeService()
 const SubmissionTagRefService = require('./submissionTagRefService')
 const submissionTagRefService = new SubmissionTagRefService()
 
@@ -23,9 +25,9 @@ const submissionTagRefService = new SubmissionTagRefService()
 const { Sequelize } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString)
 
-class SubmissionService {
+class SubmissionService extends ModelService {
   constructor () {
-    this.SequelizeServiceInstance = new SequelizeService(Submission)
+    super(Submission)
   }
 
   sqlLike (userId, sortColumn, isDesc, limit, offset) {
@@ -72,19 +74,6 @@ class SubmissionService {
         'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
         'ORDER BY ' + sortColumn + (isDesc ? ' DESC ' : ' ASC ') +
         'LIMIT ' + limit + ' OFFSET ' + offset
-  }
-
-  async create (submissionToCreate) {
-    try {
-      const result = await this.SequelizeServiceInstance.create(submissionToCreate)
-      return { success: true, body: result }
-    } catch (err) {
-      return { success: false, error: err }
-    }
-  }
-
-  async getByPk (submissionId) {
-    return await this.SequelizeServiceInstance.findByPk(submissionId)
   }
 
   async getEagerByPk (submissionId) {
@@ -140,7 +129,7 @@ class SubmissionService {
       return { success: false, error: 'Insufficient privileges to delete submission.' }
     }
 
-    await submission.delete()
+    await submission.destroy()
 
     return { success: true, body: submission }
   }
@@ -271,19 +260,17 @@ class SubmissionService {
       return { success: false, error: 'Submission not found.' }
     }
 
-    const userResponse = await userService.get(userId)
-    if (!userResponse.success) {
+    const user = await userService.getByPk(userId)
+    if (!user) {
       return { success: false, error: 'User not found.' }
     }
-    const user = userResponse.body
 
-    const index = submission.likes.indexOf(user.id)
-    if (index >= 0) {
-      submission.likes.splice(index, 1)
+    let like = await likeService.getByFks(submission.id, user.id)
+    if (like) {
+      await likeService.deleteByPk(like.id)
     } else {
-      submission.likes.push(user.id)
+      like = await likeService.createOrFetch(submission.id, user.id)
     }
-    await submission.save()
 
     return { success: true, body: submission }
   }
@@ -356,7 +343,9 @@ class SubmissionService {
         return { success: false, error: 'Tag not found.' }
       }
       const ref = await submissionTagRefService.getByFks(submission.id, tag.id)
-      await ref.delete()
+      if (ref) {
+        submissionTagRefService.deleteByPk(ref.id)
+      }
     }
 
     return { success: true, body: submission }
