@@ -3,7 +3,11 @@
 const config = require('../config')
 const { Sequelize, Model, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString)
+const Like = require('./likeModel').Like
 const User = require('./userModel').User
+const SubmissionMethodRef = require('./submissionMethodRefModel').SubmissionMethodRef
+const SubmissionTaskRef = require('./submissionTaskRefModel').SubmissionTaskRef
+const SubmissionTagRef = require('./submissionTagRefModel').SubmissionTagRef
 
 class Submission extends Model {
   async delete () {
@@ -35,7 +39,11 @@ Submission.init({
   }
 }, { sequelize, modelName: 'submission' })
 
-Submission.belongsTo(User)
 User.hasMany(Submission)
+
+Submission.hasMany(Like)
+Submission.hasMany(SubmissionMethodRef)
+Submission.hasMany(SubmissionTaskRef)
+Submission.hasMany(SubmissionTagRef)
 
 module.exports.Submission = Submission

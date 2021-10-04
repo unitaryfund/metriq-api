@@ -4,7 +4,6 @@ const config = require('../config')
 const { Sequelize, Model } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString)
 const User = require('./userModel').User
-const Submission = require('./submissionModel').Submission
 const Task = require('./taskModel').Task
 
 class SubmissionTaskRef extends Model {
@@ -14,13 +13,8 @@ class SubmissionTaskRef extends Model {
 }
 SubmissionTaskRef.init({}, { sequelize, paranoid: true, modelName: 'submissionTaskRef' })
 
-SubmissionTaskRef.belongsTo(User)
 User.hasMany(SubmissionTaskRef)
 
-SubmissionTaskRef.belongsTo(Submission)
-Submission.hasMany(SubmissionTaskRef)
-
 SubmissionTaskRef.belongsTo(Task)
-Task.hasMany(SubmissionTaskRef)
 
 module.exports.SubmissionTaskRef = SubmissionTaskRef

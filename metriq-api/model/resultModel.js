@@ -4,7 +4,6 @@ const config = require('../config')
 const { Sequelize, Model, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString)
 const User = require('./userModel').User
-const SubmissionMethodRef = require('./submissionMethodRefModel').SubmissionMethodRef
 
 class Result extends Model {
   async delete () {
@@ -26,10 +25,6 @@ Result.init({
   }
 }, { sequelize, paranoid: true, modelName: 'result' })
 
-Result.belongsTo(User)
 User.hasMany(Result)
-
-Result.belongsTo(SubmissionMethodRef)
-SubmissionMethodRef.hasMany(Result)
 
 module.exports.Result = Result

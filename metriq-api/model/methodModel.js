@@ -25,7 +25,6 @@ Method.init({
   }
 }, { sequelize, modelName: 'method' })
 
-Method.belongsTo(User)
 User.hasMany(Method)
 
 module.exports.Method = Method

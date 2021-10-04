@@ -17,7 +17,6 @@ Tag.init({
   }
 }, { sequelize, modelName: 'tag' })
 
-Tag.belongsTo(User)
 User.hasMany(Tag)
 
 module.exports.Tag = Tag

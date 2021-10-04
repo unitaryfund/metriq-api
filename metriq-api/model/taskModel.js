@@ -25,7 +25,6 @@ Task.init({
   }
 }, { sequelize, modelName: 'task' })
 
-Task.belongsTo(User)
 User.hasMany(Task)
 
 module.exports.Task = Task
