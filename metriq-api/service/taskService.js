@@ -34,7 +34,7 @@ class TaskService extends ModelService {
   }
 
   async getAllNames () {
-    const result = await this.SequelizeServiceInstance.projectAll(['name'])
+    const result = await this.SequelizeServiceInstance.projectAll(['id', 'name'])
     return { success: true, body: result }
   }
 
