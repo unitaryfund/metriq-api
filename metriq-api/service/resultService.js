@@ -12,6 +12,10 @@ const TaskService = require('../service/taskService')
 const taskService = new TaskService()
 const MethodService = require('../service/methodService')
 const methodService = new MethodService()
+const SubmissionTaskRefService = require('./submissionTaskRefService')
+const submissionTaskRefService = new SubmissionTaskRefService()
+const SubmissionMethodRefService = require('./submissionMethodRefService')
+const submissionMethodRefService = new SubmissionMethodRefService()
 
 class ResultService extends ModelService {
   constructor () {
@@ -27,45 +31,42 @@ class ResultService extends ModelService {
   }
 
   async submit (userId, submissionId, reqBody) {
-    const submission = await submissionService.getEagerByPk(submissionId)
-    if (!submission) {
+    const submissionResult = await submissionService.getEagerByPk(submissionId)
+    if (!submissionResult) {
       return { success: false, error: 'Submission not found' }
     }
-
-    const result = await this.SequelizeServiceInstance.new()
-    result.user = userId
-    result.submission = submissionId
-    result.task = reqBody.task
-    result.method = reqBody.method
-    result.isHigherBetter = reqBody.isHigherBetter
-    result.metricName = reqBody.metricName
-    result.metricValue = reqBody.metricValue
-    result.evaluatedDate = reqBody.evaluatedDate
-    result.submittedDate = new Date()
+    const submission = await submissionService.populate(submissionResult, userId)
 
     // Task must be not null and valid (present in database) for a valid result object.
-    if (result.task === null) {
+    if (reqBody.task === null) {
       return { success: false, error: 'Result requires task to be defined.' }
     }
-    if (!(await taskService.getByPk(result.task))) {
+    if (!(await taskService.getByPk(reqBody.task))) {
       return { success: false, error: 'Result requires task to be present in database.' }
     }
 
     // Method must be not null and valid (present in database) for a valid result object.
-    if (result.method == null) {
+    if (reqBody.method == null) {
       return { success: false, error: 'Result requires method to be defined.' }
     }
-    if (!(await methodService.getByPk(result.method))) {
+    if (!(await methodService.getByPk(reqBody.method))) {
       return { success: false, error: 'Result requires method to be present in database.' }
     }
+
+    const result = await this.SequelizeServiceInstance.new()
+    result.userId = userId
+    result.submissionId = submissionId
+    result.submissionTaskRefId = (await submissionTaskRefService.getByFks(submissionId, reqBody.task)).id
+    result.submissionMethodRefId = (await submissionMethodRefService.getByFks(submissionId, reqBody.method)).id
+    result.isHigherBetter = reqBody.isHigherBetter
+    result.metricName = reqBody.metricName
+    result.metricValue = reqBody.metricValue
+    result.evaluatedDate = reqBody.evaluatedDate
 
     const nResult = await this.create(result)
     if (!nResult.success) {
       return nResult
     }
-
-    submission.results.push(result.id)
-    await submission.save()
 
     return { success: true, body: submission }
   }
