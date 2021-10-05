@@ -355,7 +355,7 @@ class SubmissionService extends ModelService {
   }
 
   async addOrRemoveTag (isAdd, submissionId, tagName, userId) {
-    const submission = await this.getEagerByPk(submissionId)
+    let submission = await this.getByPk(submissionId)
     if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
@@ -373,6 +373,9 @@ class SubmissionService extends ModelService {
         submissionTagRefService.deleteByPk(ref.id)
       }
     }
+
+    submission = await this.getEagerByPk(submissionId)
+    submission = await this.populate(submission, userId)
 
     return { success: true, body: submission }
   }

@@ -96,38 +96,28 @@ class TaskService extends ModelService {
     return { success: true, body: task }
   }
 
-  async addOrRemoveSubmission (isAdd, taskId, submissionId) {
+  async addOrRemoveSubmission (isAdd, taskId, submissionId, userId) {
     const task = await this.getByPk(taskId)
     if (!task) {
       return { success: false, error: 'Task not found.' }
     }
 
-    const submission = await submissionService.getEagerByPk(submissionId)
+    let submission = await submissionService.getByPk(submissionId)
     if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
 
-    const tsi = task.submissions.indexOf(submission.id)
-    const sti = submission.tasks.indexOf(task.id)
-
     if (isAdd) {
-      if (tsi === -1) {
-        task.submissions.push(submission.id)
-      }
-      if (sti === -1) {
-        submission.tasks.push(task.id)
-      }
+      await submissionTaskRefService.createOrFetch(submission.id, userId, task.id)
     } else {
-      if (tsi > -1) {
-        task.submissions.splice(tsi, 1)
-      }
-      if (sti > -1) {
-        submission.tasks.splice(sti, 1)
+      const ref = await submissionTaskRefService.getByFks(submission.id, task.id)
+      if (ref) {
+        submissionTaskRefService.deleteByPk(ref.id)
       }
     }
 
-    await task.save()
-    await submission.save()
+    submission = await submissionService.getEagerByPk(submissionId)
+    submission = await submissionService.populate(submission, userId)
 
     return { success: true, body: submission }
   }

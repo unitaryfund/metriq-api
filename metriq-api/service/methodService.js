@@ -97,38 +97,28 @@ class MethodService extends ModelService {
     return { success: true, body: method }
   }
 
-  async addOrRemoveSubmission (isAdd, methodId, submissionId) {
+  async addOrRemoveSubmission (isAdd, methodId, submissionId, userId) {
     const method = await this.getByPk(methodId)
     if (!method) {
       return { success: false, error: 'Method not found.' }
     }
 
-    const submission = await submissionService.getEagerByPk(submissionId)
+    let submission = await submissionService.getByPk(submissionId)
     if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
 
-    const msi = method.submissions.indexOf(submission.id)
-    const smi = submission.methods.indexOf(method.id)
-
     if (isAdd) {
-      if (msi === -1) {
-        method.submissions.push(submission.id)
-      }
-      if (smi === -1) {
-        submission.methods.push(method.id)
-      }
+      await submissionMethodRefService.createOrFetch(submission.id, userId, method.id)
     } else {
-      if (msi > -1) {
-        method.submissions.splice(msi, 1)
-      }
-      if (smi > -1) {
-        submission.methods.splice(smi, 1)
+      const ref = await submissionMethodRefService.getByFks(submission.id, method.id)
+      if (ref) {
+        submissionMethodRefService.deleteByPk(ref.id)
       }
     }
 
-    await method.save()
-    await submission.save()
+    submission = await submissionService.getEagerByPk(submissionId)
+    submission = await submissionService.populate(submission, userId)
 
     return { success: true, body: submission }
   }
