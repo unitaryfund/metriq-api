@@ -291,11 +291,11 @@ class SubmissionService extends ModelService {
       return { success: false, error: 'User not found.' }
     }
 
-    let like = await likeService.getByFks(submission.id, user.id)
+    let like = await likeService.getByFks(submission.id, user.id, user.id)
     if (like) {
       await likeService.deleteByPk(like.id)
     } else {
-      like = await likeService.createOrFetch(submission.id, user.id)
+      like = await likeService.createOrFetch(submission.id, user.id, user.id)
     }
 
     return { success: true, body: submission }

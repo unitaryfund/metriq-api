@@ -7,7 +7,7 @@ const Like = require('../model/likeModel').Like
 
 class LikeService extends SubmissionRefService {
   constructor () {
-    super(null, Like)
+    super('userId', Like)
   }
 }
 

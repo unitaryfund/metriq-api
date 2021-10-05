@@ -14,20 +14,13 @@ class SubmissionRefService extends ModelService {
   }
 
   async createOrFetch (submissionId, userId, fkId) {
-    let ref = {}
-    if (!this.foreignKey) {
-      ref = await this.getByFks(submissionId, userId)
-    } else {
-      ref = await this.getByFks(submissionId, fkId)
-    }
+    let ref = await this.getByFks(submissionId, fkId)
 
     if (!ref) {
       ref = await this.SequelizeServiceInstance.new()
       ref.submissionId = submissionId
       ref.userId = userId
-      if (this.foreignKey) {
-        ref[this.foreignKey] = fkId
-      }
+      ref[this.foreignKey] = fkId
       ref = (await this.create(ref)).body
       await ref.save()
     }
