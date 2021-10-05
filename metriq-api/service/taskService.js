@@ -8,6 +8,8 @@ const Task = require('../model/taskModel').Task
 // Service dependencies
 const SubmissionService = require('./submissionService')
 const submissionService = new SubmissionService()
+const SubmissionTaskRefService = require('./submissionTaskRefService')
+const submissionTaskRefService = new SubmissionTaskRefService()
 
 // Aggregation
 const { Sequelize } = require('sequelize')
@@ -48,39 +50,27 @@ class TaskService extends ModelService {
 
   async submit (userId, reqBody) {
     let task = await this.SequelizeServiceInstance.new()
-    task.user = userId
+    task.userId = userId
     task.name = reqBody.name.trim()
     task.fullName = reqBody.fullName.trim()
     task.description = reqBody.description.trim()
-    task.submissions = []
 
     // Get an ObjectId for the new object, first.
     const createResult = await this.create(task)
     task = createResult.body
 
     const submissionsSplit = reqBody.submissions ? reqBody.submissions.split(',') : []
-    const submissionModels = []
     for (let i = 0; i < submissionsSplit.length; i++) {
       const submissionId = submissionsSplit[i].trim()
       if (submissionId) {
-        // Reference to submission goes in reference collection on task
-        task.submissions.push(submissionId)
         const submission = await submissionService.getByPk(submissionId)
         if (!submission) {
           return { success: false, error: 'Submission reference in Task collection not found.' }
         }
-        // Reference to task goes in reference collection on submission
-        submission.tasks.push(task.id)
-        submissionModels.push(submission)
+        // Reference to submission goes in reference collection on task
+        await submissionTaskRefService.createOrFetch(submissionId, task.id)
       }
     }
-
-    // Save all save() calls for the last step, after we're 100% sure that the request schema was entirely valid.
-    for (let i = 0; i < submissionModels.length; i++) {
-      await submissionModels[i].save()
-    }
-
-    await task.save()
 
     return createResult
   }

@@ -26,7 +26,7 @@ class SequelizeService {
   }
 
   async findOneEager (keyValuePair) {
-    const result = await this.Collection.findOne({ where: keyValuePair, include: [{ all: true, nested: true }] })
+    const result = await this.Collection.findOne({ where: keyValuePair, include: [{ all: true }] })
     if (result) {
       return result.dataValues
     }
@@ -38,7 +38,7 @@ class SequelizeService {
   }
 
   async findAllEager (keyValuePair) {
-    return await this.Collection.findAll({ where: keyValuePair, include: [{ all: true, nested: true }] })
+    return await this.Collection.findAll({ where: keyValuePair, include: [{ all: true }] })
   }
 
   async projectAll (attributes) {

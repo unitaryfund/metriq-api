@@ -11,7 +11,7 @@ class SubmissionMethodRef extends Model {}
 SubmissionMethodRef.init({}, { sequelize, paranoid: true, modelName: 'submissionMethodRef' })
 
 User.hasMany(SubmissionMethodRef)
-Method.hasMany(SubmissionMethodRef)
+SubmissionMethodRef.belongsTo(Method)
 SubmissionMethodRef.hasMany(Result)
 
 module.exports.SubmissionMethodRef = SubmissionMethodRef

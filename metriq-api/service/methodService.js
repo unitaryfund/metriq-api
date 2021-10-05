@@ -8,6 +8,8 @@ const Method = require('../model/methodModel').Method
 // Service dependencies
 const SubmissionService = require('./submissionService')
 const submissionService = new SubmissionService()
+const SubmissionMethodRefService = require('./submissionMethodRefService')
+const submissionMethodRefService = new SubmissionMethodRefService()
 
 // Aggregation
 const { Sequelize } = require('sequelize')
@@ -49,39 +51,27 @@ class MethodService extends ModelService {
 
   async submit (userId, reqBody) {
     let method = await this.SequelizeServiceInstance.new()
-    method.user = userId
+    method.userId = userId
     method.name = reqBody.name
     method.fullName = reqBody.fullName
     method.description = reqBody.description
-    method.submissions = []
 
     // Get an ObjectId for the new object, first.
     const createResult = await this.create(method)
     method = createResult.body
 
     const submissionsSplit = reqBody.submissions ? reqBody.submissions.split(',') : []
-    const submissionModels = []
     for (let i = 0; i < submissionsSplit.length; i++) {
       const submissionId = submissionsSplit[i].trim()
       if (submissionId) {
-        // Reference to submission goes in reference collection on method
-        method.submissions.push(submissionId)
         const submission = await submissionService.getByPk(submissionId)
         if (!submission) {
           return { success: false, error: 'Submission reference in Method collection not found.' }
         }
-        // Reference to method goes in reference collection on submission
-        submission.methods.push(method)
-        submissionModels.push(submission)
+        // Reference to submission goes in reference collection on method
+        await submissionMethodRefService.createOrFetch(submissionId, method.id)
       }
     }
-
-    // Save all save() calls for the last step, after we're 100% sure that the request schema was entirely valid.
-    for (let i = 0; i < submissionModels.length; i++) {
-      await submissionModels[i].save()
-    }
-
-    await method.save()
 
     return createResult
   }
