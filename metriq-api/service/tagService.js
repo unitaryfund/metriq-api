@@ -34,12 +34,13 @@ class TagService extends ModelService {
     return { success: true, body: result }
   }
 
-  async createOrFetch (tagName) {
+  async createOrFetch (tagName, userId) {
     let tag = await this.getByName(tagName)
 
     if (!tag) {
       tag = await this.SequelizeServiceInstance.new()
       tag.name = tagName
+      tag.userId = userId
       tag = (await this.create(tag)).body
       await tag.save()
     }

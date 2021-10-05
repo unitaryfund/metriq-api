@@ -183,8 +183,8 @@ class SubmissionService extends ModelService {
     }
 
     const submission = await this.SequelizeServiceInstance.new()
-    submission.user = userId
-    submission.name = reqBody.submissionName.trim()
+    submission.userId = userId
+    submission.name = reqBody.name.trim()
     submission.nameNormal = reqBody.name.trim().toLowerCase()
     submission.contentUrl = reqBody.contentUrl.trim()
     submission.thumbnailUrl = reqBody.thumbnailUrl ? reqBody.thumbnailUrl.trim() : null
@@ -194,22 +194,18 @@ class SubmissionService extends ModelService {
     if (!result.success) {
       return result
     }
+    await submission.save()
 
-    const tags = []
     if (reqBody.tags) {
       const tagSplit = reqBody.tags.split(',')
       for (let i = 0; i < tagSplit.length; i++) {
         const tag = tagSplit[i].trim().toLowerCase()
         if (tag) {
-          const tagModel = await tagService.createOrFetch(tag)
-          tagModel.submissions.push(submission.id)
-          await tagModel.save()
-          tags.push(tagModel.id)
+          const tagModel = (await tagService.createOrFetch(tag, userId)).body
+          await submissionTagRefService.createOrFetch(submission.id, userId, tagModel.id)
         }
       }
     }
-    submission.tags = tags
-    await submission.save()
 
     if (!sendEmail) {
       return result
@@ -263,21 +259,21 @@ class SubmissionService extends ModelService {
   }
 
   async validateSubmission (reqBody) {
-    if (!reqBody.submissionName) {
+    if (!reqBody.name) {
       return { success: false, error: 'Submission name cannot be blank.' }
     }
 
-    if (!reqBody.submissionContentUrl || !reqBody.submissionContentUrl.trim()) {
+    if (!reqBody.contentUrl || !reqBody.contentUrl.trim()) {
       return { success: false, error: 'Submission content URL cannot be blank.' }
     }
 
-    const tlSubmissionName = reqBody.submissionName.trim().toLowerCase()
-    if (tlSubmissionName.length === 0) {
+    const tlName = reqBody.name.trim().toLowerCase()
+    if (tlName.length === 0) {
       return { success: false, error: 'Submission name cannot be blank.' }
     }
 
-    const submissionNameMatch = await this.getByName(tlSubmissionName)
-    if (submissionNameMatch) {
+    const nameMatch = await this.getByName(tlName)
+    if (nameMatch) {
       return { success: false, error: 'Submission name already in use.' }
     }
 
@@ -365,8 +361,8 @@ class SubmissionService extends ModelService {
     }
 
     if (isAdd) {
-      const tag = await tagService.createOrFetch(tagName)
-      await submissionTagRefService.createOrFetch(submission.id, tag.id)
+      const tag = await tagService.createOrFetch(tagName, userId)
+      await submissionTagRefService.createOrFetch(submission.id, userId, tag.id)
     } else {
       const tag = await tagService.getByName(tagName)
       if (!tag) {
