@@ -154,7 +154,7 @@ class SubmissionService extends ModelService {
     toRet.results = []
     for (let i = 0; i < toRet.submissionTaskRefs.length; i++) {
       toRet.tasks.push(await toRet.submissionTaskRefs[i].getTask())
-      const results = await toRet.tasks[i].getResults()
+      const results = await toRet.submissionTaskRefs[i].getResults()
       toRet.results.push(...results)
     }
     delete toRet.submissionTaskRefs
