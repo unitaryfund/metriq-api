@@ -54,7 +54,7 @@ class SubmissionService extends ModelService {
   }
 
   sqlTrending (userId, sortColumn, isDesc, limit, offset) {
-    return 'SELECT submissions.*, "upvotesCount", ("upvotesCount" * 3600000) / (CURRENT_DATE::DATE - "createdAt"::DATE) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
+    return 'SELECT submissions.*, "upvotesCount", ("upvotesCount" * 3600000) / EXTRACT(EPOCH FROM (CURRENT_DATE - "createdAt")) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
         '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
         '    WHERE submissions."approvedAt" IS NOT NULL ' +
