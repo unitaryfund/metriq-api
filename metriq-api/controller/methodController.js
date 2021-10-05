@@ -50,12 +50,6 @@ exports.update = async function (req, res) {
     'Updated method.')
 }
 
-exports.delete = async function (req, res) {
-  routeWrapper(res,
-    async () => await methodService.delete(req.params.id),
-    'Successfully deleted method.')
-}
-
 exports.readSubmissionCounts = async function (req, res) {
   routeWrapper(res,
     async () => await methodService.getAllNamesAndCounts(),

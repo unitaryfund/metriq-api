@@ -50,12 +50,6 @@ exports.update = async function (req, res) {
     'Updated task.')
 }
 
-exports.delete = async function (req, res) {
-  routeWrapper(res,
-    async () => await taskService.delete(req.params.id),
-    'Successfully deleted task.')
-}
-
 exports.readSubmissionCounts = async function (req, res) {
   routeWrapper(res,
     async () => await taskService.getAllNamesAndCounts(),
