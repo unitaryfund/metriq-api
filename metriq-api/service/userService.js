@@ -171,12 +171,11 @@ class UserService extends ModelService {
   }
 
   async saveClientTokenForUserId (userId) {
-    const users = await this.getByPk(userId)
-    if (!users || !users.length) {
+    const user = await this.getByPk(userId)
+    if (!user) {
       return { success: false, error: 'User not found.' }
     }
 
-    const user = users[0]
     user.clientToken = await this.generateClientJwt(userId)
     user.clientTokenCreated = new Date()
     await user.save()
@@ -185,12 +184,11 @@ class UserService extends ModelService {
   }
 
   async deleteClientTokenForUserId (userId) {
-    const users = await this.getByPk(userId)
-    if (!users || !users.length) {
+    const user = await this.getByPk(userId)
+    if (!user) {
       return { success: false, error: 'User not found.' }
     }
 
-    const user = users[0]
     user.clientToken = ''
     user.clientTokenCreated = null
     await user.save()

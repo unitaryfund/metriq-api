@@ -361,7 +361,7 @@ class SubmissionService extends ModelService {
     }
 
     if (isAdd) {
-      const tag = await tagService.createOrFetch(tagName, userId)
+      const tag = (await tagService.createOrFetch(tagName, userId)).body
       await submissionTagRefService.createOrFetch(submission.id, userId, tag.id)
     } else {
       const tag = await tagService.getByName(tagName)

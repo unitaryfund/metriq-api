@@ -58,21 +58,23 @@ class TaskService extends ModelService {
     // Get an ObjectId for the new object, first.
     const createResult = await this.create(task)
     task = createResult.body
+    await task.save()
 
     const submissionsSplit = reqBody.submissions ? reqBody.submissions.split(',') : []
     for (let i = 0; i < submissionsSplit.length; i++) {
       const submissionId = submissionsSplit[i].trim()
       if (submissionId) {
-        const submission = await submissionService.getByPk(submissionId)
+        const submission = await submissionService.getByPk(parseInt(submissionId))
         if (!submission) {
           return { success: false, error: 'Submission reference in Task collection not found.' }
         }
         // Reference to submission goes in reference collection on task
-        await submissionTaskRefService.createOrFetch(submissionId, task.id)
+        await submissionTaskRefService.createOrFetch(submissionId, userId, task.id)
       }
     }
 
-    return createResult
+    task = await this.getByPk(task.id)
+    return { success: true, body: task }
   }
 
   async update (taskId, reqBody) {

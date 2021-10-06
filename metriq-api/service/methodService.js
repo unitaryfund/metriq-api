@@ -59,21 +59,23 @@ class MethodService extends ModelService {
     // Get an ObjectId for the new object, first.
     const createResult = await this.create(method)
     method = createResult.body
+    await method.save()
 
     const submissionsSplit = reqBody.submissions ? reqBody.submissions.split(',') : []
     for (let i = 0; i < submissionsSplit.length; i++) {
       const submissionId = submissionsSplit[i].trim()
       if (submissionId) {
-        const submission = await submissionService.getByPk(submissionId)
+        const submission = await submissionService.getByPk(parseInt(submissionId))
         if (!submission) {
           return { success: false, error: 'Submission reference in Method collection not found.' }
         }
         // Reference to submission goes in reference collection on method
-        await submissionMethodRefService.createOrFetch(submissionId, method.id)
+        await submissionMethodRefService.createOrFetch(submissionId, userId, method.id)
       }
     }
 
-    return createResult
+    method = await this.getByPk(method.id)
+    return { success: true, body: method }
   }
 
   async update (methodId, reqBody) {

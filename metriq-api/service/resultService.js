@@ -31,11 +31,10 @@ class ResultService extends ModelService {
   }
 
   async submit (userId, submissionId, reqBody) {
-    const submissionResult = await submissionService.getEagerByPk(submissionId)
-    if (!submissionResult) {
+    let submission = await submissionService.getByPk(submissionId)
+    if (!submission) {
       return { success: false, error: 'Submission not found' }
     }
-    const submission = await submissionService.populate(submissionResult, userId)
 
     // Task must be not null and valid (present in database) for a valid result object.
     if (reqBody.task === null) {
@@ -68,7 +67,21 @@ class ResultService extends ModelService {
       return nResult
     }
 
+    submission = await submissionService.getEagerByPk(submissionId)
+    submission = await submissionService.populate(submission, userId)
+
     return { success: true, body: submission }
+  }
+
+  async delete (resultId) {
+    const result = await this.getByPk(resultId)
+    if (!result) {
+      return { success: false, error: 'Result not found.' }
+    }
+
+    await result.destroy()
+
+    return { success: true, body: await result }
   }
 }
 
