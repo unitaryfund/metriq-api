@@ -242,7 +242,7 @@ class SubmissionService extends ModelService {
   }
 
   async update (submissionId, reqBody, userId) {
-    const submission = await this.getByPk(submissionId)
+    let submission = await this.getByPk(submissionId)
     if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
@@ -255,6 +255,8 @@ class SubmissionService extends ModelService {
     }
     await submission.save()
 
+    submission = await this.getEagerByPk(submissionId)
+    submission = await this.populate(submission, userId)
     return { success: true, body: submission }
   }
 
