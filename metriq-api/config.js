@@ -5,9 +5,6 @@ config.isDebug = true
 config.app = {}
 config.app.port = process.env.PORT || 8080
 
-config.db = {}
-config.db.url = 'mongodb://localhost/metriq'
-
 config.web = {}
 config.web.url = config.isDebug ? 'localhost:3000' : 'metriq.info'
 config.web.protocol = config.isDebug ? 'http://' : 'https://'

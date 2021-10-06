@@ -114,7 +114,7 @@ class TaskService extends ModelService {
     } else {
       const ref = await submissionTaskRefService.getByFks(submission.id, task.id)
       if (ref) {
-        submissionTaskRefService.deleteByPk(ref.id)
+        await submissionTaskRefService.deleteByPk(ref.id)
       }
     }
 

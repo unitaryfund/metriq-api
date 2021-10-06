@@ -115,7 +115,7 @@ class MethodService extends ModelService {
     } else {
       const ref = await submissionMethodRefService.getByFks(submission.id, method.id)
       if (ref) {
-        submissionMethodRefService.deleteByPk(ref.id)
+        await submissionMethodRefService.deleteByPk(ref.id)
       }
     }
 

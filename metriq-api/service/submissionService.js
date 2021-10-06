@@ -281,7 +281,7 @@ class SubmissionService extends ModelService {
   }
 
   async upvote (submissionId, userId) {
-    const submission = await this.getByPk(submissionId)
+    let submission = await this.getByPk(submissionId)
     if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
@@ -298,6 +298,7 @@ class SubmissionService extends ModelService {
       like = await likeService.createOrFetch(submission.id, user.id, user.id)
     }
 
+    submission = await this.getByPk(submissionId)
     return { success: true, body: submission }
   }
 
@@ -370,7 +371,7 @@ class SubmissionService extends ModelService {
       }
       const ref = await submissionTagRefService.getByFks(submission.id, tag.id)
       if (ref) {
-        submissionTagRefService.deleteByPk(ref.id)
+        await submissionTagRefService.deleteByPk(ref.id)
       }
     }
 
