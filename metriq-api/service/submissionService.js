@@ -76,6 +76,20 @@ class SubmissionService extends ModelService {
         'LIMIT ' + limit + ' OFFSET ' + offset
   }
 
+  sqlByTask (taskId) {
+    return 'SELECT s.*, l."upvoteCount" FROM submissions AS s ' +
+        '    RIGHT JOIN public."submissionTaskRefs" AS str ON s.id = str."submissionId" ' +
+        '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
+        '    WHERE str."deletedAt" IS NULL AND str."taskId" = ' + taskId
+  }
+
+  sqlByMethod (methodId) {
+    return 'SELECT s.*, l."upvoteCount" FROM submissions AS s ' +
+        '    RIGHT JOIN public."submissionMethodRefs" AS str ON s.id = str."submissionId" ' +
+        '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
+        '    WHERE str."deletedAt" IS NULL AND str."methodId" = ' + methodId
+  }
+
   async getEagerByPk (submissionId) {
     return await this.SequelizeServiceInstance.findOneEager({ id: submissionId })
   }
@@ -91,6 +105,16 @@ class SubmissionService extends ModelService {
 
   async getEagerByNameOrId (submissionNameOrId) {
     return await this.SequelizeServiceInstance.findOneEager({ [Op.or]: [{ id: submissionNameOrId }, { nameNormal: submissionNameOrId.trim().toLowerCase() }] })
+  }
+
+  async getByTaskId (taskId) {
+    const result = (await sequelize.query(this.sqlByTask(taskId)))[0]
+    return { success: true, body: result }
+  }
+
+  async getByMethodId (methodId) {
+    const result = (await sequelize.query(this.sqlByMethod(methodId)))[0]
+    return { success: true, body: result }
   }
 
   async get (submissionNameOrId) {

@@ -30,6 +30,8 @@ class TaskService extends ModelService {
     if (!task) {
       return { success: false, error: 'Task not found.' }
     }
+    task.dataValues.submissions = (await submissionService.getByTaskId(taskId)).body
+    console.log(task)
     return { success: true, body: task }
   }
 
@@ -40,7 +42,7 @@ class TaskService extends ModelService {
 
   async getAllNamesAndCounts () {
     const result = (await sequelize.query(
-      'SELECT tasks.name as name, COUNT("submissionTaskRefs".*) as "submissionCount", COUNT(likes.*) as "upvoteTotal" from "submissionTaskRefs" ' +
+      'SELECT tasks.id as id, tasks.name as name, COUNT("submissionTaskRefs".*) as "submissionCount", COUNT(likes.*) as "upvoteTotal" from "submissionTaskRefs" ' +
       'LEFT JOIN tasks on tasks.id = "submissionTaskRefs"."taskId" ' +
       'LEFT JOIN likes on likes."submissionId" = "submissionTaskRefs"."submissionId" ' +
       'GROUP BY tasks.id'

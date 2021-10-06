@@ -21,16 +21,12 @@ class MethodService extends ModelService {
     super(Method)
   }
 
-  async populate (method) {
-    method.submissions = await method.getSubmissions()
-  }
-
   async getSanitized (methodId) {
     const method = await this.getByPk(methodId)
     if (!method) {
       return { success: false, error: 'Method not found.' }
     }
-    // await this.populate(method)
+    method.dataValues.submissions = (await submissionService.getByMethodId(methodId)).body
     return { success: true, body: method }
   }
 
@@ -41,7 +37,7 @@ class MethodService extends ModelService {
 
   async getAllNamesAndCounts () {
     const result = (await sequelize.query(
-      'SELECT methods.name as name, COUNT("submissionMethodRefs".*) as "submissionCount", COUNT(likes.*) as "upvoteTotal" from "submissionMethodRefs" ' +
+      'SELECT methods.id as id, methods.name as name, COUNT("submissionMethodRefs".*) as "submissionCount", COUNT(likes.*) as "upvoteTotal" from "submissionMethodRefs" ' +
       'LEFT JOIN methods on methods.id = "submissionMethodRefs"."methodId" ' +
       'LEFT JOIN likes on likes."submissionId" = "submissionMethodRefs"."submissionId" ' +
       'GROUP BY methods.id'
