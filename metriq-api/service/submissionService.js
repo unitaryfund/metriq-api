@@ -298,7 +298,8 @@ class SubmissionService extends ModelService {
       like = await likeService.createOrFetch(submission.id, user.id, user.id)
     }
 
-    submission = await this.getByPk(submissionId)
+    submission = await this.getEagerByPk(submissionId)
+    submission = await this.populate(submission, userId)
     return { success: true, body: submission }
   }
 
