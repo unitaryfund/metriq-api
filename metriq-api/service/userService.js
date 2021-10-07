@@ -27,11 +27,11 @@ class UserService extends ModelService {
       id: user.id,
       clientToken: '[REDACTED]',
       clientTokenCreated: user.clientTokenCreated,
-      dateJoined: user.dateJoined,
       email: user.email,
       passwordHash: '[REDACTED]',
       username: user.username,
-      usernameNormal: user.usernameNormal
+      usernameNormal: user.usernameNormal,
+      createdAt: user.createdAt
     }
   }
 
@@ -87,11 +87,10 @@ class UserService extends ModelService {
       return validationResult
     }
 
-    const user = await this.SequelizeServiceInstance.new()
+    let user = await this.SequelizeServiceInstance.new()
     user.username = reqBody.username.trim()
     user.usernameNormal = reqBody.username.trim().toLowerCase()
     user.email = reqBody.email.trim().toLowerCase()
-    user.dateJoined = new Date()
     user.passwordHash = await bcrypt.hash(reqBody.password, saltRounds)
 
     const result = await this.create(user)
@@ -99,7 +98,10 @@ class UserService extends ModelService {
       return result
     }
 
-    return { success: true, body: await this.sanitize(result.body) }
+    user = result.body
+    await user.save()
+
+    return { success: true, body: await this.sanitize(user) }
   }
 
   async login (reqBody) {
@@ -157,13 +159,13 @@ class UserService extends ModelService {
       return { success: false, error: 'Invalid email format.' }
     }
 
-    const usernameMatch = await this.getByUsername(tlUsername)
-    if (usernameMatch.length > 0) {
+    const username = await this.getByUsername(tlUsername)
+    if (username) {
       return { success: false, error: 'Username already in use.' }
     }
 
     const emailMatch = await this.getByEmail(tlEmail)
-    if (emailMatch.length > 0) {
+    if (emailMatch) {
       return { success: false, error: 'Email already in use.' }
     }
 
