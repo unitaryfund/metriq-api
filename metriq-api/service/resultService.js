@@ -40,7 +40,8 @@ class ResultService extends ModelService {
     if (reqBody.task === null) {
       return { success: false, error: 'Result requires task to be defined.' }
     }
-    if (!(await taskService.getByPk(reqBody.task))) {
+    const task = await taskService.getByPk(reqBody.task)
+    if (!task) {
       return { success: false, error: 'Result requires task to be present in database.' }
     }
 
@@ -48,19 +49,20 @@ class ResultService extends ModelService {
     if (reqBody.method == null) {
       return { success: false, error: 'Result requires method to be defined.' }
     }
-    if (!(await methodService.getByPk(reqBody.method))) {
+    const method = await methodService.getByPk(reqBody.method)
+    if (!method) {
       return { success: false, error: 'Result requires method to be present in database.' }
     }
 
     const result = await this.SequelizeServiceInstance.new()
     result.userId = userId
     result.submissionId = submissionId
-    result.submissionTaskRefId = (await submissionTaskRefService.getByFks(submissionId, reqBody.task)).id
-    result.submissionMethodRefId = (await submissionMethodRefService.getByFks(submissionId, reqBody.method)).id
+    result.submissionTaskRefId = (await submissionTaskRefService.getByFks(submissionId, task.id)).id
+    result.submissionMethodRefId = (await submissionMethodRefService.getByFks(submissionId, method.id)).id
     result.isHigherBetter = reqBody.isHigherBetter
     result.metricName = reqBody.metricName
     result.metricValue = reqBody.metricValue
-    result.evaluatedDate = reqBody.evaluatedDate
+    result.evaluatedAt = reqBody.evaluatedAt
 
     const nResult = await this.create(result)
     if (!nResult.success) {
@@ -81,7 +83,7 @@ class ResultService extends ModelService {
 
     await result.destroy()
 
-    return { success: true, body: await result }
+    return { success: true, body: result }
   }
 }
 

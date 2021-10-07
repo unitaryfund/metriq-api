@@ -126,7 +126,7 @@ app.use(unless(publicApiRoutes, async function (req, res, next) {
 
 // Connect to PostgreSQL
 console.log(config.pgConnectionString)
-const sequelize = new Sequelize(config.pgConnectionString)
+const sequelize = new Sequelize(config.pgConnectionString, { logging: false })
 
 // Add a check for DB connection.
 const testSqlConnection = async function () {

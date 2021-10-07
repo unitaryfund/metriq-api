@@ -2,14 +2,18 @@
 
 const config = require('../config')
 const { Sequelize, Model, DataTypes } = require('sequelize')
-const sequelize = new Sequelize(config.pgConnectionString)
+const sequelize = new Sequelize(config.pgConnectionString, { logging: false })
 const Like = require('./likeModel').Like
 const User = require('./userModel').User
 const SubmissionMethodRef = require('./submissionMethodRefModel').SubmissionMethodRef
 const SubmissionTaskRef = require('./submissionTaskRefModel').SubmissionTaskRef
 const SubmissionTagRef = require('./submissionTagRefModel').SubmissionTagRef
 
-class Submission extends Model {}
+class Submission extends Model {
+  approve () {
+    this.approvedAt = new Date()
+  }
+}
 Submission.init({
   name: {
     type: DataTypes.TEXT,

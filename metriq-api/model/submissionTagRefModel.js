@@ -2,7 +2,7 @@
 
 const config = require('../config')
 const { Sequelize, Model } = require('sequelize')
-const sequelize = new Sequelize(config.pgConnectionString)
+const sequelize = new Sequelize(config.pgConnectionString, { logging: false })
 const User = require('./userModel').User
 const Tag = require('./tagModel').Tag
 

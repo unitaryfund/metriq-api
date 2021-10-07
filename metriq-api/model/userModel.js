@@ -1,10 +1,19 @@
 // userModel.js
 
 const config = require('../config')
+const { v4: uuidv4 } = require('uuid')
 const { Sequelize, Model, DataTypes } = require('sequelize')
-const sequelize = new Sequelize(config.pgConnectionString)
+const sequelize = new Sequelize(config.pgConnectionString, { logging: false })
 
-class User extends Model {}
+const recoveryExpirationMinutes = 30
+const millisPerMinute = 60000
+
+class User extends Model {
+  generateRecovery () {
+    this.recoveryToken = uuidv4()
+    this.recoveryTokenExpiration = new Date((new Date()).getTime() + recoveryExpirationMinutes * millisPerMinute)
+  }
+}
 User.init({
   username: {
     type: DataTypes.TEXT,

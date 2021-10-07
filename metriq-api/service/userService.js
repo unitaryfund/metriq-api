@@ -245,10 +245,11 @@ class UserService extends ModelService {
       return { success: false, error: 'Password and confirmation do not match.' }
     }
 
-    const user = await this.getByUsernameOrEmail(reqBody.username)
+    let user = await this.getByUsernameOrEmail(reqBody.username)
     if (!user) {
       return { success: false, error: 'User not found.' }
     }
+    user = await this.getByPk(user.id)
 
     if (!user.recoveryToken || (user.recoveryToken !== reqBody.uuid) || (user.recoveryTokenExpiration < new Date())) {
       return { success: false, error: 'Supplied bad recovery token.' }
@@ -260,6 +261,17 @@ class UserService extends ModelService {
     await user.save()
 
     return { success: true, body: await this.sanitize(user) }
+  }
+
+  async delete (userId) {
+    const user = await this.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    await user.destroy()
+
+    return { success: true, body: user }
   }
 }
 

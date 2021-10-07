@@ -27,7 +27,7 @@ class TagService extends ModelService {
   async getAllNamesAndCounts () {
     const result = (await sequelize.query(
       'SELECT tags.name as name, COUNT("submissionTagRefs".*) as "submissionCount", COUNT(likes.*) as "upvoteTotal" from "submissionTagRefs" ' +
-      'LEFT JOIN tags on tags.id = "submissionTagRefs"."tagId" ' +
+      'RIGHT JOIN tags on tags.id = "submissionTagRefs"."tagId" ' +
       'LEFT JOIN likes on likes."submissionId" = "submissionTagRefs"."submissionId" ' +
       'GROUP BY tags.id'
     ))[0]

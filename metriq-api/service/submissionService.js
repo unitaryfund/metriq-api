@@ -31,7 +31,7 @@ class SubmissionService extends ModelService {
   }
 
   sqlLike (userId, sortColumn, isDesc, limit, offset) {
-    return 'SELECT submissions.*, "upvotesCount", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
+    return 'SELECT submissions.*, CAST("upvotesCount" AS integer) AS "upvotesCount", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
         '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
         '    WHERE submissions."approvedAt" IS NOT NULL ' +
@@ -42,7 +42,7 @@ class SubmissionService extends ModelService {
   }
 
   sqlTagLike (tagId, userId, sortColumn, isDesc, limit, offset) {
-    return 'SELECT submissions.*, "upvotesCount", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
+    return 'SELECT submissions.*, CAST("upvotesCount" AS integer) AS "upvotesCount", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
         '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
         '    LEFT JOIN "submissionTagRefs" on "submissionTagRefs"."submissionId" = submissions.id AND "submissionTagRefs"."tagId" = ' + tagId + ' ' +
@@ -54,7 +54,7 @@ class SubmissionService extends ModelService {
   }
 
   sqlTrending (userId, sortColumn, isDesc, limit, offset) {
-    return 'SELECT submissions.*, "upvotesCount", ("upvotesCount" * 3600000) / EXTRACT(EPOCH FROM (CURRENT_DATE - "createdAt")) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
+    return 'SELECT submissions.*, CAST("upvotesCount" AS integer) AS "upvotesCount", ("upvotesCount" * 3600000) / EXTRACT(EPOCH FROM (CURRENT_DATE - "createdAt")) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
         '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
         '    WHERE submissions."approvedAt" IS NOT NULL ' +
@@ -65,7 +65,7 @@ class SubmissionService extends ModelService {
   }
 
   sqlTagTrending (tagId, userId, sortColumn, isDesc, limit, offset) {
-    return 'SELECT submissions.*, "upvotesCount", ("upvotesCount" * 3600000) / (CURRENT_DATE::DATE - "createdAt"::DATE) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
+    return 'SELECT submissions.*, CAST("upvotesCount" AS integer) AS "upvotesCount", ("upvotesCount" * 3600000) / (CURRENT_DATE::DATE - "createdAt"::DATE) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
         '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
         '    LEFT JOIN "submissionTagRefs" on "submissionTagRefs"."submissionId" = submissions.id AND "submissionTagRefs"."tagId" = ' + tagId + ' ' +
@@ -77,14 +77,14 @@ class SubmissionService extends ModelService {
   }
 
   sqlByTask (taskId) {
-    return 'SELECT s.*, l."upvoteCount" FROM submissions AS s ' +
+    return 'SELECT s.*, CAST(l."upvoteCount" AS integer) AS "upvoteCount" FROM submissions AS s ' +
         '    RIGHT JOIN public."submissionTaskRefs" AS str ON s.id = str."submissionId" ' +
         '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
         '    WHERE str."deletedAt" IS NULL AND str."taskId" = ' + taskId
   }
 
   sqlByMethod (methodId) {
-    return 'SELECT s.*, l."upvoteCount" FROM submissions AS s ' +
+    return 'SELECT s.*, CAST(l."upvoteCount" AS integer) AS "upvoteCount" FROM submissions AS s ' +
         '    RIGHT JOIN public."submissionMethodRefs" AS str ON s.id = str."submissionId" ' +
         '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
         '    WHERE str."deletedAt" IS NULL AND str."methodId" = ' + methodId
@@ -100,11 +100,11 @@ class SubmissionService extends ModelService {
   }
 
   async getByNameOrId (submissionNameOrId) {
-    return await this.SequelizeServiceInstance.findOne({ [Op.or]: [{ id: submissionNameOrId }, { nameNormal: submissionNameOrId.trim().toLowerCase() }] })
+    return await this.SequelizeServiceInstance.findOne({ [Op.or]: [{ id: submissionNameOrId }, { nameNormal: submissionNameOrId.toString().trim().toLowerCase() }] })
   }
 
   async getEagerByNameOrId (submissionNameOrId) {
-    return await this.SequelizeServiceInstance.findOneEager({ [Op.or]: [{ id: submissionNameOrId }, { nameNormal: submissionNameOrId.trim().toLowerCase() }] })
+    return await this.SequelizeServiceInstance.findOneEager({ [Op.or]: [{ id: submissionNameOrId }, { nameNormal: submissionNameOrId.toString().trim().toLowerCase() }] })
   }
 
   async getByTaskId (taskId) {

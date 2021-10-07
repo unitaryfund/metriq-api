@@ -2,8 +2,6 @@
 
 const dbHandler = require('./db-handler')
 const TagService = require('../service/tagService')
-const SubmissionService = require('../service/submissionService')
-const UserService = require('../service/userService')
 
 /**
  * Connect to a new in-memory database before running any tests.

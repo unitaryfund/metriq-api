@@ -26,7 +26,7 @@ describe('task', () => {
 
     it('can be created', async () => {
         // Initialize
-        const userId = (await (new UserService()).register(registration1)).body._id
+        const userId = (await (new UserService()).register(registration1)).body.id
         const taskService = new TaskService()
 
         // Act
@@ -35,21 +35,6 @@ describe('task', () => {
         // Assert
         expect(result.success).toBe(true)
     })
-
-    it('can be deleted', async () => {
-        // Initialize
-        const userId = (await (new UserService()).register(registration1)).body._id
-        const taskService = new TaskService()
-        const taskResult = await taskService.submit(userId, task1)
-
-        // Act
-        const result = await taskService.delete(taskResult.body._id)
-
-        // Assert
-        expect(result.success).toBe(true)
-    })
-
-
 })
 
 const registration1 = {

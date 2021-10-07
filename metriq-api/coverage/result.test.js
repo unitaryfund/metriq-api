@@ -6,6 +6,9 @@ const TaskService = require('../service/taskService')
 const MethodService = require('../service/methodService')
 const UserService = require('../service/userService.js')
 const SubmissionService = require('../service/submissionService.js')
+const SubmissionTaskRefService = require('../service/submissionTaskRefService.js')
+const SubmissionMethodRefService = require('../service/submissionMethodRefService.js');
+const SubmissionTagRefService = require('../service/submissionTagRefService');
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -29,12 +32,12 @@ describe('result', () => {
 
     it('cannot be created if method or task is not defined', async () => {
         // Initialize
-        const userId = (await (new UserService()).register(registration1)).body._id
+        const userId = (await (new UserService()).register(registration1)).body.id
 
         const submissionService = new SubmissionService()
         const submissionResult = await submissionService.submit(userId, submission1, false)
 
-        const submissionId = submissionResult.body._id
+        const submissionId = submissionResult.body.id
 
         const resultService = new ResultService()
 
@@ -47,7 +50,7 @@ describe('result', () => {
 
     it('can be created', async () => {
         // Initialize
-        const userId = (await (new UserService()).register(registration1)).body._id
+        const userId = (await (new UserService()).register(registration1)).body.id
 
         const taskService = new TaskService()
         const taskResult = await taskService.submit(userId, task1)
@@ -58,9 +61,16 @@ describe('result', () => {
         const submissionService = new SubmissionService()
         const submissionResult = await submissionService.submit(userId, submission1, false)
 
-        const submissionId = submissionResult.body._id
-        const taskId = taskResult.body._id
-        const methodId = methodResult.body._id
+        const submissionId = submissionResult.body.id
+        const taskId = taskResult.body.id
+        const methodId = methodResult.body.id
+
+        const submissionTaskRefService = new SubmissionTaskRefService()
+        await submissionTaskRefService.createOrFetch(submissionId, userId, taskId)
+
+        const submissionMethodRefService = new SubmissionMethodRefService()
+        await submissionMethodRefService.createOrFetch(submissionId, userId, methodId)
+        
 
         result1.task = taskId
         result1.method = methodId
@@ -87,12 +97,12 @@ const result1 = {
     isHigherBetter: true,
     metricName: 'metricName',
     metricValue: 1,
-    evaluatedDate: new Date(),
+    evaluatedAt: new Date(),
 }
 
 const submission1 = {
-    submissionName: 'Test Submission',
-    submissionContentUrl: 'https://github.com'
+    name: 'Test Submission',
+    contentUrl: 'https://github.com'
 }
 
 const task1 = {
