@@ -32,4 +32,3 @@ jobs:
         cd ./metriq-api 
         npm ci
         npm run build --if-present
-        npm test
