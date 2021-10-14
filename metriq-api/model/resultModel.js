@@ -1,65 +1,29 @@
 // resultModel.js
 
-const config = require('./../config')
-const mongoose = require('mongoose')
+const config = require('../config')
+const { Sequelize, Model, DataTypes } = require('sequelize')
+const sequelize = new Sequelize(config.pgConnectionString, { logging: false })
+const User = require('./userModel').User
 
-// Set up schema.
-const resultSchema = mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
-    required: true
-  },
-  submission: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'submission',
-    required: true
-  },
-  task: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'task',
-    required: true
-  },
-  method: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'method',
-    required: true
-  },
+class Result extends Model {}
+Result.init({
   isHigherBetter: {
-    type: Boolean,
-    required: true
+    type: DataTypes.BOOLEAN,
+    allowNull: false
   },
   metricName: {
-    type: String,
-    required: true
+    type: DataTypes.TEXT,
+    allowNull: false
   },
   metricValue: {
-    type: Number,
-    required: true
+    type: DataTypes.FLOAT,
+    allowNull: false
   },
-  evaluatedDate: {
-    type: Date,
-    required: false
-  },
-  submittedDate: {
-    type: Date,
-    required: true
-  },
-  deletedDate: {
-    type: Date,
-    default: null
+  evaluatedAt: {
+    type: DataTypes.DATE
   }
-}, { autoIndex: config.isDebug, optimisticConcurrency: true })
+}, { sequelize, paranoid: true, modelName: 'result' })
 
-resultSchema.methods.softDelete = function () {
-  this.deletedDate = new Date()
-}
-resultSchema.methods.isDeleted = function () {
-  return !!(this.deletedDate)
-}
+User.hasMany(Result)
 
-// Export Result model.
-const Result = module.exports = mongoose.model('result', resultSchema)
-module.exports.get = function (callback, limit) {
-  Result.find(callback).limit(limit)
-}
+module.exports.Result = Result

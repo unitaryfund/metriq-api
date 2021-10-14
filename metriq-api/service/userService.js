@@ -1,9 +1,11 @@
 // userService.js
 
+const { Op } = require('sequelize')
+
 // Data Access Layer
-const MongooseService = require('./mongooseService')
+const ModelService = require('./modelService')
 // Database Model
-const UserModel = require('../model/userModel')
+const User = require('../model/userModel').User
 
 // Password hasher
 const bcrypt = require('bcrypt')
@@ -15,31 +17,21 @@ const config = require('./../config')
 
 const nodemailer = require('nodemailer')
 
-class UserService {
+class UserService extends ModelService {
   constructor () {
-    this.MongooseServiceInstance = new MongooseService(UserModel)
-  }
-
-  async create (userToCreate) {
-    try {
-      const result = await this.MongooseServiceInstance.create(userToCreate)
-      return { success: true, body: result }
-    } catch (err) {
-      return { success: false, error: err }
-    }
+    super(User)
   }
 
   async sanitize (user) {
     return {
-      __v: user.__v,
-      _id: user._id,
+      id: user.id,
       clientToken: '[REDACTED]',
       clientTokenCreated: user.clientTokenCreated,
-      dateJoined: user.dateJoined,
       email: user.email,
       passwordHash: '[REDACTED]',
       username: user.username,
-      usernameNormal: user.usernameNormal
+      usernameNormal: user.usernameNormal,
+      createdAt: user.createdAt
     }
   }
 
@@ -59,75 +51,34 @@ class UserService {
     return jwt.sign({ id: userId, role: role }, config.api.token.secretKey, meta)
   }
 
-  async getByUserId (userId) {
-    return await this.MongooseServiceInstance.find({ _id: userId })
-  }
-
   async getByUsername (username) {
-    return await this.MongooseServiceInstance.find({ usernameNormal: username.trim().toLowerCase() })
+    return await this.SequelizeServiceInstance.findOne({ usernameNormal: username.trim().toLowerCase() })
   }
 
   async getByEmail (email) {
-    return await this.MongooseServiceInstance.find({ email: email.trim().toLowerCase() })
+    return await this.SequelizeServiceInstance.findOne({ email: email.trim().toLowerCase() })
   }
 
   async getByUsernameOrEmail (usernameOrEmail) {
-    let users = await this.getByUsername(usernameOrEmail)
-    if (!users || !users.length) {
-      users = await this.getByEmail(usernameOrEmail)
-    }
-    return users
+    const usernameOrEmailNormal = usernameOrEmail.trim().toLowerCase()
+    return await this.SequelizeServiceInstance.findOne({ [Op.or]: [{ usernameNormal: usernameOrEmailNormal }, { email: usernameOrEmailNormal }] })
   }
 
   async get (userId) {
-    let userResult = []
-    try {
-      userResult = await this.getByUserId(userId)
-      if (!userResult || !userResult.length) {
-        return { success: false, error: 'User not found.' }
-      }
-    } catch (err) {
-      return { success: false, error: err }
-    }
-
-    const user = userResult[0]
-
-    if (user.isDeleted()) {
-      return { success: false, error: 'User not found.' }
+    const user = await this.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User ID not found.' }
     }
 
     return { success: true, body: user }
   }
 
   async getSanitized (userId) {
-    const result = await this.get(userId)
-    if (!result.success) {
-      return result
+    const user = await this.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User ID not found.' }
     }
-    return { success: true, body: await this.sanitize(result.body) }
-  }
-
-  async delete (userId) {
-    let userResult = []
-    try {
-      userResult = await this.getByUserId(userId)
-      if (!userResult || !userResult.length) {
-        return { success: false, error: 'User not found.' }
-      }
-    } catch (err) {
-      return { success: false, error: err }
-    }
-
-    const userToDelete = userResult[0]
-
-    if (userToDelete.isDeleted()) {
-      return { success: false, error: 'User not found.' }
-    }
-
-    userToDelete.softDelete()
-    await userToDelete.save()
-
-    return { success: true, body: await this.sanitize(userToDelete) }
+    return { success: true, body: await this.sanitize(user) }
   }
 
   async register (reqBody) {
@@ -136,29 +87,28 @@ class UserService {
       return validationResult
     }
 
-    const user = await this.MongooseServiceInstance.new()
+    let user = await this.SequelizeServiceInstance.new()
     user.username = reqBody.username.trim()
     user.usernameNormal = reqBody.username.trim().toLowerCase()
     user.email = reqBody.email.trim().toLowerCase()
-    user.dateJoined = new Date()
     user.passwordHash = await bcrypt.hash(reqBody.password, saltRounds)
-    user.deletedDate = null
 
     const result = await this.create(user)
     if (!result.success) {
       return result
     }
 
-    return { success: true, body: await this.sanitize(result.body) }
+    user = result.body
+    await user.save()
+
+    return { success: true, body: await this.sanitize(user) }
   }
 
   async login (reqBody) {
-    const userResult = await this.getByUsernameOrEmail(reqBody.username)
-    if (!userResult || !userResult.length || userResult[0].isDeleted()) {
+    const user = await this.getByUsernameOrEmail(reqBody.username)
+    if (!user) {
       return { success: false, error: 'User not found.' }
     }
-
-    const user = userResult[0]
 
     const isPasswordValid = bcrypt.compareSync(reqBody.password, user.passwordHash)
     if (!isPasswordValid) {
@@ -209,13 +159,13 @@ class UserService {
       return { success: false, error: 'Invalid email format.' }
     }
 
-    const usernameMatch = await this.getByUsername(tlUsername)
-    if (usernameMatch.length > 0) {
+    const username = await this.getByUsername(tlUsername)
+    if (username) {
       return { success: false, error: 'Username already in use.' }
     }
 
     const emailMatch = await this.getByEmail(tlEmail)
-    if (emailMatch.length > 0) {
+    if (emailMatch) {
       return { success: false, error: 'Email already in use.' }
     }
 
@@ -223,12 +173,11 @@ class UserService {
   }
 
   async saveClientTokenForUserId (userId) {
-    const users = await this.getByUserId(userId)
-    if (!users || !users.length) {
+    const user = await this.getByPk(userId)
+    if (!user) {
       return { success: false, error: 'User not found.' }
     }
 
-    const user = users[0]
     user.clientToken = await this.generateClientJwt(userId)
     user.clientTokenCreated = new Date()
     await user.save()
@@ -237,12 +186,11 @@ class UserService {
   }
 
   async deleteClientTokenForUserId (userId) {
-    const users = await this.getByUserId(userId)
-    if (!users || !users.length) {
+    const user = await this.getByPk(userId)
+    if (!user) {
       return { success: false, error: 'User not found.' }
     }
 
-    const user = users[0]
     user.clientToken = ''
     user.clientTokenCreated = null
     await user.save()
@@ -256,11 +204,10 @@ class UserService {
       return { success: false, error: 'Support email not available.' }
     }
 
-    const users = await this.getByUsernameOrEmail(usernameOrEmail)
-    if (!users || !users.length) {
+    const user = await this.getByUsernameOrEmail(usernameOrEmail)
+    if (!user) {
       return { success: false, error: 'User not found.' }
     }
-    const user = users[0]
     user.generateRecovery()
 
     const transporter = nodemailer.createTransport({
@@ -298,12 +245,12 @@ class UserService {
       return { success: false, error: 'Password and confirmation do not match.' }
     }
 
-    const userResult = await this.getByUsernameOrEmail(reqBody.username)
-    if (!userResult || !userResult.length || userResult[0].isDeleted()) {
+    let user = await this.getByUsernameOrEmail(reqBody.username)
+    if (!user) {
       return { success: false, error: 'User not found.' }
     }
+    user = await this.getByPk(user.id)
 
-    const user = userResult[0]
     if (!user.recoveryToken || (user.recoveryToken !== reqBody.uuid) || (user.recoveryTokenExpiration < new Date())) {
       return { success: false, error: 'Supplied bad recovery token.' }
     }
@@ -314,6 +261,17 @@ class UserService {
     await user.save()
 
     return { success: true, body: await this.sanitize(user) }
+  }
+
+  async delete (userId) {
+    const user = await this.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    await user.destroy()
+
+    return { success: true, body: user }
   }
 }
 

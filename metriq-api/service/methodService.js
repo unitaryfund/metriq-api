@@ -1,167 +1,84 @@
 // methodService.js
 
-const mongoose = require('mongoose')
-
 // Data Access Layer
-const MongooseService = require('./mongooseService')
+const ModelService = require('./modelService')
 // Database Model
-const MethodModel = require('../model/methodModel')
+const Method = require('../model/methodModel').Method
 
 // Service dependencies
 const SubmissionService = require('./submissionService')
 const submissionService = new SubmissionService()
+const SubmissionMethodRefService = require('./submissionMethodRefService')
+const submissionMethodRefService = new SubmissionMethodRefService()
 
-class MethodService {
+// Aggregation
+const { Sequelize } = require('sequelize')
+const config = require('../config')
+const sequelize = new Sequelize(config.pgConnectionString)
+
+class MethodService extends ModelService {
   constructor () {
-    this.MongooseServiceInstance = new MongooseService(MethodModel)
-  }
-
-  async create (methodToCreate) {
-    try {
-      const result = await this.MongooseServiceInstance.create(methodToCreate)
-      return { success: true, body: result }
-    } catch (err) {
-      return { success: false, error: err }
-    }
-  }
-
-  async delete (methodId) {
-    let methodResult = []
-    try {
-      methodResult = await this.getById(methodId)
-      if (!methodResult || !methodResult.length) {
-        return { success: false, error: 'Method not found.' }
-      }
-    } catch (err) {
-      return { success: false, error: err }
-    }
-
-    const methodToDelete = methodResult[0]
-
-    if (methodToDelete.isDeleted()) {
-      return { success: false, error: 'Method not found.' }
-    }
-
-    methodToDelete.softDelete()
-    await methodToDelete.save()
-
-    return { success: true, body: await methodToDelete }
-  }
-
-  async getById (methodId) {
-    return await this.MongooseServiceInstance.find({ _id: methodId })
-  }
-
-  async populate (method) {
-    await method.populate('submissions').execPopulate()
+    super(Method)
   }
 
   async getSanitized (methodId) {
-    const methods = await this.getById(methodId)
-    if (!methods || !methods.length || methods[0].isDeleted()) {
+    const method = await this.getByPk(methodId)
+    if (!method) {
       return { success: false, error: 'Method not found.' }
     }
-    const method = methods[0]
-    await this.populate(method)
+    method.dataValues.submissions = (await submissionService.getByMethodId(methodId)).body
     return { success: true, body: method }
   }
 
   async getAllNames () {
-    const result = await this.MongooseServiceInstance.Collection.aggregate([{ $project: { name: true } }])
+    const result = await this.SequelizeServiceInstance.projectAll(['id', 'name'])
     return { success: true, body: result }
   }
 
   async getAllNamesAndCounts () {
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null } },
-      {
-        $project: {
-          name: true,
-          submissions: true
-        }
-      },
-      { $addFields: { submissionCount: { $size: '$submissions' } } },
-      {
-        $lookup: {
-          from: 'submissions',
-          localField: 'submissions',
-          foreignField: '_id',
-          as: 'submissionObjects'
-        }
-      },
-      {
-        $addFields: {
-          upvotes: {
-            $reduce: {
-              input: '$submissionObjects.upvotes',
-              initialValue: [],
-              in: { $concatArrays: ['$$value', '$$this'] }
-            }
-          }
-        }
-      },
-      {
-        $addFields: {
-          upvoteTotal: { $size: '$upvotes' }
-        }
-      },
-      {
-        $project: {
-          name: true,
-          submissionCount: true,
-          upvoteTotal: true
-        }
-      }
-    ])
+    const result = (await sequelize.query(
+      'SELECT methods.id as id, methods.name as name, COUNT("submissionMethodRefs".*) as "submissionCount", COUNT(likes.*) as "upvoteTotal" from "submissionMethodRefs" ' +
+      'RIGHT JOIN methods on methods.id = "submissionMethodRefs"."methodId" ' +
+      'LEFT JOIN likes on likes."submissionId" = "submissionMethodRefs"."submissionId" ' +
+      'GROUP BY methods.id'
+    ))[0]
     return { success: true, body: result }
   }
 
   async submit (userId, reqBody) {
-    let method = await this.MongooseServiceInstance.new()
-    method.user = userId
+    let method = await this.SequelizeServiceInstance.new()
+    method.userId = userId
     method.name = reqBody.name
     method.fullName = reqBody.fullName
     method.description = reqBody.description
-    method.submissions = []
 
     // Get an ObjectId for the new object, first.
     const createResult = await this.create(method)
     method = createResult.body
+    await method.save()
 
     const submissionsSplit = reqBody.submissions ? reqBody.submissions.split(',') : []
-    const submissionModels = []
     for (let i = 0; i < submissionsSplit.length; i++) {
       const submissionId = submissionsSplit[i].trim()
       if (submissionId) {
-        // Reference to submission goes in reference collection on method
-        method.submissions.push(mongoose.Types.ObjectId(submissionId))
-        const submissionResult = await submissionService.getBySubmissionId(submissionId)
-        if (!submissionResult || !submissionResult.length) {
+        const submission = await submissionService.getByPk(parseInt(submissionId))
+        if (!submission) {
           return { success: false, error: 'Submission reference in Method collection not found.' }
         }
-        const submissionModel = submissionResult[0]
-        // Reference to method goes in reference collection on submission
-        submissionModel.methods.push(method._id)
-        submissionModels.push(submissionModel)
+        // Reference to submission goes in reference collection on method
+        await submissionMethodRefService.createOrFetch(submissionId, userId, method.id)
       }
     }
 
-    // Save all save() calls for the last step, after we're 100% sure that the request schema was entirely valid.
-    for (let i = 0; i < submissionModels.length; i++) {
-      await submissionModels[i].save()
-    }
-
-    await method.save()
-
-    return createResult
+    method = (await this.getByPk(method.id)).dataValues
+    return { success: true, body: method }
   }
 
   async update (methodId, reqBody) {
-    const methods = await this.getById(methodId)
-    if (!methods || !methods.length) {
+    const method = await this.getByPk(methodId)
+    if (!method) {
       return { success: false, error: 'Method not found.' }
     }
-    const method = methods[0]
 
     if (reqBody.name !== undefined) {
       method.name = reqBody.name.trim()
@@ -174,56 +91,32 @@ class MethodService {
     }
 
     await method.save()
-    await this.populate(method)
 
     return { success: true, body: method }
   }
 
-  async addOrRemoveSubmission (isAdd, methodId, submissionId) {
-    const methods = await this.getById(methodId)
-    if (!methods || !methods.length || methods[0].isDeleted()) {
+  async addOrRemoveSubmission (isAdd, methodId, submissionId, userId) {
+    const method = await this.getByPk(methodId)
+    if (!method) {
       return { success: false, error: 'Method not found.' }
     }
-    const method = methods[0]
 
-    const submissions = await submissionService.getBySubmissionId(submissionId)
-    if (!submissions || !submissions.length || submissions[0].isDeleted()) {
+    let submission = await submissionService.getByPk(submissionId)
+    if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
-    const submission = submissions[0]
-
-    const msi = method.submissions.indexOf(submission._id)
-    const smi = submission.methods.indexOf(method._id)
 
     if (isAdd) {
-      if (msi === -1) {
-        method.submissions.push(submission._id)
-      }
-      if (smi === -1) {
-        submission.methods.push(method._id)
-      }
+      await submissionMethodRefService.createOrFetch(submission.id, userId, method.id)
     } else {
-      if (msi > -1) {
-        method.submissions.splice(msi, 1)
-      }
-      if (smi > -1) {
-        submission.methods.splice(smi, 1)
+      const ref = await submissionMethodRefService.getByFks(submission.id, method.id)
+      if (ref) {
+        await submissionMethodRefService.deleteByPk(ref.id)
       }
     }
 
-    await method.save()
-    await submission.save()
-
-    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    let i = 0
-    while (i < submission.results.length) {
-      if (submission.results[i].isDeleted()) {
-        submission.results.splice(i, 1)
-      } else {
-        await submission.results[i].populate('task').populate('method').execPopulate()
-        i++
-      }
-    }
+    submission = await submissionService.getEagerByPk(submissionId)
+    submission = await submissionService.populate(submission, userId)
 
     return { success: true, body: submission }
   }

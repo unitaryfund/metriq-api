@@ -62,13 +62,13 @@ exports.delete = async function (req, res) {
 
 exports.newMethod = async function (req, res) {
   routeWrapper(res,
-    async () => await methodService.addOrRemoveSubmission(true, req.params.methodId, req.params.submissionId),
+    async () => await methodService.addOrRemoveSubmission(true, req.params.methodId, req.params.submissionId, req.user.id),
     'Successfully added method to submission.')
 }
 
 exports.deleteMethod = async function (req, res) {
   routeWrapper(res,
-    async () => await methodService.addOrRemoveSubmission(false, req.params.methodId, req.params.submissionId),
+    async () => await methodService.addOrRemoveSubmission(false, req.params.methodId, req.params.submissionId, req.user.id),
     'Successfully removed method from submission.')
 }
 
@@ -86,13 +86,13 @@ exports.deleteTag = async function (req, res) {
 
 exports.newTask = async function (req, res) {
   routeWrapper(res,
-    async () => await taskService.addOrRemoveSubmission(true, req.params.taskId, req.params.submissionId),
+    async () => await taskService.addOrRemoveSubmission(true, req.params.taskId, req.params.submissionId, req.user.id),
     'Successfully added task to submission.')
 }
 
 exports.deleteTask = async function (req, res) {
   routeWrapper(res,
-    async () => await taskService.addOrRemoveSubmission(false, req.params.taskId, req.params.submissionId),
+    async () => await taskService.addOrRemoveSubmission(false, req.params.taskId, req.params.submissionId, req.user.id),
     'Successfully removed task from submission.')
 }
 

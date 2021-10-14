@@ -1,77 +1,49 @@
 // submissionModel.js
 
-const config = require('./../config')
-const mongoose = require('mongoose')
+const config = require('../config')
+const { Sequelize, Model, DataTypes } = require('sequelize')
+const sequelize = new Sequelize(config.pgConnectionString, { logging: false })
+const Like = require('./likeModel').Like
+const User = require('./userModel').User
+const SubmissionMethodRef = require('./submissionMethodRefModel').SubmissionMethodRef
+const SubmissionTaskRef = require('./submissionTaskRefModel').SubmissionTaskRef
+const SubmissionTagRef = require('./submissionTagRefModel').SubmissionTagRef
 
-// Set up schema.
-const submissionSchema = mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
-    required: true,
-    index: true
+class Submission extends Model {
+  approve () {
+    this.approvedAt = new Date()
+  }
+}
+Submission.init({
+  name: {
+    type: DataTypes.TEXT,
+    allowNull: false
   },
-  submissionName: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  submissionNameNormal: {
-    type: String,
-    required: true,
-    unique: true
+  nameNormal: {
+    type: DataTypes.TEXT,
+    allowNull: false
   },
   description: {
-    type: String
+    type: DataTypes.TEXT,
+    allowNull: false
   },
-  submittedDate: {
-    type: Date,
-    required: true
+  contentUrl: {
+    type: DataTypes.TEXT,
+    allowNull: false
   },
-  submissionContentUrl: {
-    type: String,
-    required: true
+  thumbnailUrl: {
+    type: DataTypes.TEXT
   },
-  submissionThumbnailUrl: {
-    type: String,
-    default: null
-  },
-  approvedDate: {
-    type: Date,
-    default: null
-  },
-  deletedDate: {
-    type: Date,
-    default: null
-  },
-  upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
-  tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'tag' }],
-  methods: [{ type: mongoose.Schema.Types.ObjectId, ref: 'method' }],
-  tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'task' }],
-  results: [{ type: mongoose.Schema.Types.ObjectId, ref: 'result' }]
-}, { autoIndex: config.isDebug, optimisticConcurrency: true })
+  approvedAt: {
+    type: DataTypes.DATE
+  }
+}, { sequelize, modelName: 'submission' })
 
-submissionSchema.methods.softDelete = function () {
-  this.deletedDate = new Date()
-}
-submissionSchema.methods.isDeleted = function () {
-  return !!(this.deletedDate)
-}
-submissionSchema.methods.getUpvoteCount = function () {
-  return this.upvotes.length
-}
-submissionSchema.methods.getAgeTicks = function () {
-  return (new Date().getTime() - this.approvedDate.getTime())
-}
-submissionSchema.methods.getUpvoteRate = function () {
-  return this.getUpvoteCount() / this.getAgeTicks()
-}
-submissionSchema.methods.approve = function () {
-  this.approvedDate = new Date()
-}
+User.hasMany(Submission)
 
-// Export Submission model.
-const Submission = module.exports = mongoose.model('submission', submissionSchema)
-module.exports.get = function (callback, limit) {
-  Submission.find(callback).limit(limit)
-}
+Submission.hasMany(Like)
+Submission.hasMany(SubmissionMethodRef)
+Submission.hasMany(SubmissionTaskRef)
+Submission.hasMany(SubmissionTagRef)
+
+module.exports.Submission = Submission

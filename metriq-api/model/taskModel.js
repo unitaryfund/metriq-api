@@ -1,48 +1,27 @@
 // taskModel.js
 
-const config = require('./../config')
-const mongoose = require('mongoose')
+const config = require('../config')
+const { Sequelize, Model, DataTypes } = require('sequelize')
+const sequelize = new Sequelize(config.pgConnectionString, { logging: false })
+const User = require('./userModel').User
 
-// Set up schema.
-const taskSchema = mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
-    required: true
-  },
+class Task extends Model {}
+Task.init({
   name: {
-    type: String,
-    required: true
+    type: DataTypes.TEXT,
+    allowNull: false
   },
   fullName: {
-    type: String,
-    required: true
+    type: DataTypes.TEXT,
+    allowNull: false
   },
   description: {
-    type: String,
-    required: true
-  },
-  submittedDate: {
-    type: Date,
-    required: true,
-    default: new Date()
-  },
-  deletedDate: {
-    type: Date,
-    default: null
-  },
-  submissions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'submission' }]
-}, { autoIndex: config.isDebug, optimisticConcurrency: true })
+    type: DataTypes.TEXT,
+    allowNull: false
+  }
+}, { sequelize, modelName: 'task' })
 
-taskSchema.methods.softDelete = function () {
-  this.deletedDate = new Date()
-}
-taskSchema.methods.isDeleted = function () {
-  return !!(this.deletedDate)
-}
+User.hasMany(Task)
+Task.belongsTo(Task)
 
-// Export Task model.
-const Task = module.exports = mongoose.model('task', taskSchema)
-module.exports.get = function (callback, limit) {
-  Task.find(callback).limit(limit)
-}
+module.exports.Task = Task

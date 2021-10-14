@@ -1,11 +1,11 @@
 // submissionService.js
 
-const mongoose = require('mongoose')
+const { Op } = require('sequelize')
 
 // Data Access Layer
-const MongooseService = require('./mongooseService')
+const ModelService = require('./modelService')
 // Database Model
-const SubmissionModel = require('../model/submissionModel')
+const Submission = require('../model/submissionModel').Submission
 
 // For email
 const config = require('./../config')
@@ -16,79 +16,127 @@ const UserService = require('./userService')
 const userService = new UserService()
 const TagService = require('./tagService')
 const tagService = new TagService()
+const LikeService = require('./likeService')
+const likeService = new LikeService()
+const SubmissionTagRefService = require('./submissionTagRefService')
+const submissionTagRefService = new SubmissionTagRefService()
 
-// Model dependencies
-require('../model/methodModel')
-require('../model/resultModel')
-require('../model/taskModel')
+// Aggregation
+const { Sequelize } = require('sequelize')
+const sequelize = new Sequelize(config.pgConnectionString)
 
-class SubmissionService {
+class SubmissionService extends ModelService {
   constructor () {
-    this.MongooseServiceInstance = new MongooseService(SubmissionModel)
+    super(Submission)
   }
 
-  async create (submissionToCreate) {
-    try {
-      const result = await this.MongooseServiceInstance.create(submissionToCreate)
-      return { success: true, body: result }
-    } catch (err) {
-      return { success: false, error: err }
-    }
+  sqlLike (userId, sortColumn, isDesc, limit, offset) {
+    return 'SELECT submissions.*, CAST("upvotesCount" AS integer) AS "upvotesCount", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
+        '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
+        '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
+        '    WHERE submissions."approvedAt" IS NOT NULL ' +
+        '    GROUP BY submissions.id) as sl ' +
+        'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
+        'ORDER BY ' + sortColumn + (isDesc ? ' DESC ' : ' ASC ') +
+        'LIMIT ' + limit + ' OFFSET ' + offset
   }
 
-  async getBySubmissionId (submissionId) {
-    return await this.MongooseServiceInstance.find({ _id: submissionId })
+  sqlTagLike (tagId, userId, sortColumn, isDesc, limit, offset) {
+    return 'SELECT submissions.*, CAST("upvotesCount" AS integer) AS "upvotesCount", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
+        '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
+        '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
+        '    LEFT JOIN "submissionTagRefs" on "submissionTagRefs"."submissionId" = submissions.id AND "submissionTagRefs"."tagId" = ' + tagId + ' ' +
+        '    WHERE submissions."approvedAt" IS NOT NULL and "submissionTagRefs".id IS NOT NULL ' +
+        '    GROUP BY submissions.id) as sl ' +
+        'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
+        'ORDER BY ' + sortColumn + (isDesc ? ' DESC ' : ' ASC ') +
+        'LIMIT ' + limit + ' OFFSET ' + offset
   }
 
-  async getBySubmissionName (submissionName) {
-    return await this.MongooseServiceInstance.find({ submissionNameNormal: submissionName.trim().toLowerCase() })
+  sqlTrending (userId, sortColumn, isDesc, limit, offset) {
+    return 'SELECT submissions.*, CAST("upvotesCount" AS integer) AS "upvotesCount", ("upvotesCount" * 3600000) / EXTRACT(EPOCH FROM (CURRENT_DATE - "createdAt")) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
+        '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
+        '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
+        '    WHERE submissions."approvedAt" IS NOT NULL ' +
+        '    GROUP BY submissions.id) as sl ' +
+        'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
+        'ORDER BY ' + sortColumn + (isDesc ? ' DESC ' : ' ASC ') +
+        'LIMIT ' + limit + ' OFFSET ' + offset
   }
 
-  async getBySubmissionNameOrId (submissionNameOrId) {
-    let submission = await this.getBySubmissionId(submissionNameOrId)
-    if (!submission || !submission.length) {
-      submission = await this.getBySubmissionName(submissionNameOrId)
-    }
-    return submission
+  sqlTagTrending (tagId, userId, sortColumn, isDesc, limit, offset) {
+    return 'SELECT submissions.*, CAST("upvotesCount" AS integer) AS "upvotesCount", ("upvotesCount" * 3600000) / (CURRENT_DATE::DATE - "createdAt"::DATE) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
+        '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
+        '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
+        '    LEFT JOIN "submissionTagRefs" on "submissionTagRefs"."submissionId" = submissions.id AND "submissionTagRefs"."tagId" = ' + tagId + ' ' +
+        '    WHERE submissions."approvedAt" IS NOT NULL and "submissionTagRefs".id IS NOT NULL ' +
+        '    GROUP BY submissions.id) as sl ' +
+        'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
+        'ORDER BY ' + sortColumn + (isDesc ? ' DESC ' : ' ASC ') +
+        'LIMIT ' + limit + ' OFFSET ' + offset
+  }
+
+  sqlByTask (taskId) {
+    return 'SELECT s.*, CAST(l."upvoteCount" AS integer) AS "upvoteCount" FROM submissions AS s ' +
+        '    RIGHT JOIN public."submissionTaskRefs" AS str ON s.id = str."submissionId" ' +
+        '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
+        '    WHERE str."deletedAt" IS NULL AND str."taskId" = ' + taskId
+  }
+
+  sqlByMethod (methodId) {
+    return 'SELECT s.*, CAST(l."upvoteCount" AS integer) AS "upvoteCount" FROM submissions AS s ' +
+        '    RIGHT JOIN public."submissionMethodRefs" AS str ON s.id = str."submissionId" ' +
+        '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
+        '    WHERE str."deletedAt" IS NULL AND str."methodId" = ' + methodId
+  }
+
+  async getEagerByPk (submissionId) {
+    return await this.SequelizeServiceInstance.findOneEager({ id: submissionId })
+  }
+
+  async getByName (submissionName) {
+    const nameNormal = submissionName.trim().toLowerCase()
+    return await this.SequelizeServiceInstance.findOne({ nameNormal: nameNormal })
+  }
+
+  async getByNameOrId (submissionNameOrId) {
+    return await this.SequelizeServiceInstance.findOne({ [Op.or]: [{ id: submissionNameOrId }, { nameNormal: submissionNameOrId.toString().trim().toLowerCase() }] })
+  }
+
+  async getEagerByNameOrId (submissionNameOrId) {
+    return await this.SequelizeServiceInstance.findOneEager({ [Op.or]: [{ id: submissionNameOrId }, { nameNormal: submissionNameOrId.toString().trim().toLowerCase() }] })
+  }
+
+  async getByTaskId (taskId) {
+    const result = (await sequelize.query(this.sqlByTask(taskId)))[0]
+    return { success: true, body: result }
+  }
+
+  async getByMethodId (methodId) {
+    const result = (await sequelize.query(this.sqlByMethod(methodId)))[0]
+    return { success: true, body: result }
   }
 
   async get (submissionNameOrId) {
-    let submissionResult = []
-    try {
-      submissionResult = await this.getBySubmissionNameOrId(submissionNameOrId)
-      if (!submissionResult || !submissionResult.length) {
-        return { success: false, error: 'Submission not found' }
-      }
-    } catch (err) {
-      return { success: false, error: err }
-    }
-
-    const submission = submissionResult[0]
-
-    if (submission.isDeleted()) {
-      return { success: false, error: 'Submission not found.' }
-    }
-
+    const submission = await this.getByNameOrId(submissionNameOrId)
     return { success: true, body: submission }
   }
 
   async getSanitized (submissionNameOrId, userId) {
-    const result = await this.get(submissionNameOrId)
-    if (!result.success) {
-      return result
+    let submission = await this.getEagerByNameOrId(submissionNameOrId)
+    if (!submission) {
+      return { success: false, error: 'Submission name or ID not found.' }
     }
-    let submission = result.body
     submission = await this.populate(submission, userId)
 
     return { success: true, body: submission }
   }
 
   async approve (submissionId) {
-    const submissionResult = this.get(submissionId)
-    if (!submissionResult.success) {
-      return submissionResult
+    const submission = this.getByNameOrId(submissionId)
+    if (!submission) {
+      return { success: false, error: 'Submission name or ID not found.' }
     }
-    const submission = submissionResult.body
     submission.approve()
     await submission.save()
 
@@ -96,62 +144,53 @@ class SubmissionService {
   }
 
   async deleteIfOwner (userId, submissionId) {
-    let submissionResult = []
-    try {
-      submissionResult = await this.getBySubmissionId(submissionId)
-      if (!submissionResult || !submissionResult.length) {
-        return { success: false, error: 'Submission not found.' }
-      }
-    } catch (err) {
-      return { success: false, error: err }
-    }
-
-    const submissionToDelete = submissionResult[0]
-
-    if (submissionToDelete.isDeleted()) {
+    const submission = await this.getByPk(submissionId)
+    if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
 
-    if (toString(submissionToDelete.user) !== toString(userId)) {
+    if (toString(submission.userId) !== toString(userId)) {
       return { success: false, error: 'Insufficient privileges to delete submission.' }
     }
 
-    submissionToDelete.softDelete()
-    await submissionToDelete.save()
+    await submission.destroy()
 
-    return { success: true, body: await submissionToDelete }
+    return { success: true, body: submission }
   }
 
   async populate (submission, userId) {
-    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    let i = 0
-    while (i < submission.results.length) {
-      if (submission.results[i].isDeleted()) {
-        submission.results.splice(i, 1)
-      } else {
-        await submission.results[i].populate('task').populate('method').execPopulate()
-        i++
+    const toRet = { ...submission }
+    toRet.isUpvoted = toRet.likes.length ? (toRet.likes.find(like => like.userId === userId) !== undefined) : false
+
+    toRet.tags = []
+    for (let i = 0; i < toRet.submissionTagRefs.length; i++) {
+      toRet.tags.push(await toRet.submissionTagRefs[i].getTag())
+    }
+    delete toRet.submissionTagRefs
+
+    toRet.methods = []
+    toRet.results = []
+    for (let i = 0; i < toRet.submissionMethodRefs.length; i++) {
+      toRet.methods.push(await toRet.submissionMethodRefs[i].getMethod())
+      const results = await toRet.submissionMethodRefs[i].getResults()
+      for (let j = 0; j < results.length; j++) {
+        results[j] = results[j].dataValues
+        results[j].method = toRet.methods[i]
+      }
+      toRet.results.push(...results)
+    }
+    delete toRet.submissionMethodRefs
+
+    toRet.tasks = []
+    for (let i = 0; i < toRet.submissionTaskRefs.length; i++) {
+      toRet.tasks.push(await toRet.submissionTaskRefs[i].getTask())
+      for (let j = 0; j < toRet.results.length; j++) {
+        if (toRet.submissionTaskRefs[i].id === toRet.results[j].submissionTaskRefId) {
+          toRet.results[j].task = toRet.tasks[i]
+        }
       }
     }
-
-    const toRet = {
-      _id: submission._id,
-      submissionThumbnailUrl: submission.submissionThumbnailUrl,
-      approvedDate: submission.approvedDate,
-      deletedDate: submission.deletedDate,
-      tags: submission.tags,
-      methods: submission.methods,
-      tasks: submission.tasks,
-      results: submission.results,
-      user: submission.user,
-      submissionName: submission.submissionName,
-      submissionNameNormal: submission.submissionNameNormal,
-      description: submission.description,
-      submittedDate: submission.submittedDate,
-      submissionContentUrl: submission.submissionContentUrl,
-      isUpvoted: submission.upvotes.includes(mongoose.Types.ObjectId(userId)),
-      upvotesCount: submission.upvotes.length
-    }
+    delete toRet.submissionTaskRefs
 
     return toRet
   }
@@ -162,41 +201,35 @@ class SubmissionService {
       return validationResult
     }
 
-    const users = await userService.getByUserId(userId)
-    if (!users || !users.length) {
+    const user = await userService.getByPk(userId)
+    if (!user) {
       return { success: false, error: 'User not found.' }
     }
-    const user = users[0]
 
-    const submission = await this.MongooseServiceInstance.new()
-    submission.user = userId
-    submission.submissionName = reqBody.submissionName.trim()
-    submission.submissionNameNormal = reqBody.submissionName.trim().toLowerCase()
-    submission.submittedDate = new Date()
-    submission.submissionContentUrl = reqBody.submissionContentUrl.trim()
-    submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl ? reqBody.submissionThumbnailUrl.trim() : null
+    const submission = await this.SequelizeServiceInstance.new()
+    submission.userId = userId
+    submission.name = reqBody.name.trim()
+    submission.nameNormal = reqBody.name.trim().toLowerCase()
+    submission.contentUrl = reqBody.contentUrl.trim()
+    submission.thumbnailUrl = reqBody.thumbnailUrl ? reqBody.thumbnailUrl.trim() : null
     submission.description = reqBody.description ? reqBody.description.trim() : ''
 
     const result = await this.create(submission)
     if (!result.success) {
       return result
     }
+    await submission.save()
 
-    const tags = []
     if (reqBody.tags) {
       const tagSplit = reqBody.tags.split(',')
       for (let i = 0; i < tagSplit.length; i++) {
         const tag = tagSplit[i].trim().toLowerCase()
         if (tag) {
-          const tagModel = await tagService.createOrFetch(tag)
-          tagModel.submissions.push(submission._id)
-          await tagModel.save()
-          tags.push(tagModel._id)
+          const tagModel = (await tagService.createOrFetch(tag, userId)).body
+          await submissionTagRefService.createOrFetch(submission.id, userId, tagModel.id)
         }
       }
     }
-    submission.tags = tags
-    await submission.save()
 
     if (!sendEmail) {
       return result
@@ -233,11 +266,10 @@ class SubmissionService {
   }
 
   async update (submissionId, reqBody, userId) {
-    const submissions = await this.getBySubmissionId(submissionId)
-    if (!submissions || !submissions.length) {
+    let submission = await this.getByPk(submissionId)
+    if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
-    let submission = submissions[0]
 
     if (reqBody.submissionThumbnailUrl !== undefined) {
       submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl.trim() ? reqBody.submissionThumbnailUrl.trim() : null
@@ -247,27 +279,27 @@ class SubmissionService {
     }
     await submission.save()
 
+    submission = await this.getEagerByPk(submissionId)
     submission = await this.populate(submission, userId)
-
     return { success: true, body: submission }
   }
 
   async validateSubmission (reqBody) {
-    if (!reqBody.submissionName) {
+    if (!reqBody.name) {
       return { success: false, error: 'Submission name cannot be blank.' }
     }
 
-    if (!reqBody.submissionContentUrl || !reqBody.submissionContentUrl.trim()) {
+    if (!reqBody.contentUrl || !reqBody.contentUrl.trim()) {
       return { success: false, error: 'Submission content URL cannot be blank.' }
     }
 
-    const tlSubmissionName = reqBody.submissionName.trim().toLowerCase()
-    if (tlSubmissionName.length === 0) {
+    const tlName = reqBody.name.trim().toLowerCase()
+    if (tlName.length === 0) {
       return { success: false, error: 'Submission name cannot be blank.' }
     }
 
-    const submissionNameMatch = await this.getBySubmissionName(tlSubmissionName)
-    if (submissionNameMatch.length > 0) {
+    const nameMatch = await this.getByName(tlName)
+    if (nameMatch) {
       return { success: false, error: 'Submission name already in use.' }
     }
 
@@ -275,210 +307,102 @@ class SubmissionService {
   }
 
   async upvote (submissionId, userId) {
-    const submissions = await this.getBySubmissionId(submissionId)
-    if (!submissions || !submissions.length) {
+    let submission = await this.getByPk(submissionId)
+    if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
-    let submission = submissions[0]
 
-    const userResponse = await userService.get(userId)
-    if (!userResponse.success) {
+    const user = await userService.getByPk(userId)
+    if (!user) {
       return { success: false, error: 'User not found.' }
     }
-    const user = userResponse.body
 
-    const index = submission.upvotes.indexOf(user._id)
-    if (index >= 0) {
-      submission.upvotes.splice(index, 1)
+    let like = await likeService.getByFks(submission.id, user.id, user.id)
+    if (like) {
+      await likeService.deleteByPk(like.id)
     } else {
-      submission.upvotes.push(user._id)
+      like = await likeService.createOrFetch(submission.id, user.id, user.id)
     }
-    await submission.save()
 
-    submission = await this.populate(submission, user._id)
-
+    submission = await this.getEagerByPk(submissionId)
+    submission = await this.populate(submission, userId)
     return { success: true, body: submission }
   }
 
   async getByUserId (userId, startIndex, count) {
-    const oid = mongoose.Types.ObjectId(userId)
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { user: oid, deletedDate: null } },
-      { $sort: { submittedDate: -1 } }
-    ]).skip(startIndex).limit(count)
+    const result = await this.SequelizeServiceInstance.findAndSort({ userId: userId }, [['createdAt', 'DESC']], startIndex, count)
     return { success: true, body: result }
   }
 
   async getTrending (startIndex, count, userId) {
-    const millisPerHour = 1000 * 60 * 60
-    const oid = userId ? mongoose.Types.ObjectId(userId) : null
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, approvedDate: { $ne: null } } },
-      {
-        $addFields: {
-          upvotesCount: { $size: '$upvotes' },
-          isUpvoted: { $in: [oid, '$upvotes'] },
-          upvotesPerHour: {
-            $divide: [
-              { $multiply: [{ $size: '$upvotes' }, millisPerHour] },
-              { $subtract: [new Date(), '$approvedDate'] }
-            ]
-          }
-        }
-      },
-      { $project: { upvotes: 0 } },
-      { $sort: { upvotesPerHour: -1 } }
-    ]).skip(startIndex).limit(count)
+    const result = (await sequelize.query(this.sqlTrending(userId, '"upvotesPerHour"', true, count, startIndex)))[0]
     return { success: true, body: result }
   }
 
   async getLatest (startIndex, count, userId) {
-    const oid = userId ? mongoose.Types.ObjectId(userId) : null
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, approvedDate: { $ne: null } } },
-      {
-        $addFields: {
-          upvotesCount: { $size: '$upvotes' },
-          isUpvoted: { $in: [oid, '$upvotes'] }
-        }
-      },
-      { $project: { upvotes: 0 } },
-      { $sort: { submittedDate: -1 } }
-    ]).skip(startIndex).limit(count)
+    const result = (await sequelize.query(this.sqlLike(userId, 'submissions."createdAt"', true, count, startIndex)))[0]
     return { success: true, body: result }
   }
 
   async getPopular (startIndex, count, userId) {
-    const oid = userId ? mongoose.Types.ObjectId(userId) : null
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, approvedDate: { $ne: null } } },
-      {
-        $addFields: {
-          upvotesCount: { $size: '$upvotes' },
-          isUpvoted: { $in: [oid, '$upvotes'] }
-        }
-      },
-      { $project: { upvotes: 0 } },
-      { $sort: { upvotesCount: -1 } }
-    ]).skip(startIndex).limit(count)
+    const result = (await sequelize.query(this.sqlLike(userId, '"upvotesCount"', true, count, startIndex)))[0]
     return { success: true, body: result }
   }
 
   async getTrendingByTag (tagName, startIndex, count, userId) {
-    const millisPerHour = 1000 * 60 * 60
-    const oid = userId ? mongoose.Types.ObjectId(userId) : null
-
     const tag = await tagService.getByName(tagName)
-    if (!tag || !tag.length) {
+    if (!tag) {
       return { success: false, error: 'Category not found' }
     }
-    const tagId = tag[0]._id
+    const tagId = tag.id
 
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
-      {
-        $addFields: {
-          upvotesCount: { $size: '$upvotes' },
-          isUpvoted: { $in: [oid, '$upvotes'] },
-          upvotesPerHour: {
-            $divide: [
-              { $multiply: [{ $size: '$upvotes' }, millisPerHour] },
-              { $subtract: [new Date(), '$approvedDate'] }
-            ]
-          }
-        }
-      },
-      { $project: { upvotes: 0 } },
-      { $sort: { upvotesPerHour: -1 } }
-    ]).skip(startIndex).limit(count)
-    return { success: true, body: result }
-  }
-
-  async getPopularByTag (tagName, startIndex, count, userId) {
-    const tag = await tagService.getByName(tagName)
-    if (!tag || !tag.length) {
-      return { success: false, error: 'Category not found' }
-    }
-    const tagId = tag[0]._id
-
-    const oid = userId ? mongoose.Types.ObjectId(userId) : null
-
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
-      {
-        $addFields: {
-          upvotesCount: { $size: '$upvotes' },
-          isUpvoted: { $in: [oid, '$upvotes'] }
-        }
-      },
-      { $project: { upvotes: 0 } },
-      { $sort: { upvotesCount: -1 } }
-    ]).skip(startIndex).limit(count)
+    const result = (await sequelize.query(this.sqlTagTrending(tagId, userId, '"upvotesPerHour"', true, count, startIndex)))[0]
     return { success: true, body: result }
   }
 
   async getLatestByTag (tagName, startIndex, count, userId) {
     const tag = await tagService.getByName(tagName)
-    if (!tag || !tag.length) {
+    if (!tag) {
       return { success: false, error: 'Category not found' }
     }
-    const tagId = tag[0]._id
+    const tagId = tag.id
 
-    const oid = userId ? mongoose.Types.ObjectId(userId) : null
+    const result = (await sequelize.query(this.sqlTagLike(tagId, userId, 'submissions."createdAt"', true, count, startIndex)))[0]
+    return { success: true, body: result }
+  }
 
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null, approvedDate: { $ne: null }, $expr: { $in: [tagId, '$tags'] } } },
-      {
-        $addFields: {
-          upvotesCount: { $size: '$upvotes' },
-          isUpvoted: { $in: [oid, '$upvotes'] }
-        }
-      },
-      { $project: { upvotes: 0 } },
-      { $sort: { submittedDate: -1 } }
-    ]).skip(startIndex).limit(count)
+  async getPopularByTag (tagName, startIndex, count, userId) {
+    const tag = await tagService.getByName(tagName)
+    if (!tag) {
+      return { success: false, error: 'Category not found' }
+    }
+    const tagId = tag.id
+
+    const result = (await sequelize.query(this.sqlTagLike(tagId, userId, '"upvotesCount"', true, count, startIndex)))[0]
     return { success: true, body: result }
   }
 
   async addOrRemoveTag (isAdd, submissionId, tagName, userId) {
-    const submissions = await this.getBySubmissionId(submissionId)
-    if (!submissions || !submissions.length || submissions[0].isDeleted()) {
+    let submission = await this.getByPk(submissionId)
+    if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
-    let submission = submissions[0]
 
-    let tag = {}
     if (isAdd) {
-      tag = await tagService.createOrFetch(tagName)
+      const tag = (await tagService.createOrFetch(tagName, userId)).body
+      await submissionTagRefService.createOrFetch(submission.id, userId, tag.id)
     } else {
-      const tags = await tagService.getByName(tagName)
-      if (!tags || !tags.length || tags[0].isDeleted()) {
+      const tag = await tagService.getByName(tagName)
+      if (!tag) {
         return { success: false, error: 'Tag not found.' }
       }
-      tag = tags[0]
-    }
-
-    const tsi = tag.submissions.indexOf(submission._id)
-    const sti = submission.tags.indexOf(tag._id)
-
-    if (isAdd) {
-      if (tsi === -1) {
-        tag.submissions.push(submission._id)
-      }
-      if (sti === -1) {
-        submission.tags.push(tag._id)
-      }
-    } else {
-      if (tsi > -1) {
-        tag.submissions.splice(tsi, 1)
-      }
-      if (sti > -1) {
-        submission.tags.splice(sti, 1)
+      const ref = await submissionTagRefService.getByFks(submission.id, tag.id)
+      if (ref) {
+        await submissionTagRefService.deleteByPk(ref.id)
       }
     }
 
-    await tag.save()
-    await submission.save()
+    submission = await this.getEagerByPk(submissionId)
     submission = await this.populate(submission, userId)
 
     return { success: true, body: submission }

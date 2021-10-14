@@ -1,10 +1,7 @@
 // tests/register.test.js
 
-const mongoose = require('mongoose')
-
 const dbHandler = require('./db-handler')
 const UserService = require('../service/userService')
-const UserModel = require('../model/userModel')
 
 /**
  * Connect to a new in-memory database before running any tests.
@@ -120,7 +117,7 @@ const registration1Response = {
   usernameNormal: 'test1',
   passwordHash: '[REDACTED]',
   email: 'test@test.com',
-  dateJoined: expect.any(Date)
+  createdAt: expect.any(Date)
 }
 
 const registration2 = {

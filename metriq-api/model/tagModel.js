@@ -1,32 +1,18 @@
 // tagModel.js
 
-const config = require('./../config')
-const mongoose = require('mongoose')
+const config = require('../config')
+const { Sequelize, Model, DataTypes } = require('sequelize')
+const sequelize = new Sequelize(config.pgConnectionString, { logging: false })
+const User = require('./userModel').User
 
-// Set up schema.
-const tagSchema = mongoose.Schema({
+class Tag extends Model {}
+Tag.init({
   name: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true
-  },
-  deletedDate: {
-    type: Date,
-    default: null
-  },
-  submissions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'submission' }]
-}, { autoIndex: config.isDebug, optimisticConcurrency: true })
+    type: DataTypes.TEXT,
+    allowNull: false
+  }
+}, { sequelize, modelName: 'tag' })
 
-tagSchema.methods.softDelete = function () {
-  this.deletedDate = new Date()
-}
-tagSchema.methods.isDeleted = function () {
-  return !!(this.deletedDate)
-}
+User.hasMany(Tag)
 
-// Export Tag model.
-const Tag = module.exports = mongoose.model('tag', tagSchema)
-module.exports.get = function (callback, limit) {
-  Tag.find(callback).limit(limit)
-}
+module.exports.Tag = Tag

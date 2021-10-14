@@ -30,7 +30,7 @@ describe('user', () => {
         const loginResult = await userService.login(login1)
 
         // Act
-        const result = await userService.getSanitized(loginResult.body._id)
+        const result = await userService.getSanitized(loginResult.body.id)
 
         // Assert
         expect(result.body)
@@ -44,7 +44,7 @@ describe('user', () => {
         const loginResult = await userService.login(login1)
 
         // Act
-        const result = await userService.delete(loginResult.body._id)
+        const result = await userService.delete(loginResult.body.id)
 
         // Assert
         expect(result.success).toBe(true)
@@ -55,7 +55,7 @@ describe('user', () => {
         const userService = new UserService()
 
         // Act
-        const result = await userService.delete(undefinedUserId._id)
+        const result = await userService.delete(undefinedUserId.id)
 
         // Assert
         expect(result.success).toBe(false)
@@ -65,10 +65,10 @@ describe('user', () => {
         // Initialize
         const userService = new UserService()
         const registerResult = await userService.register(registration1)
-        await userService.delete(registerResult.body._id)
+        await userService.delete(registerResult.body.id)
 
         // Act
-        const result = await userService.delete(registerResult.body._id)
+        const result = await userService.delete(registerResult.body.id)
 
         // Assert
         expect(result.success).toBe(false)
@@ -78,8 +78,8 @@ describe('user', () => {
         // Initialize
         const userService = new UserService()
         const registerResult = await userService.register(registration1)
-        await userService.saveClientTokenForUserId(registerResult.body._id)
-        let getResult = await userService.get(registerResult.body._id)
+        await userService.saveClientTokenForUserId(registerResult.body.id)
+        let getResult = await userService.get(registerResult.body.id)
         let user = getResult.body
 
         // Act
@@ -97,7 +97,7 @@ describe('user', () => {
         // Initialize
         const userService = new UserService()
         const registerResult = await userService.register(registration2)
-        let getResult = await userService.get(registerResult.body._id)
+        let getResult = await userService.get(registerResult.body.id)
         let user = getResult.body
 
         // Act
@@ -138,7 +138,7 @@ const profile1 = {
 
 const undefinedUserId = {
     username: 'Test',
-    id: "60cbedcdf5cf30ca9d645ab7"
+    id: 1000
 }
 
 const recovery2 = {

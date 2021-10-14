@@ -1,96 +1,51 @@
 // tagService.js
 
 // Data Access Layer
-const MongooseService = require('./mongooseService')
+const ModelService = require('./modelService')
 // Database Model
-const TagModel = require('../model/tagModel')
+const Tag = require('../model/tagModel').Tag
 
-class TagService {
+// Aggregation
+const { Sequelize } = require('sequelize')
+const config = require('../config')
+const sequelize = new Sequelize(config.pgConnectionString)
+
+class TagService extends ModelService {
   constructor () {
-    this.MongooseServiceInstance = new MongooseService(TagModel)
-  }
-
-  async create (tagToCreate) {
-    try {
-      const result = await this.MongooseServiceInstance.create(tagToCreate)
-      return { success: true, body: result }
-    } catch (err) {
-      return { success: false, error: err }
-    }
-  }
-
-  async getById (tagId) {
-    return await this.MongooseServiceInstance.find({ _id: tagId })
+    super(Tag)
   }
 
   async getByName (tagName) {
-    return await this.MongooseServiceInstance.find({ name: tagName.trim().toLowerCase() })
+    return await this.SequelizeServiceInstance.findOne({ name: tagName.trim().toLowerCase() })
   }
 
   async getAllNames () {
-    const result = await this.MongooseServiceInstance.Collection.aggregate([{ $project: { name: true } }])
+    const result = await this.SequelizeServiceInstance.projectAll(['id', 'name'])
     return { success: true, body: result }
   }
 
   async getAllNamesAndCounts () {
-    const result = await this.MongooseServiceInstance.Collection.aggregate([
-      { $match: { deletedDate: null } },
-      {
-        $project: {
-          name: true,
-          submissions: true
-        }
-      },
-      { $addFields: { submissionCount: { $size: '$submissions' } } },
-      { $match: { submissionCount: { $gte: 1 } } },
-      {
-        $lookup: {
-          from: 'submissions',
-          localField: 'submissions',
-          foreignField: '_id',
-          as: 'submissionObjects'
-        }
-      },
-      {
-        $addFields: {
-          upvotes: {
-            $reduce: {
-              input: '$submissionObjects.upvotes',
-              initialValue: [],
-              in: { $concatArrays: ['$$value', '$$this'] }
-            }
-          }
-        }
-      },
-      {
-        $addFields: {
-          upvoteTotal: { $size: '$upvotes' }
-        }
-      },
-      {
-        $project: {
-          name: true,
-          submissionCount: true,
-          upvoteTotal: true
-        }
-      }
-    ])
+    const result = (await sequelize.query(
+      'SELECT tags.name as name, COUNT("submissionTagRefs".*) as "submissionCount", COUNT(likes.*) as "upvoteTotal" from "submissionTagRefs" ' +
+      'RIGHT JOIN tags on tags.id = "submissionTagRefs"."tagId" ' +
+      'LEFT JOIN likes on likes."submissionId" = "submissionTagRefs"."submissionId" ' +
+      'GROUP BY tags.id'
+    ))[0]
     return { success: true, body: result }
   }
 
-  async createOrFetch (tagName) {
-    let toReturn = {}
-    const tagGetResults = await this.getByName(tagName)
-    if (!tagGetResults || !tagGetResults.length) {
-      const tag = await this.MongooseServiceInstance.new()
+  async createOrFetch (tagName, userId) {
+    let tag = await this.getByName(tagName)
+
+    if (!tag) {
+      tag = await this.SequelizeServiceInstance.new()
       tag.name = tagName
-      toReturn = (await this.create(tag)).body
-      await toReturn.save()
-    } else {
-      toReturn = tagGetResults[0]
+      tag.userId = userId
+      tag = (await this.create(tag)).body
+      await tag.save()
     }
 
-    return toReturn
+    return { success: true, body: tag }
   }
 }
 

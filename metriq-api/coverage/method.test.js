@@ -26,7 +26,7 @@ describe('method', () => {
 
     it('can be created', async () => {
         // Initialize
-        const userId = (await (new UserService()).register(registration1)).body._id
+        const userId = (await (new UserService()).register(registration1)).body.id
         const methodService = new MethodService()
 
         // Act
@@ -38,31 +38,18 @@ describe('method', () => {
 
     it('can be listed', async () => {
         // Initialize
-        const userId = (await (new UserService()).register(registration1)).body._id
+        const userId = (await (new UserService()).register(registration1)).body.id
         const methodService = new MethodService()
         await methodService.submit(userId, method1)
 
         // Act
         const result = await methodService.getAllNamesAndCounts()
+        console.log(result)
         expect(result.body.length).toEqual(1)
 
         // Assert
         expect(result.success).toEqual(true)
     })
-
-    it('can be deleted', async () => {
-        // Initialize
-        const userId = (await (new UserService()).register(registration1)).body._id
-        const methodService = new MethodService()
-        const methodResult = await methodService.submit(userId, method1)
-
-        // Act
-        const result = await methodService.delete(methodResult.body._id)
-
-        // Assert
-        expect(result.success).toBe(true)
-    })
-
 })
 
 const registration1 = {

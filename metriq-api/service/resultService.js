@@ -1,9 +1,9 @@
 // resultService.js
 
 // Data Access Layer
-const MongooseService = require('./mongooseService')
+const ModelService = require('./modelService')
 // Database Model
-const ResultModel = require('../model/resultModel')
+const Result = require('../model/resultModel').Result
 
 // Service dependencies
 const SubmissionService = require('../service/submissionService')
@@ -12,107 +12,78 @@ const TaskService = require('../service/taskService')
 const taskService = new TaskService()
 const MethodService = require('../service/methodService')
 const methodService = new MethodService()
+const SubmissionTaskRefService = require('./submissionTaskRefService')
+const submissionTaskRefService = new SubmissionTaskRefService()
+const SubmissionMethodRefService = require('./submissionMethodRefService')
+const submissionMethodRefService = new SubmissionMethodRefService()
 
-class ResultService {
+class ResultService extends ModelService {
   constructor () {
-    this.MongooseServiceInstance = new MongooseService(ResultModel)
-  }
-
-  async create (resultToCreate) {
-    try {
-      const result = await this.MongooseServiceInstance.create(resultToCreate)
-      return { success: true, body: result }
-    } catch (err) {
-      return { success: false, error: err }
-    }
-  }
-
-  async get (resultId) {
-    return await this.MongooseServiceInstance.find({ _id: resultId })
+    super(Result)
   }
 
   async getBySubmissionId (submissionId) {
-    return await this.MongooseServiceInstance.find({ submission: submissionId })
+    return await this.SequelizeServiceInstance.findOne({ submission: submissionId })
   }
 
   async listMetricNames () {
-    return this.MongooseServiceInstance.Collection.distinct('metricName', {})
+    return this.SequelizeServiceInstance.distinctAll('metricName')
   }
 
   async submit (userId, submissionId, reqBody) {
-    const submissions = await submissionService.getBySubmissionId(submissionId)
-    if (!submissions || !submissions.length) {
+    let submission = await submissionService.getByPk(submissionId)
+    if (!submission) {
       return { success: false, error: 'Submission not found' }
     }
-    const submission = submissions[0]
-
-    const result = await this.MongooseServiceInstance.new()
-    result.user = userId
-    result.submission = submissionId
-    result.task = reqBody.task
-    result.method = reqBody.method
-    result.isHigherBetter = reqBody.isHigherBetter
-    result.metricName = reqBody.metricName
-    result.metricValue = reqBody.metricValue
-    result.evaluatedDate = reqBody.evaluatedDate
-    result.submittedDate = new Date()
 
     // Task must be not null and valid (present in database) for a valid result object.
-    if (result.task == null) {
+    if (reqBody.task === null) {
       return { success: false, error: 'Result requires task to be defined.' }
     }
-    try {
-      taskService.getById(result.task)
-    } catch (err) {
+    const task = await taskService.getByPk(reqBody.task)
+    if (!task) {
       return { success: false, error: 'Result requires task to be present in database.' }
     }
 
     // Method must be not null and valid (present in database) for a valid result object.
-    if (result.method == null) {
+    if (reqBody.method == null) {
       return { success: false, error: 'Result requires method to be defined.' }
     }
-    try {
-      methodService.getById(result.method)
-    } catch (err) {
+    const method = await methodService.getByPk(reqBody.method)
+    if (!method) {
       return { success: false, error: 'Result requires method to be present in database.' }
     }
+
+    const result = await this.SequelizeServiceInstance.new()
+    result.userId = userId
+    result.submissionId = submissionId
+    result.submissionTaskRefId = (await submissionTaskRefService.getByFks(submissionId, task.id)).id
+    result.submissionMethodRefId = (await submissionMethodRefService.getByFks(submissionId, method.id)).id
+    result.isHigherBetter = reqBody.isHigherBetter
+    result.metricName = reqBody.metricName
+    result.metricValue = reqBody.metricValue
+    result.evaluatedAt = reqBody.evaluatedAt
 
     const nResult = await this.create(result)
     if (!nResult.success) {
       return nResult
     }
 
-    submission.results.push(result._id)
-    submission.save()
-    await submission.populate('results').populate('tags').populate('methods').populate('tasks').execPopulate()
-    let i = 0
-    while (i < submission.results.length) {
-      if (submission.results[i].isDeleted()) {
-        submission.results.splice(i, 1)
-      } else {
-        await submission.results[i].populate('task').populate('method').execPopulate()
-        i++
-      }
-    }
+    submission = await submissionService.getEagerByPk(submissionId)
+    submission = await submissionService.populate(submission, userId)
 
     return { success: true, body: submission }
   }
 
   async delete (resultId) {
-    const resultResult = await this.get(resultId)
-    if (!resultResult || !resultResult.length) {
-      return { success: false, error: 'Result not found.' }
-    }
-    const result = resultResult[0]
-
-    if (result.isDeleted()) {
+    const result = await this.getByPk(resultId)
+    if (!result) {
       return { success: false, error: 'Result not found.' }
     }
 
-    result.softDelete()
-    await result.save()
+    await result.destroy()
 
-    return { success: true, body: await result }
+    return { success: true, body: result }
   }
 }
 

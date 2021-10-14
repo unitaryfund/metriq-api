@@ -5,9 +5,6 @@ config.isDebug = true
 config.app = {}
 config.app.port = process.env.PORT || 8080
 
-config.db = {}
-config.db.url = 'mongodb://localhost/metriq'
-
 config.web = {}
 config.web.url = config.isDebug ? 'localhost:3000' : 'metriq.info'
 config.web.protocol = config.isDebug ? 'http://' : 'https://'
@@ -38,5 +35,24 @@ config.supportEmail.password = process.env.METRIQ_SUPPORT_EMAIL_PASSWORD
 config.supportEmail.address = process.env.METRIQ_SUPPORT_EMAIL_ADDRESS
 
 config.defaultSubmissionThumbnailUrl = config.api.protocol + config.api.url + '/default.jpg'
+
+config.pgPool = (process.env.mode === 'TESTING')
+  ? {
+      user: 'metriq',
+      host: 'localhost',
+      database: 'metriqmock',
+      password: process.env.PGPASSWORD,
+      port: 5432
+    }
+  : {
+      user: 'metriq',
+      host: 'localhost',
+      database: 'metriq',
+      password: process.env.PGPASSWORD,
+      port: 5432
+    }
+
+config.pgConnectionString = 'postgres://' + config.pgPool.user + ':' + config.pgPool.password + '@' + config.pgPool.host + ':' + config.pgPool.port + '/' + config.pgPool.database
+config.pgMockCreateConnectionString = 'postgres://' + config.pgPool.user + ':' + config.pgPool.password + '@' + config.pgPool.host + ':' + config.pgPool.port + '/postgres'
 
 module.exports = config
