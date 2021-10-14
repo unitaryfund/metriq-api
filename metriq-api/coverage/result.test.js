@@ -8,7 +8,6 @@ const UserService = require('../service/userService.js')
 const SubmissionService = require('../service/submissionService.js')
 const SubmissionTaskRefService = require('../service/submissionTaskRefService.js')
 const SubmissionMethodRefService = require('../service/submissionMethodRefService.js');
-const SubmissionTagRefService = require('../service/submissionTagRefService');
 
 /**
  * Connect to a new in-memory database before running any tests.
