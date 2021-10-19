@@ -1,4 +1,5 @@
-// Get the connection string.
+process.env.METRIQ_MODE = undefined
+// Get the connection string
 const config = require('./config')
 // Import express
 const express = require('express')
