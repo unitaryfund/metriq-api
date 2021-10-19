@@ -36,15 +36,15 @@ config.supportEmail.address = process.env.METRIQ_SUPPORT_EMAIL_ADDRESS
 
 config.defaultSubmissionThumbnailUrl = config.api.protocol + config.api.url + '/default.jpg'
 
-config.pgPool = (process.env.mode === 'TESTING') ?
-    {
+config.pgPool = (process.env.METRIQ_MODE === 'TESTING')
+  ? {
       user: 'metriq',
       host: 'localhost',
       database: 'metriqmock',
       password: process.env.PGPASSWORD,
       port: 5432
-    } :
-    {
+    }
+  : {
       user: 'metriq',
       host: 'localhost',
       database: 'metriq',

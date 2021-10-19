@@ -23,7 +23,7 @@ truncateModels = async function() {
  * Connect to the in-memory database.
  */
 module.exports.connect = async () => {
-  process.env.mode = "TESTING"
+  process.env.METRIQ_MODE = "TESTING"
   await truncateModels()
 }
 
@@ -31,7 +31,7 @@ module.exports.connect = async () => {
  * Drop database, close the connection and stop mongod.
  */
 module.exports.closeDatabase = async () => {
-  process.env.mode = undefined
+  process.env.METRIQ_MODE = undefined
 }
 
 /**
