@@ -20,7 +20,7 @@ truncateModels = async function() {
 }
 
 /**
- * Connect to the in-memory database.
+ * Connect to the mock database and prep for tests.
  */
 module.exports.connect = async () => {
   process.env.METRIQ_MODE = "TESTING"
@@ -28,7 +28,7 @@ module.exports.connect = async () => {
 }
 
 /**
- * Drop database, close the connection and stop mongod.
+ * Clean up environment, after a test suite.
  */
 module.exports.closeDatabase = async () => {
   process.env.METRIQ_MODE = undefined
