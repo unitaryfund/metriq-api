@@ -9,13 +9,6 @@ on:
 
 jobs:
   deployment:
-    runs-on: ubuntu-latest
-    environment: qa
-    steps:
-      - name: deploy
-
-jobs:
-  deployment:
 
     runs-on: ubuntu-latest
     environment: qa
