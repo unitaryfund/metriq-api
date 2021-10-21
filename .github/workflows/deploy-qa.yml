@@ -24,7 +24,7 @@ jobs:
     - name: Deploy to QA
       run: |
         mkdir ~/.ssh
-        echo ${{ secrets.KNOWN_HOSTS }} > ~/.ssh/known_hosts
+        echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
         ssh ${{ secrets.QA_LOGIN }}
         cd GitHub/metriq-api
         git pull
