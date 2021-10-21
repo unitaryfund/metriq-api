@@ -14,13 +14,16 @@ jobs:
     environment: qa
 
     steps:
-    - name: Deploy to QA
-      shell: bash
+    - name: Setup SSH Keys and known_hosts
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} 
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
       run: |
-        echo "$SSH_PRIVATE_KEY" > key.pem
-        ssh -i key.pem ${{ secrets.QA_LOGIN }}
+        ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+        ssh-add - <<< "${{ secrets.SSH_PRIVATE_KEY }}"
+    
+    - name: Deploy to QA
+      run: |
+        ssh ${{ secrets.QA_LOGIN }}
         cd GitHub/metriq-api
         git pull
         cd metriq-api
@@ -28,5 +31,3 @@ jobs:
         cd ..
         cd metriq-app
         git pull
-        exit
-        rm key.pem
