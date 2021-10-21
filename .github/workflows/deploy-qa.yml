@@ -1,0 +1,40 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Metriq QA Deployment
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    environment: qa
+    steps:
+      - name: deploy
+
+jobs:
+  deployment:
+
+    runs-on: ubuntu-latest
+    environment: qa
+
+    steps:
+    - name: Setup SSH Keys and known_hosts
+        env:
+            SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+            ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+            ssh-add - <<< "${{ secrets.SSH_PRIVATE_KEY }}"
+    
+    - name: Deploy to QA
+        run: |
+            ssh ${{ secrets.QA_LOGIN }}
+            cd GitHub/metriq-api
+            git pull
+            cd metriq-api
+            git pull
+            cd ..
+            cd metriq-app
+            git pull
