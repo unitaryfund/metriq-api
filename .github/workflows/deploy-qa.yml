@@ -20,7 +20,7 @@ jobs:
       run: |
         ssh-agent -a $SSH_AUTH_SOCK > /dev/null
         ssh-add - <<< "${{ secrets.SSH_PRIVATE_KEY }}"
-    
+
     - name: Deploy to QA
       run: |
         ssh ${{ secrets.QA_LOGIN }}
