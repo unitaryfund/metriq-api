@@ -16,7 +16,7 @@ jobs:
     steps:
     - name: Deploy to QA
       run: |
-        cat ${{ secrets.SSH_PRIVATE_KEY }} > key.pem
+        echo ${{ secrets.SSH_PRIVATE_KEY }} > key.pem
         ssh -i key.pem ${{ secrets.QA_LOGIN }}
         cd GitHub/metriq-api
         git pull
