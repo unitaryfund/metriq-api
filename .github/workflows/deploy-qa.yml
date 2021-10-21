@@ -14,7 +14,7 @@ jobs:
     environment: qa
 
     steps:
-      name: Deploy to QA
+    - name: Deploy to QA
       shell: bash
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }} 
