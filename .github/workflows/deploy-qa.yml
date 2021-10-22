@@ -15,17 +15,22 @@ jobs:
 
     steps:
     - name: Setup SSH Keys and known_hosts
+      env:
+        KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        QA_SSH_USER: ${{ QA_SSH_USER }}
+        QA_IP_ADDRESS: ${{ QA_IP_ADDRESS }}
       run: |
         mkdir ~/.ssh
-        echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_metriq
+        echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_metriq
         chmod 400 ~/.ssh/id_metriq
         eval "$(ssh-agent -s)"
         ssh-add ~/.ssh/id_metriq
 
     - name: Deploy to QA
       run: |
-        ssh ${{ secrets.QA_LOGIN }}
+        ssh $QA_SSH_USER@$QA_IP_ADDRESS
         cd GitHub/metriq-api
         git pull
         cd metriq-api
