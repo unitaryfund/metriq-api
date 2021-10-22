@@ -18,8 +18,8 @@ jobs:
       env:
         KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        QA_SSH_USER: ${{ QA_SSH_USER }}
-        QA_IP_ADDRESS: ${{ QA_IP_ADDRESS }}
+        QA_SSH_USER: ${{ secrets.QA_SSH_USER }}
+        QA_IP_ADDRESS: ${{ secrets.QA_IP_ADDRESS }}
       run: |
         mkdir ~/.ssh
         echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
