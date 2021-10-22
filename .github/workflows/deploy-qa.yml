@@ -19,6 +19,7 @@ jobs:
         mkdir ~/.ssh
         echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_metriq
+        chmod 400 ~/.ssh/id_metriq
         eval "$(ssh-agent -s)"
         ssh-add ~/.ssh/id_metriq
 
