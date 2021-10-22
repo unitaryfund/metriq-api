@@ -16,6 +16,7 @@ jobs:
     steps:
     - name: Setup SSH Keys and known_hosts
       run: |
+        mkdir ~/.ssh
         echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_metriq
         eval "$(ssh-agent -s)"
