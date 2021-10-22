@@ -29,8 +29,8 @@ jobs:
         QA_SSH_USER: ${{ secrets.QA_SSH_USER }}
         QA_IP_ADDRESS: ${{ secrets.QA_IP_ADDRESS }}
       run: |
-        ssh -i ~/.ssh/id_metriq $QA_SSH_USER@$QA_IP_ADDRESS
-        cd GitHub/metriq-api
+        ssh -tt -i ~/.ssh/id_metriq $QA_SSH_USER@$QA_IP_ADDRESS
+        cd ~/GitHub/metriq-api
         git pull
         cd metriq-api
         git pull
