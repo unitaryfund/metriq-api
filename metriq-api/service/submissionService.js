@@ -77,10 +77,8 @@ class SubmissionService extends ModelService {
   }
 
   sqlByTask (taskId) {
-    return 'SELECT s.*, CAST(l."upvoteCount" AS integer) AS "upvoteCount" FROM submissions AS s ' +
-        '    RIGHT JOIN public."submissionTaskRefs" AS str ON s.id = str."submissionId" ' +
-        '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
-        '    WHERE str."deletedAt" IS NULL AND str."taskId" = ' + taskId
+    return 'SELECT "submissionId" FROM public."submissionTaskRefs" ' +
+        '    WHERE "deletedAt" IS NULL AND "taskId" = ' + taskId
   }
 
   sqlByMethod (methodId) {
