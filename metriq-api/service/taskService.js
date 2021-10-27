@@ -30,8 +30,11 @@ class TaskService extends ModelService {
     if (!task) {
       return { success: false, error: 'Task not found.' }
     }
-    task.dataValues.submissions = (await submissionService.getByTaskId(taskId)).body
-    console.log(task)
+    const submissionIds = (await submissionService.getByTaskId(taskId)).body
+    task.dataValues.submissions = []
+    for (let i = 0; i < submissionIds.length; i++) {
+      task.dataValues.submissions.push((await submissionService.getSanitized(submissionIds[i].submissionId, 1)).body)
+    }
     return { success: true, body: task }
   }
 
