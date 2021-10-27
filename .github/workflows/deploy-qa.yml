@@ -1,6 +1,5 @@
 # This workflow publish to QA by connecting to the environment via SSH and pulling all repos.
 # The web server instances will hotload the changes, as a result.
-# The repository shell scripts must be up-to-date, for automatic deployment.
 
 name: Metriq QA Deployment
 
@@ -30,4 +29,4 @@ jobs:
         QA_SSH_USER: ${{ secrets.QA_SSH_USER }}
         QA_IP_ADDRESS: ${{ secrets.QA_IP_ADDRESS }}
       run: |
-        ssh -i ~/.ssh/id_metriq $QA_SSH_USER@$QA_IP_ADDRESS /home/ubuntu/GitHub/metriq-api/metriq-pull.sh
+        ssh -i ~/.ssh/id_metriq $QA_SSH_USER@$QA_IP_ADDRESS ./GitHub/metriq-api/metriq-pull.sh
