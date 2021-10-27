@@ -1,4 +1,4 @@
-cd metriq-api
+cd /home/ubuntu/GitHub/metriq-api
 git stash
 git pull
 git stash apply
