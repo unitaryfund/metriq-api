@@ -1,5 +1,6 @@
 # This workflow publish to QA by connecting to the environment via SSH and pulling all repos.
 # The web server instances will hotload the changes, as a result.
+# The repository shell scripts must be up-to-date, for automatic deployment.
 
 name: Metriq QA Deployment
 
