@@ -16,8 +16,8 @@ jobs:
     steps:
     - name: Setup SSH Keys and known_hosts
       env:
-        KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        KNOWN_HOSTS: ${{ secrets.QA_KNOWN_HOSTS }}
+        SSH_PRIVATE_KEY: ${{ secrets.QA_SSH_PRIVATE_KEY }}
       run: |
         mkdir ~/.ssh
         echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
@@ -26,7 +26,7 @@ jobs:
 
     - name: Deploy to QA
       env:
-        QA_SSH_USER: ${{ secrets.QA_SSH_USER }}
-        QA_IP_ADDRESS: ${{ secrets.QA_IP_ADDRESS }}
+        SSH_USER: ${{ secrets.QA_SSH_USER }}
+        IP_ADDRESS: ${{ secrets.QA_IP_ADDRESS }}
       run: |
-        ssh -i ~/.ssh/id_metriq $QA_SSH_USER@$QA_IP_ADDRESS ./GitHub/metriq-api/metriq-pull.sh
+        ssh -i ~/.ssh/id_metriq $SSH_USER@$IP_ADDRESS ./GitHub/metriq-api/metriq-pull.sh
