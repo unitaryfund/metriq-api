@@ -158,7 +158,6 @@ class SubmissionService extends ModelService {
 
   async populate (submission, userId) {
     const toRet = { ...submission }
-    console.log(toRet.likes)
     toRet.isUpvoted = toRet.likes.length ? (toRet.likes.find(like => like.dataValues.userId === userId) !== undefined) : false
     toRet.upvotesCount = toRet.likes.length
     delete toRet.likes
