@@ -158,7 +158,9 @@ class SubmissionService extends ModelService {
 
   async populate (submission, userId) {
     const toRet = { ...submission }
-    toRet.isUpvoted = toRet.likes.length ? (toRet.likes.find(like => like.userId === userId) !== undefined) : false
+    toRet.isUpvoted = toRet.likes.length ? (toRet.likes.find(like => like.dataValues.userId === userId) !== undefined) : false
+    toRet.upvotesCount = toRet.likes.length
+    delete toRet.likes
 
     toRet.tags = []
     for (let i = 0; i < toRet.submissionTagRefs.length; i++) {
