@@ -30,6 +30,10 @@ class TaskService extends ModelService {
     if (!task) {
       return { success: false, error: 'Task not found.' }
     }
+
+    task.dataValues.parentTask = await this.getByPk(task.dataValues.taskId)
+    delete task.dataValues.taskId
+
     const submissionIds = (await submissionService.getByTaskId(taskId)).body
     task.dataValues.submissions = []
     for (let i = 0; i < submissionIds.length; i++) {
@@ -59,7 +63,6 @@ class TaskService extends ModelService {
     task.name = reqBody.name.trim()
     task.fullName = reqBody.fullName.trim()
     task.description = reqBody.description.trim()
-
 
     if (reqBody.parentTask && reqBody.parentTask !== '') {
       task.taskId = reqBody.parentTask
