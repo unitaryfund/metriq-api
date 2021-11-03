@@ -8,8 +8,6 @@ const Result = require('../model/resultModel').Result
 // Service dependencies
 const SubmissionService = require('../service/submissionService')
 const submissionService = new SubmissionService()
-const TaskService = require('../service/taskService')
-const taskService = new TaskService()
 const MethodService = require('../service/methodService')
 const methodService = new MethodService()
 const SubmissionTaskRefService = require('./submissionTaskRefService')
@@ -17,9 +15,34 @@ const submissionTaskRefService = new SubmissionTaskRefService()
 const SubmissionMethodRefService = require('./submissionMethodRefService')
 const submissionMethodRefService = new SubmissionMethodRefService()
 
+const config = require('./../config')
+const { Sequelize } = require('sequelize')
+const sequelize = new Sequelize(config.pgConnectionString)
+
 class ResultService extends ModelService {
   constructor () {
     super(Result)
+  }
+
+  sqlByTask (taskId) {
+    return 'WITH RECURSIVE c AS ( ' +
+    '    SELECT ' + taskId + ' as id ' +
+    '    UNION ALL ' +
+    '    SELECT t.id FROM tasks AS t ' +
+    '    JOIN c on c.id = t."taskId" ' +
+    ') ' +
+    'SELECT r.*, s.name as "submissionName", m.name as "methodName" FROM "submissionTaskRefs" AS str ' +
+    '    RIGHT JOIN c on c.id = str."taskId" ' +
+    '    JOIN results AS r on r."submissionTaskRefId" = str.id ' +
+    '    LEFT JOIN submissions AS s on str."submissionId" = s.id ' +
+    '    LEFT JOIN "submissionMethodRefs" AS smr on r."submissionMethodRefId" = smr.id ' +
+    '    LEFT JOIN methods AS m on smr."methodId" = m.id ' +
+    '    WHERE str."deletedAt" IS NULL;'
+  }
+
+  async getByTaskId (taskId) {
+    const result = (await sequelize.query(this.sqlByTask(taskId)))[0]
+    return { success: true, body: result }
   }
 
   async getBySubmissionId (submissionId) {
@@ -40,10 +63,6 @@ class ResultService extends ModelService {
     if (reqBody.task === null) {
       return { success: false, error: 'Result requires task to be defined.' }
     }
-    const task = await taskService.getByPk(reqBody.task)
-    if (!task) {
-      return { success: false, error: 'Result requires task to be present in database.' }
-    }
 
     // Method must be not null and valid (present in database) for a valid result object.
     if (reqBody.method == null) {
@@ -57,7 +76,7 @@ class ResultService extends ModelService {
     const result = await this.SequelizeServiceInstance.new()
     result.userId = userId
     result.submissionId = submissionId
-    result.submissionTaskRefId = (await submissionTaskRefService.getByFks(submissionId, task.id)).id
+    result.submissionTaskRefId = (await submissionTaskRefService.getByFks(submissionId, parseInt(reqBody.task))).id
     result.submissionMethodRefId = (await submissionMethodRefService.getByFks(submissionId, method.id)).id
     result.isHigherBetter = reqBody.isHigherBetter
     result.metricName = reqBody.metricName

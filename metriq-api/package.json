@@ -15,6 +15,7 @@
   "author": "Unitary Fund",
   "license": "Apache-2.0",
   "dependencies": {
+    "@types/sequelize": "^4.28.10",
     "bcrypt": "^5.0.1",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",

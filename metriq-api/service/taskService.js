@@ -6,6 +6,8 @@ const ModelService = require('./modelService')
 const Task = require('../model/taskModel').Task
 
 // Service dependencies
+const ResultService = require('./resultService')
+const resultService = new ResultService()
 const SubmissionService = require('./submissionService')
 const submissionService = new SubmissionService()
 const SubmissionTaskRefService = require('./submissionTaskRefService')
@@ -34,11 +36,9 @@ class TaskService extends ModelService {
     task.dataValues.parentTask = await this.getByPk(task.dataValues.taskId)
     delete task.dataValues.taskId
 
-    const submissionIds = (await submissionService.getByTaskId(taskId)).body
-    task.dataValues.submissions = []
-    for (let i = 0; i < submissionIds.length; i++) {
-      task.dataValues.submissions.push((await submissionService.getSanitized(submissionIds[i].submissionId, 1)).body)
-    }
+    task.dataValues.submissions = (await submissionService.getByTaskId(taskId)).body
+    task.dataValues.results = (await resultService.getByTaskId(taskId)).body
+
     return { success: true, body: task }
   }
 
