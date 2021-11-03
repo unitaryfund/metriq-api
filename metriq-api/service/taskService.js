@@ -57,6 +57,63 @@ class TaskService extends ModelService {
     return { success: true, body: result }
   }
 
+  async getNetworkGraphGroups () {
+    return (await sequelize.query(
+      'SELECT id as group, name FROM tasks WHERE "taskId" IS NULL;'
+    ))[0]
+  }
+
+  async getNetworkGraphGroupLinks (parentId) {
+    return (await sequelize.query(
+      'WITH RECURSIVE c AS ( ' +
+      '  SELECT ' + parentId + ' as id ' +
+      '  UNION ALL ' +
+      '  SELECT t.id FROM tasks AS t ' +
+      '    JOIN c on c.id = t."taskId" ' +
+      ') ' +
+      'SELECT t.id as source, t."taskId" as target, 1 as weight FROM tasks AS t ' +
+      '  RIGHT JOIN c on c.id = t.id ' +
+      '  WHERE t."taskId" IS NOT NULL;'
+    ))[0]
+  }
+
+  async getNetworkGraphGroup (taskId) {
+    return (await sequelize.query(
+      'WITH RECURSIVE c AS ( ' +
+      '  SELECT ' + taskId + ' as id ' +
+      '  UNION ALL ' +
+      '  SELECT t."taskId" as id FROM tasks AS t ' +
+      '    JOIN c on c.id = t.id ' +
+      ') ' +
+      'SELECT t.id as group, t.name FROM tasks AS t ' +
+      '  RIGHT JOIN c on c.id = t.id ' +
+      '  WHERE t."taskId" IS NULL AND t.id IS NOT NULL;'
+    ))[0][0]
+  }
+
+  async getNetworkGraph () {
+    const result = {}
+
+    const allNames = (await this.getAllNames()).body
+
+    result.nodes = []
+    for (let i = 0; i < allNames.length; i++) {
+      const row = allNames[i]
+      const group = (await this.getNetworkGraphGroup(row.dataValues.id)).group
+      result.nodes.push({ name: row.dataValues.name, group: group })
+    }
+
+    const allGroups = (await this.getNetworkGraphGroups())
+
+    result.links = []
+    for (let i = 0; i < allGroups.length; i++) {
+      const row = allGroups[i]
+      result.links = result.links.concat(await this.getNetworkGraphGroupLinks(row.group))
+    }
+
+    return { success: true, body: result }
+  }
+
   async submit (userId, reqBody) {
     let task = await this.SequelizeServiceInstance.new()
     task.userId = userId
