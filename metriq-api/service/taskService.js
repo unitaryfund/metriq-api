@@ -97,10 +97,12 @@ class TaskService extends ModelService {
     const allNames = (await this.getAllNames()).body
 
     result.nodes = []
+    const nodeDict = {}
     for (let i = 0; i < allNames.length; i++) {
       const row = allNames[i]
       const group = (await this.getNetworkGraphGroup(row.dataValues.id)).group
-      result.nodes.push({ name: row.dataValues.name, group: group })
+      nodeDict[row.dataValues.id] = i
+      result.nodes.push({ index: i, name: row.dataValues.name, group: group })
     }
 
     const allGroups = (await this.getNetworkGraphGroups())
@@ -108,7 +110,8 @@ class TaskService extends ModelService {
     result.links = []
     for (let i = 0; i < allGroups.length; i++) {
       const row = allGroups[i]
-      result.links = result.links.concat(await this.getNetworkGraphGroupLinks(row.group))
+      const links = await this.getNetworkGraphGroupLinks(row.group)
+      result.links = result.links.concat(links.map(i => { return { source: nodeDict[i.source], target: nodeDict[i.target] } }))
     }
 
     return { success: true, body: result }
