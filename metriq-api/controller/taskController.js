@@ -61,3 +61,9 @@ exports.readNames = async function (req, res) {
     async () => await taskService.getAllNames(),
     'Retrieved all task names.')
 }
+
+exports.readNetworkGraph = async function (req, res) {
+  routeWrapper(res,
+    async () => await taskService.getNetworkGraph(),
+    'Retrieved task network graph.')
+}

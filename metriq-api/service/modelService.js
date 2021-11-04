@@ -3,7 +3,7 @@
 // Data Access Layer
 const SequelizeService = require('./sequelizeService')
 
-class SubmissionRefService {
+class ModelService {
   constructor (Model) {
     this.SequelizeServiceInstance = new SequelizeService(Model)
   }
@@ -33,4 +33,4 @@ class SubmissionRefService {
   }
 }
 
-module.exports = SubmissionRefService
+module.exports = ModelService

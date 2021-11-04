@@ -1,7 +1,5 @@
 // submissionService.js
 
-const { Op } = require('sequelize')
-
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
@@ -22,7 +20,7 @@ const SubmissionTagRefService = require('./submissionTagRefService')
 const submissionTagRefService = new SubmissionTagRefService()
 
 // Aggregation
-const { Sequelize } = require('sequelize')
+const { Sequelize, Op } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString)
 
 class SubmissionService extends ModelService {
@@ -77,8 +75,18 @@ class SubmissionService extends ModelService {
   }
 
   sqlByTask (taskId) {
-    return 'SELECT "submissionId" FROM public."submissionTaskRefs" ' +
-        '    WHERE "deletedAt" IS NULL AND "taskId" = ' + taskId
+    return 'WITH RECURSIVE c AS ( ' +
+    '    SELECT ' + taskId + ' as id ' +
+    '    UNION ALL ' +
+    '    SELECT t.id FROM tasks AS t ' +
+    '    JOIN c on c.id = t."taskId" ' +
+    ') ' +
+    'SELECT s.* from submissions AS s ' +
+    '    RIGHT JOIN ( ' +
+    '        SELECT DISTINCT "submissionId" FROM public."submissionTaskRefs" ' +
+    '            RIGHT JOIN c on c.id = "taskId" ' +
+    '            WHERE "deletedAt" IS NULL ' +
+    '    ) as i on i."submissionId" = s.id;'
   }
 
   sqlByMethod (methodId) {
