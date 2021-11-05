@@ -46,6 +46,6 @@ exports.delete = async function (req, res) {
 
 exports.readMetricNames = async function (req, res) {
   routeWrapper(res,
-    async () => { return { success: true, body: await resultService.listMetricNames(req.user.id, req.body) } },
+    async () => { return { success: true, body: await resultService.listMetricNames() } },
     'Retrieved all metric names.')
 }
