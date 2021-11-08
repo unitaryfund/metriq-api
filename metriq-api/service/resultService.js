@@ -50,7 +50,12 @@ class ResultService extends ModelService {
   }
 
   async listMetricNames () {
-    return this.SequelizeServiceInstance.distinctAll('metricName')
+    const distinctResults = await this.SequelizeServiceInstance.distinctAll('"metricName"')
+    const body = []
+    for (let i = 0; i < distinctResults.length; i++) {
+      body.push(distinctResults[i].DISTINCT)
+    }
+    return body
   }
 
   async submit (userId, submissionId, reqBody) {
