@@ -8,6 +8,7 @@ const User = require('./userModel').User
 const SubmissionMethodRef = require('./submissionMethodRefModel').SubmissionMethodRef
 const SubmissionTaskRef = require('./submissionTaskRefModel').SubmissionTaskRef
 const SubmissionTagRef = require('./submissionTagRefModel').SubmissionTagRef
+const ModerationReport = require('./moderationReportModel').ModerationReport
 
 class Submission extends Model {
   approve () {
@@ -45,5 +46,6 @@ Submission.hasMany(Like)
 Submission.hasMany(SubmissionMethodRef)
 Submission.hasMany(SubmissionTaskRef)
 Submission.hasMany(SubmissionTagRef)
+Submission.hasMany(ModerationReport)
 
 module.exports.Submission = Submission
