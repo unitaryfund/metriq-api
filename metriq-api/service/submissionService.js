@@ -261,7 +261,7 @@ class SubmissionService extends ModelService {
     const mailOptions = {
       from: config.supportEmail.address,
       to: user.email,
-      subject: 'MetriQ submission received and under review',
+      subject: 'Metriq submission received and under review',
       text: mailBody
     }
 
