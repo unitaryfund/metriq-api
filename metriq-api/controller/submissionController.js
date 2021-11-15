@@ -7,6 +7,8 @@ const MethodService = require('../service/methodService')
 const methodService = new MethodService()
 const TaskService = require('../service/taskService')
 const taskService = new TaskService()
+const ModerationReportService = require('../service/moderationReportService')
+const moderationReportService = new ModerationReportService()
 
 function sendResponse (res, code, m) {
   const body = JSON.stringify({ message: m })
@@ -138,4 +140,10 @@ exports.tagLatest = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.getLatestByTag(req.params.tag, parseInt(req.params.page) * itemsPerPage, itemsPerPage, req.user ? req.user.id : null),
     'Retrieved top results.')
+}
+
+exports.newReport = async function (req, res) {
+  routeWrapper(res,
+    async () => await moderationReportService.submit(req.user.id, req.params.id, req.body, true),
+    'Submitted moderation report.')
 }
