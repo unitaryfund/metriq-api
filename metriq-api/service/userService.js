@@ -10,10 +10,13 @@ const User = require('../model/userModel').User
 // Password hasher
 const bcrypt = require('bcrypt')
 const saltRounds = 10
-
+const { v4: uuidv4 } = require('uuid')
 const jwt = require('jsonwebtoken')
 // Config for JWT secret key
 const config = require('./../config')
+
+const recoveryExpirationMinutes = 30
+const millisPerMinute = 60000
 
 const nodemailer = require('nodemailer')
 
@@ -204,11 +207,14 @@ class UserService extends ModelService {
       return { success: false, error: 'Support email not available.' }
     }
 
-    const user = await this.getByUsernameOrEmail(usernameOrEmail)
+    let user = await this.getByUsernameOrEmail(usernameOrEmail)
     if (!user) {
       return { success: false, error: 'User not found.' }
     }
-    user.generateRecovery()
+    user = await this.getByPk(user.id)
+    user.recoveryToken = uuidv4().toString()
+    user.recoveryTokenExpiration = new Date((new Date()).getTime() + recoveryExpirationMinutes * millisPerMinute)
+    await user.save()
 
     const transporter = nodemailer.createTransport({
       service: config.supportEmail.service,
@@ -251,7 +257,7 @@ class UserService extends ModelService {
     }
     user = await this.getByPk(user.id)
 
-    if (!user.recoveryToken || (user.recoveryToken !== reqBody.uuid) || (user.recoveryTokenExpiration < new Date())) {
+    if (!user.recoveryToken || (user.recoveryToken !== reqBody.uuid.toString()) || (user.recoveryTokenExpiration < new Date())) {
       return { success: false, error: 'Supplied bad recovery token.' }
     }
 
@@ -260,7 +266,7 @@ class UserService extends ModelService {
     user.recoveryTokenExpiration = null
     await user.save()
 
-    return { success: true, body: await this.sanitize(user) }
+    return { success: true, body: await this.getSanitized(user.id) }
   }
 
   async delete (userId) {
