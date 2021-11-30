@@ -36,6 +36,7 @@ class TaskService extends ModelService {
     task.dataValues.parentTask = await this.getByPk(task.dataValues.taskId)
     delete task.dataValues.taskId
 
+    task.dataValues.childTasks = await this.getChildren(taskId)
     task.dataValues.submissions = (await submissionService.getByTaskId(taskId)).body
     task.dataValues.results = (await resultService.getByTaskId(taskId)).body
 
@@ -55,6 +56,12 @@ class TaskService extends ModelService {
       'GROUP BY tasks.id'
     ))[0]
     return { success: true, body: result }
+  }
+
+  async getChildren (parentId) {
+    return (await sequelize.query(
+      'SELECT * FROM tasks WHERE tasks."taskId" = ' + parentId + ';'
+    ))[0]
   }
 
   async getNetworkGraphGroups () {
