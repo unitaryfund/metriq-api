@@ -87,6 +87,7 @@ class ResultService extends ModelService {
     result.metricName = reqBody.metricName
     result.metricValue = reqBody.metricValue
     result.evaluatedAt = reqBody.evaluatedAt
+    result.notes = reqBody.notes ? reqBody.notes : ''
 
     const nResult = await this.create(result)
     if (!nResult.success) {
