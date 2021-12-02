@@ -21,6 +21,11 @@ Result.init({
   },
   evaluatedAt: {
     type: DataTypes.DATE
+  },
+  notes: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+    defaultValue: ''
   }
 }, { sequelize, paranoid: true, modelName: 'result' })
 
