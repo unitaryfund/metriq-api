@@ -38,7 +38,7 @@ Submission.init({
   approvedAt: {
     type: DataTypes.DATE
   }
-}, { sequelize, modelName: 'submission' })
+}, { sequelize, paranoid: true, modelName: 'submission' })
 
 User.hasMany(Submission)
 

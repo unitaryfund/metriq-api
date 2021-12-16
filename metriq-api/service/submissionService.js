@@ -55,7 +55,7 @@ class SubmissionService extends ModelService {
     return 'SELECT submissions.*, CAST("upvotesCount" AS integer) AS "upvotesCount", ("upvotesCount" * 3600000) / EXTRACT(EPOCH FROM (CURRENT_DATE - "createdAt")) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
         '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
-        '    WHERE submissions."approvedAt" IS NOT NULL ' +
+        '    WHERE submissions."deletedAt" IS NULL AND submissions."approvedAt" IS NOT NULL ' +
         '    GROUP BY submissions.id) as sl ' +
         'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
         'ORDER BY ' + sortColumn + (isDesc ? ' DESC ' : ' ASC ') +
@@ -67,7 +67,7 @@ class SubmissionService extends ModelService {
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
         '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
         '    LEFT JOIN "submissionTagRefs" on "submissionTagRefs"."submissionId" = submissions.id AND "submissionTagRefs"."tagId" = ' + tagId + ' ' +
-        '    WHERE submissions."approvedAt" IS NOT NULL and "submissionTagRefs".id IS NOT NULL ' +
+        '    WHERE submissions."deletedAt" IS NULL AND submissions."approvedAt" IS NOT NULL and "submissionTagRefs".id IS NOT NULL ' +
         '    GROUP BY submissions.id) as sl ' +
         'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
         'ORDER BY ' + sortColumn + (isDesc ? ' DESC ' : ' ASC ') +
@@ -86,14 +86,15 @@ class SubmissionService extends ModelService {
     '        SELECT DISTINCT "submissionId" FROM public."submissionTaskRefs" ' +
     '            RIGHT JOIN c on c.id = "taskId" ' +
     '            WHERE "deletedAt" IS NULL ' +
-    '    ) as i on i."submissionId" = s.id;'
+    '    ) as i on i."submissionId" = s.id ' +
+    '    WHERE s."deletedAt" IS NULL;'
   }
 
   sqlByMethod (methodId) {
     return 'SELECT s.*, CAST(l."upvoteCount" AS integer) AS "upvoteCount" FROM submissions AS s ' +
         '    RIGHT JOIN public."submissionMethodRefs" AS str ON s.id = str."submissionId" ' +
         '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
-        '    WHERE str."deletedAt" IS NULL AND str."methodId" = ' + methodId
+        '    WHERE s."deletedAt" IS NULL str."deletedAt" IS NULL AND str."methodId" = ' + methodId
   }
 
   async getEagerByPk (submissionId) {
