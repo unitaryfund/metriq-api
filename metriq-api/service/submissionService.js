@@ -32,7 +32,7 @@ class SubmissionService extends ModelService {
     return 'SELECT submissions.*, CAST("upvotesCount" AS integer) AS "upvotesCount", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
         '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
-        '    WHERE submissions."deleteAt" IS NULL AND submissions."approvedAt" IS NOT NULL ' +
+        '    WHERE submissions."deletedAt" IS NULL AND submissions."approvedAt" IS NOT NULL ' +
         '    GROUP BY submissions.id) as sl ' +
         'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
         'ORDER BY ' + sortColumn + (isDesc ? ' DESC ' : ' ASC ') +
