@@ -38,6 +38,12 @@ exports.new = async function (req, res) {
     'New result added to submission!')
 }
 
+exports.update = async function (req, res) {
+  routeWrapper(res,
+    async () => await resultService.update(req.user.id, req.params.id, req.body),
+    'Updated method.')
+}
+
 exports.delete = async function (req, res) {
   routeWrapper(res,
     async () => await resultService.delete(req.params.id),
