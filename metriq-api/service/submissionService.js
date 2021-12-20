@@ -94,7 +94,7 @@ class SubmissionService extends ModelService {
     return 'SELECT s.*, CAST(l."upvoteCount" AS integer) AS "upvoteCount" FROM submissions AS s ' +
         '    RIGHT JOIN public."submissionMethodRefs" AS str ON s.id = str."submissionId" ' +
         '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
-        '    WHERE s."deletedAt" IS NULL str."deletedAt" IS NULL AND str."methodId" = ' + methodId
+        '    WHERE s."deletedAt" IS NULL AND str."deletedAt" IS NULL AND str."methodId" = ' + methodId
   }
 
   async getEagerByPk (submissionId) {
