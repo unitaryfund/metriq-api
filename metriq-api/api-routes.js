@@ -98,6 +98,7 @@ router.route('/submission/:id/result')
 router.route('/result/metricNames')
   .get(resultController.readMetricNames)
 router.route('/result/:id')
+  .post(resultController.update)
   .delete(resultController.delete)
 
 // Export API routes.

@@ -110,6 +110,37 @@ class ResultService extends ModelService {
 
     return { success: true, body: result }
   }
+
+  async update (userId, resultId, reqBody) {
+    const result = await this.getByPk(resultId)
+    if (!result) {
+      return { success: false, error: 'Result not found.' }
+    }
+
+    // Method must be not null and valid (present in database) for a valid result object.
+    if (reqBody.method === null) {
+      return { success: false, error: 'Result requires method to be defined.' }
+    }
+    const method = await methodService.getByPk(reqBody.method.id)
+    if (!method) {
+      return { success: false, error: 'Result requires method to be present in database.' }
+    }
+
+    result.submissionTaskRefId = (await submissionTaskRefService.getByFks(reqBody.submissionId, parseInt(reqBody.task.id))).id
+    result.submissionMethodRefId = (await submissionMethodRefService.getByFks(reqBody.submissionId, method.id)).id
+    result.isHigherBetter = reqBody.isHigherBetter
+    result.metricName = reqBody.metricName
+    result.metricValue = reqBody.metricValue
+    result.evaluatedAt = reqBody.evaluatedAt
+    result.notes = reqBody.notes ? reqBody.notes : ''
+
+    result.save()
+
+    let submission = await submissionService.getEagerByPk(reqBody.submissionId)
+    submission = await submissionService.populate(submission, userId)
+
+    return { success: true, body: submission }
+  }
 }
 
 module.exports = ResultService
