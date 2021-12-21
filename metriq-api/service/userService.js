@@ -269,6 +269,35 @@ class UserService extends ModelService {
     return { success: true, body: await this.getSanitized(user.id) }
   }
 
+  async tryPasswordChange (userId, reqBody) {
+    console.log('In method')
+
+    if (!this.validatePassword(reqBody.password)) {
+      return { success: false, error: 'Password is too short.' }
+    }
+
+    if (reqBody.password !== reqBody.passwordConfirm) {
+      return { success: false, error: 'Password and confirmation do not match.' }
+    }
+
+    const user = await this.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    const isPasswordValid = bcrypt.compareSync(reqBody.oldPassword, user.passwordHash)
+    if (!isPasswordValid) {
+      return { success: false, error: 'Password incorrect.' }
+    }
+
+    user.passwordHash = await bcrypt.hash(reqBody.password, saltRounds)
+    user.recoveryToken = null
+    user.recoveryTokenExpiration = null
+    await user.save()
+
+    return { success: true, body: await this.getSanitized(user.id) }
+  }
+
   async delete (userId) {
     const user = await this.getByPk(userId)
     if (!user) {

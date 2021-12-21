@@ -120,3 +120,16 @@ exports.password = async function (req, res) {
     'Successfully changed password.',
     true)
 }
+
+// Change password if cookie and old password are valid.
+exports.update_password = async function (req, res) {
+  if (req.user.role !== 'web') {
+    sendResponse(res, 403, 'Authorization role lacks privileges.')
+    return
+  }
+
+  routeWrapper(res,
+    async () => await userService.tryPasswordChange(req.user.id, req.body),
+    'Successfully changed password.',
+    true)
+}
