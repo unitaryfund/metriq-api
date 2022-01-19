@@ -174,6 +174,7 @@ class SubmissionService extends ModelService {
     toRet.isUpvoted = toRet.likes.length ? (toRet.likes.find(like => like.dataValues.userId === userId) !== undefined) : false
     toRet.upvotesCount = toRet.likes.length
     delete toRet.likes
+    toRet.user = await userService.getByPk(toRet.userId)
 
     toRet.tags = []
     for (let i = 0; i < toRet.submissionTagRefs.length; i++) {
