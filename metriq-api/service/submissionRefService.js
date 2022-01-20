@@ -13,6 +13,10 @@ class SubmissionRefService extends ModelService {
     return await this.SequelizeServiceInstance.findOne({ submissionId: submissionId, [this.foreignKey]: fkId })
   }
 
+  async getFkCount (fkId) {
+    return await this.SequelizeServiceInstance.count({ [this.foreignKey]: fkId })
+  }
+
   async createOrFetch (submissionId, userId, fkId) {
     let ref = await this.getByFks(submissionId, fkId)
 
