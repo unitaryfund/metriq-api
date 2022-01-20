@@ -37,8 +37,9 @@ class MethodService extends ModelService {
 
   async getAllNamesAndCounts () {
     const result = (await sequelize.query(
-      'SELECT methods.id as id, methods.name as name, COUNT("submissionMethodRefs".*) as "submissionCount", COUNT(likes.*) as "upvoteTotal" from "submissionMethodRefs" ' +
+      'SELECT methods.id as id, methods.name as name, COUNT(DISTINCT "submissionMethodRefs".*) as "submissionCount", COUNT(DISTINCT likes.*) as "upvoteTotal" from "submissionMethodRefs" ' +
       'RIGHT JOIN methods on methods.id = "submissionMethodRefs"."methodId" ' +
+      'RIGHT JOIN submissions on submissions.id = "submissionMethodRefs"."submissionId" AND (NOT submissions."approvedAt" IS NULL) AND submissions."deletedAt" IS NULL ' +
       'LEFT JOIN likes on likes."submissionId" = "submissionMethodRefs"."submissionId" ' +
       'GROUP BY methods.id'
     ))[0]
