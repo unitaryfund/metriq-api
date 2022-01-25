@@ -27,6 +27,11 @@ class TaskService extends ModelService {
     return await this.SequelizeServiceInstance.findOneEager({ id: taskId })
   }
 
+  async getByName (name) {
+    const nameNormal = name.trim().toLowerCase()
+    return await this.SequelizeServiceInstance.findOne({ nameNormal: nameNormal })
+  }
+
   async getSanitized (taskId) {
     const task = await this.getByPk(taskId)
     if (!task) {
@@ -52,7 +57,7 @@ class TaskService extends ModelService {
     const result = (await sequelize.query(
       'SELECT tasks.id as id, tasks.name as name, COUNT(DISTINCT "submissionTaskRefs".*) as "submissionCount", COUNT(DISTINCT likes.*) as "upvoteTotal" from "submissionTaskRefs" ' +
       'RIGHT JOIN tasks on tasks.id = "submissionTaskRefs"."taskId" ' +
-      'RIGHT JOIN submissions on submissions.id = "submissionTaskRefs"."submissionId" AND (NOT submissions."approvedAt" IS NULL) AND submissions."deletedAt" IS NULL ' +
+      'LEFT JOIN submissions on submissions.id = "submissionTaskRefs"."submissionId" AND (NOT submissions."approvedAt" IS NULL) AND submissions."deletedAt" IS NULL ' +
       'LEFT JOIN likes on likes."submissionId" = "submissionTaskRefs"."submissionId" ' +
       'GROUP BY tasks.id'
     ))[0]
@@ -126,6 +131,11 @@ class TaskService extends ModelService {
   }
 
   async submit (userId, reqBody) {
+    const nameMatch = await this.getByName(reqBody.name)
+    if (nameMatch) {
+      return { success: false, error: 'Submission name already in use.' }
+    }
+
     let task = await this.SequelizeServiceInstance.new()
     task.userId = userId
     task.name = reqBody.name.trim()
