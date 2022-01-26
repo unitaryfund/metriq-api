@@ -47,8 +47,7 @@ class MethodService extends ModelService {
   }
 
   async getByName (name) {
-    const nameNormal = name.trim().toLowerCase()
-    return await this.SequelizeServiceInstance.findOne({ nameNormal: nameNormal })
+    return await this.SequelizeServiceInstance.findOne({ name: name })
   }
 
   async submit (userId, reqBody) {
