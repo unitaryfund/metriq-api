@@ -33,9 +33,9 @@ class ResultService extends ModelService {
     ') ' +
     'SELECT r.*, s.name as "submissionName", CASE WHEN t.id = ' + taskId + ' THEN m.name ELSE m.name || \' | \' || t.name END as "methodName" FROM "submissionTaskRefs" AS str ' +
     '    RIGHT JOIN c on c.id = str."taskId" ' +
-    '    JOIN results AS r on r."submissionTaskRefId" = str.id ' +
-    '    LEFT JOIN submissions AS s on str."submissionId" = s.id ' +
-    '    LEFT JOIN "submissionMethodRefs" AS smr on r."submissionMethodRefId" = smr.id ' +
+    '    JOIN results AS r on r."submissionTaskRefId" = str.id AND r."deletedAt" IS NULL ' +
+    '    LEFT JOIN submissions AS s on str."submissionId" = s.id AND s."deletedAt" IS NULL ' +
+    '    LEFT JOIN "submissionMethodRefs" AS smr on r."submissionMethodRefId" = smr.id AND smr."deletedAt" IS NULL ' +
     '    LEFT JOIN methods AS m on smr."methodId" = m.id ' +
     '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
     '    WHERE str."deletedAt" IS NULL;'
