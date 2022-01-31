@@ -171,7 +171,7 @@ class SubmissionService extends ModelService {
 
   async populate (submission, userId) {
     const toRet = { ...submission }
-    toRet.isUpvoted = toRet.likes.length ? (toRet.likes.find(like => like.dataValues.userId === userId) !== undefined) : false
+    toRet.isUpvoted = ((userId > 0) && toRet.likes.length) ? (toRet.likes.find(like => like.dataValues.userId === userId) !== undefined) : false
     toRet.upvotesCount = toRet.likes.length
     delete toRet.likes
     toRet.user = await userService.getByPk(toRet.userId)
@@ -344,7 +344,21 @@ class SubmissionService extends ModelService {
   }
 
   async getByUserId (userId, startIndex, count) {
-    const result = await this.SequelizeServiceInstance.findAndSort({ userId: userId }, [['createdAt', 'DESC']], startIndex, count)
+    const result = await this.SequelizeServiceInstance.findAndSort({ userId: userId, deletedAt: null }, [['createdAt', 'DESC']], startIndex, count)
+    return { success: true, body: result }
+  }
+
+  async getByUserIdPublic (submittingUserId, userId, startIndex, count) {
+    const user = await userService.getByPk(submittingUserId)
+    if (!user) {
+      return { success: false, error: 'User not found.' }
+    }
+    const result = await this.SequelizeServiceInstance.findAndSort({ userId: submittingUserId, deletedAt: null, approvedAt: { [Op.ne]: null } }, [['createdAt', 'DESC']], startIndex, count)
+    for (let i = 0; i < result.length; i++) {
+      result[i] = await this.getEagerByPk(result[i].id)
+      result[i] = await this.populate(result[i], userId)
+      result[i].username = user.username
+    }
     return { success: true, body: result }
   }
 

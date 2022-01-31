@@ -54,3 +54,9 @@ exports.readSubmissions = async function (req, res) {
     async () => await submissionService.getByUserId(req.user.id, parseInt(req.params.page) * itemsPerPage, itemsPerPage),
     'Successfully retrieved user submissions.')
 }
+
+exports.readSubmissionsPublic = async function (req, res) {
+  routeWrapper(res,
+    async () => await submissionService.getByUserIdPublic(req.params.userId, (req.user && req.user.id) ? req.user.id : 0, parseInt(req.params.page) * itemsPerPage, itemsPerPage),
+    'Successfully retrieved user submissions.')
+}
