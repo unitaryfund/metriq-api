@@ -344,7 +344,14 @@ class SubmissionService extends ModelService {
   }
 
   async getByUserId (userId, startIndex, count) {
+    const user = await userService.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User not found.' }
+    }
     const result = await this.SequelizeServiceInstance.findAndSort({ userId: userId, deletedAt: null }, [['createdAt', 'DESC']], startIndex, count)
+    for (let i = 0; i < result.length; i++) {
+      result[i].dataValues.username = user.username
+    }
     return { success: true, body: result }
   }
 
