@@ -3,9 +3,9 @@
 const config = require('../config')
 const { Sequelize, Model } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString, { logging: false })
-const User = require('./userModel').User
-const Method = require('./methodModel').Method
-const Result = require('./resultModel').Result
+const User = require('./userModel')
+const Method = require('./methodModel')
+const Result = require('./resultModel')
 
 class SubmissionMethodRef extends Model {}
 SubmissionMethodRef.init({}, { sequelize, paranoid: true, modelName: 'submissionMethodRef' })
@@ -14,4 +14,4 @@ User.hasMany(SubmissionMethodRef)
 SubmissionMethodRef.belongsTo(Method)
 SubmissionMethodRef.hasMany(Result)
 
-module.exports.SubmissionMethodRef = SubmissionMethodRef
+module.exports = SubmissionMethodRef

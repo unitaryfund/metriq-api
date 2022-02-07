@@ -3,12 +3,12 @@
 const config = require('../config')
 const { Sequelize, Model, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString, { logging: false })
-const Like = require('./likeModel').Like
-const User = require('./userModel').User
-const SubmissionMethodRef = require('./submissionMethodRefModel').SubmissionMethodRef
-const SubmissionTaskRef = require('./submissionTaskRefModel').SubmissionTaskRef
-const SubmissionTagRef = require('./submissionTagRefModel').SubmissionTagRef
-const ModerationReport = require('./moderationReportModel').ModerationReport
+const Like = require('./likeModel')
+const User = require('./userModel')
+const SubmissionMethodRef = require('./submissionMethodRefModel')
+const SubmissionTaskRef = require('./submissionTaskRefModel')
+const SubmissionTagRef = require('./submissionTagRefModel')
+const ModerationReport = require('./moderationReportModel')
 
 class Submission extends Model {
   approve () {
@@ -48,4 +48,4 @@ Submission.hasMany(SubmissionTaskRef)
 Submission.hasMany(SubmissionTagRef)
 Submission.hasMany(ModerationReport)
 
-module.exports.Submission = Submission
+module.exports = Submission

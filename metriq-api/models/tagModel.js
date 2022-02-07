@@ -3,7 +3,7 @@
 const config = require('../config')
 const { Sequelize, Model, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString, { logging: false })
-const User = require('./userModel').User
+const User = require('./userModel')
 
 class Tag extends Model {}
 Tag.init({
@@ -15,4 +15,4 @@ Tag.init({
 
 User.hasMany(Tag)
 
-module.exports.Tag = Tag
+module.exports = Tag

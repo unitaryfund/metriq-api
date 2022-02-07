@@ -3,7 +3,7 @@
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
-const Method = require('../model/methodModel').Method
+const Method = require('../models/methodModel')
 
 // Service dependencies
 const SubmissionService = require('./submissionService')

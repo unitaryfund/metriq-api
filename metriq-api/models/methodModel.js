@@ -1,12 +1,12 @@
-// taskModel.js
+// methodModel.js
 
 const config = require('../config')
 const { Sequelize, Model, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString, { logging: false })
-const User = require('./userModel').User
+const User = require('./userModel')
 
-class Task extends Model {}
-Task.init({
+class Method extends Model {}
+Method.init({
   name: {
     type: DataTypes.TEXT,
     allowNull: false
@@ -19,9 +19,8 @@ Task.init({
     type: DataTypes.TEXT,
     allowNull: false
   }
-}, { sequelize, modelName: 'task' })
+}, { sequelize, modelName: 'method' })
 
-User.hasMany(Task)
-Task.belongsTo(Task)
+User.hasMany(Method)
 
-module.exports.Task = Task
+module.exports = Method

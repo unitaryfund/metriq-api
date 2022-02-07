@@ -45,4 +45,4 @@ User.init({
   }
 }, { sequelize, paranoid: true, modelName: 'user' })
 
-module.exports.User = User
+module.exports = User

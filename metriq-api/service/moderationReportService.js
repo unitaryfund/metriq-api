@@ -3,7 +3,7 @@
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
-const ModerationReport = require('../model/moderationReportModel').ModerationReport
+const ModerationReport = require('../models/moderationReportModel')
 
 // For email
 const config = require('./../config')

@@ -3,7 +3,7 @@
 // Base class
 const SubmissionRefService = require('./submissionRefService')
 // Database Model
-const Like = require('../model/likeModel').Like
+const Like = require('../models/likeModel')
 
 class LikeService extends SubmissionRefService {
   constructor () {

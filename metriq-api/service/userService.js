@@ -5,7 +5,7 @@ const { Op } = require('sequelize')
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
-const User = require('../model/userModel').User
+const User = require('../models/userModel')
 
 // Password hasher
 const bcrypt = require('bcrypt')

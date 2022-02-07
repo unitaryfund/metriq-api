@@ -3,7 +3,7 @@
 // Base class
 const SubmissionRefService = require('./submissionRefService')
 // Database Model
-const SubmissionTaskRef = require('../model/submissionTaskRefModel').SubmissionTaskRef
+const SubmissionTaskRef = require('../models/submissionTaskRefModel')
 
 class SubmissionTaskRefService extends SubmissionRefService {
   constructor () {

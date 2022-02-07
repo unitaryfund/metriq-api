@@ -3,7 +3,7 @@
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
-const Tag = require('../model/tagModel').Tag
+const Tag = require('../models/tagModel')
 
 // Aggregation
 const { Sequelize } = require('sequelize')

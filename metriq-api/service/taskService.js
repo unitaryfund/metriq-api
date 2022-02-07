@@ -3,7 +3,7 @@
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
-const Task = require('../model/taskModel').Task
+const Task = require('../models/taskModel')
 
 // Service dependencies
 const ResultService = require('./resultService')

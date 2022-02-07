@@ -3,7 +3,7 @@
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
-const Submission = require('../model/submissionModel').Submission
+const Submission = require('../models/submissionModel')
 
 // For email
 const config = require('./../config')
