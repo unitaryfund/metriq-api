@@ -13,36 +13,40 @@ class User extends Model {
     this.recoveryToken = uuidv4()
     this.recoveryTokenExpiration = new Date((new Date()).getTime() + recoveryExpirationMinutes * millisPerMinute)
   }
-}
-User.init({
-  username: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  usernameNormal: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  passwordHash: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  email: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  clientToken: {
-    type: DataTypes.TEXT
-  },
-  recoveryToken: {
-    type: DataTypes.TEXT
-  },
-  clientTokenCreated: {
-    type: DataTypes.DATE
-  },
-  recoveryTokenExpiration: {
-    type: DataTypes.DATE
+
+  static init (sequelize, DataTypes) {
+    return super.init({
+      username: {
+        type: DataTypes.TEXT,
+        allowNull: false
+      },
+      usernameNormal: {
+        type: DataTypes.TEXT,
+        allowNull: false
+      },
+      passwordHash: {
+        type: DataTypes.TEXT,
+        allowNull: false
+      },
+      email: {
+        type: DataTypes.TEXT,
+        allowNull: false
+      },
+      clientToken: {
+        type: DataTypes.TEXT
+      },
+      recoveryToken: {
+        type: DataTypes.TEXT
+      },
+      clientTokenCreated: {
+        type: DataTypes.DATE
+      },
+      recoveryTokenExpiration: {
+        type: DataTypes.DATE
+      }
+    }, { sequelize, paranoid: true, modelName: 'user' })
   }
-}, { sequelize, paranoid: true, modelName: 'user' })
+}
+User.init(sequelize, DataTypes)
 
 module.exports = User

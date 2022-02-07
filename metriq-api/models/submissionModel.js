@@ -15,6 +15,32 @@ class Submission extends Model {
     this.approvedAt = new Date()
   }
 
+  static init (sequelize, DataTypes) {
+    return super.init({
+      name: {
+        type: DataTypes.TEXT,
+        allowNull: false
+      },
+      nameNormal: {
+        type: DataTypes.TEXT,
+        allowNull: false
+      },
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: false
+      },
+      contentUrl: {
+        type: DataTypes.TEXT,
+        allowNull: false
+      },
+      thumbnailUrl: {
+        type: DataTypes.TEXT
+      },
+      approvedAt: {
+        type: DataTypes.DATE
+      }
+    }, { sequelize, paranoid: true, modelName: 'submission' })
+  }
   static associate (db) {
     db.user.hasMany(db.submission)
     db.submission.hasMany(db.like)
@@ -24,30 +50,7 @@ class Submission extends Model {
     db.submission.hasMany(db.moderationReport)
   }
 }
-Submission.init({
-  name: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  nameNormal: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  description: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  contentUrl: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  thumbnailUrl: {
-    type: DataTypes.TEXT
-  },
-  approvedAt: {
-    type: DataTypes.DATE
-  }
-}, { sequelize, paranoid: true, modelName: 'submission' })
+Submission.init(sequelize, DataTypes)
 
 User.hasMany(Submission)
 

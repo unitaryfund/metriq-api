@@ -22,10 +22,8 @@ fs
   })
   .forEach(file => {
     const model = require(path.join(__dirname, file))
-    db[model.name] = model.init({}, { sequelize, modelName: model.name })
+    db[model.name] = model.init(sequelize, Sequelize.DataTypes)
   })
-
-console.log(db)
 
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {
