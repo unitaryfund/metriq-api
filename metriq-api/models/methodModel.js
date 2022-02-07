@@ -5,7 +5,11 @@ const { Sequelize, Model, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString, { logging: false })
 const User = require('./userModel')
 
-class Method extends Model {}
+class Method extends Model {
+  static associate (db) {
+    db.user.hasMany(db.method)
+  }
+}
 Method.init({
   name: {
     type: DataTypes.TEXT,

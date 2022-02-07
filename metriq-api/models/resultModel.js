@@ -5,7 +5,11 @@ const { Sequelize, Model, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString, { logging: false })
 const User = require('./userModel')
 
-class Result extends Model {}
+class Result extends Model {
+  static associate (db) {
+    db.user.hasMany(db.result)
+  }
+}
 Result.init({
   isHigherBetter: {
     type: DataTypes.BOOLEAN,

@@ -14,6 +14,15 @@ class Submission extends Model {
   approve () {
     this.approvedAt = new Date()
   }
+
+  static associate (db) {
+    db.user.hasMany(db.submission)
+    db.submission.hasMany(db.like)
+    db.submission.hasMany(db.submissionMethodRef)
+    db.submission.hasMany(db.submissionTaskRef)
+    db.submission.hasMany(db.submissionTagRef)
+    db.submission.hasMany(db.moderationReport)
+  }
 }
 Submission.init({
   name: {

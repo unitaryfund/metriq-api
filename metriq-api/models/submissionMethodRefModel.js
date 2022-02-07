@@ -7,7 +7,13 @@ const User = require('./userModel')
 const Method = require('./methodModel')
 const Result = require('./resultModel')
 
-class SubmissionMethodRef extends Model {}
+class SubmissionMethodRef extends Model {
+  static associate (db) {
+    db.user.hasMany(db.submissionMethodRef)
+    db.submissionMethodRef.belongsTo(db.method)
+    db.submissionMethodRef.hasMany(db.result)
+  }
+}
 SubmissionMethodRef.init({}, { sequelize, paranoid: true, modelName: 'submissionMethodRef' })
 
 User.hasMany(SubmissionMethodRef)
