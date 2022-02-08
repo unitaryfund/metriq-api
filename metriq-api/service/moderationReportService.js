@@ -3,10 +3,12 @@
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
-const ModerationReport = require('../models/moderationReportModel')
+const config = require('../config')
+const { Sequelize, DataTypes } = require('sequelize')
+const sequelize = new Sequelize(config.pgConnectionString)
+const ModerationReport = require('../models/moderationReportModel')(sequelize, DataTypes)
 
 // For email
-const config = require('./../config')
 const nodemailer = require('nodemailer')
 
 // Service dependencies

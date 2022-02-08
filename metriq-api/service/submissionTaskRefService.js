@@ -3,7 +3,10 @@
 // Base class
 const SubmissionRefService = require('./submissionRefService')
 // Database Model
-const SubmissionTaskRef = require('../models/submissionTaskRefModel')
+const config = require('../config')
+const { Sequelize, DataTypes } = require('sequelize')
+const sequelize = new Sequelize(config.pgConnectionString)
+const SubmissionTaskRef = require('../models/submissionTaskRefModel')(sequelize, DataTypes)
 
 class SubmissionTaskRefService extends SubmissionRefService {
   constructor () {

@@ -3,7 +3,10 @@
 // Base class
 const SubmissionRefService = require('./submissionRefService')
 // Database Model
-const Like = require('../models/likeModel')
+const config = require('../config')
+const { Sequelize, DataTypes } = require('sequelize')
+const sequelize = new Sequelize(config.pgConnectionString)
+const Like = require('../models/likeModel')(sequelize, DataTypes)
 
 class LikeService extends SubmissionRefService {
   constructor () {

@@ -1,52 +1,51 @@
 // userModel.js
 
-const config = require('../config')
-const { v4: uuidv4 } = require('uuid')
-const { Sequelize, Model, DataTypes } = require('sequelize')
-const sequelize = new Sequelize(config.pgConnectionString, { logging: false })
+'use strict'
 
+const { v4: uuidv4 } = require('uuid')
 const recoveryExpirationMinutes = 30
 const millisPerMinute = 60000
 
-class User extends Model {
-  generateRecovery () {
-    this.recoveryToken = uuidv4()
-    this.recoveryTokenExpiration = new Date((new Date()).getTime() + recoveryExpirationMinutes * millisPerMinute)
-  }
-
-  static init (sequelize, DataTypes) {
-    return super.init({
-      username: {
-        type: DataTypes.TEXT,
-        allowNull: false
+module.exports = function (sequelize, DataTypes) {
+  return sequelize.define('user', {
+    username: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    usernameNormal: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    passwordHash: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    email: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    clientToken: {
+      type: DataTypes.TEXT
+    },
+    recoveryToken: {
+      type: DataTypes.TEXT
+    },
+    clientTokenCreated: {
+      type: DataTypes.DATE
+    },
+    recoveryTokenExpiration: {
+      type: DataTypes.DATE
+    }
+  }, {
+    classMethods: {
+      associate: function (db) {
+        db.user.hasMany(db.task)
+        db.task.belongsTo(db.task)
       },
-      usernameNormal: {
-        type: DataTypes.TEXT,
-        allowNull: false
-      },
-      passwordHash: {
-        type: DataTypes.TEXT,
-        allowNull: false
-      },
-      email: {
-        type: DataTypes.TEXT,
-        allowNull: false
-      },
-      clientToken: {
-        type: DataTypes.TEXT
-      },
-      recoveryToken: {
-        type: DataTypes.TEXT
-      },
-      clientTokenCreated: {
-        type: DataTypes.DATE
-      },
-      recoveryTokenExpiration: {
-        type: DataTypes.DATE
+      generateRecovery: function () {
+        this.recoveryToken = uuidv4()
+        this.recoveryTokenExpiration = new Date((new Date()).getTime() + recoveryExpirationMinutes * millisPerMinute)
       }
-    }, { sequelize, paranoid: true, modelName: 'user' })
-  }
+    }
+  })
 }
-User.init(sequelize, DataTypes)
-
-module.exports = User

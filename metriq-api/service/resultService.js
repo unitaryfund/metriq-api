@@ -3,7 +3,10 @@
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
-const Result = require('../models/resultModel')
+const config = require('../config')
+const { Sequelize, DataTypes } = require('sequelize')
+const sequelize = new Sequelize(config.pgConnectionString)
+const Result = require('../models/resultModel')(sequelize, DataTypes)
 
 // Service dependencies
 const SubmissionService = require('../service/submissionService')
@@ -14,10 +17,6 @@ const SubmissionTaskRefService = require('./submissionTaskRefService')
 const submissionTaskRefService = new SubmissionTaskRefService()
 const SubmissionMethodRefService = require('./submissionMethodRefService')
 const submissionMethodRefService = new SubmissionMethodRefService()
-
-const config = require('./../config')
-const { Sequelize } = require('sequelize')
-const sequelize = new Sequelize(config.pgConnectionString)
 
 class ResultService extends ModelService {
   constructor () {
