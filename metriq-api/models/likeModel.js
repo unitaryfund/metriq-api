@@ -1,0 +1,12 @@
+// likeModel.js
+
+'use strict'
+module.exports = function (sequelize, DataTypes) {
+  return sequelize.define('like', {}, {
+    classMethods: {
+      associate: function (db) {
+        db.user.hasMany(db.like)
+      }
+    }
+  })
+}

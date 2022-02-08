@@ -3,10 +3,12 @@
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
-const Submission = require('../model/submissionModel').Submission
+const config = require('../config')
+const { Sequelize, DataTypes, Op } = require('sequelize')
+const sequelize = new Sequelize(config.pgConnectionString)
+const Submission = require('../models/submissionModel')(sequelize, DataTypes)
 
 // For email
-const config = require('./../config')
 const nodemailer = require('nodemailer')
 
 // Service dependencies
@@ -18,10 +20,6 @@ const LikeService = require('./likeService')
 const likeService = new LikeService()
 const SubmissionTagRefService = require('./submissionTagRefService')
 const submissionTagRefService = new SubmissionTagRefService()
-
-// Aggregation
-const { Sequelize, Op } = require('sequelize')
-const sequelize = new Sequelize(config.pgConnectionString)
 
 class SubmissionService extends ModelService {
   constructor () {

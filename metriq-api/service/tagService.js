@@ -3,12 +3,10 @@
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
-const Tag = require('../model/tagModel').Tag
-
-// Aggregation
-const { Sequelize } = require('sequelize')
 const config = require('../config')
+const { Sequelize, DataTypes } = require('sequelize')
 const sequelize = new Sequelize(config.pgConnectionString)
+const Tag = require('../models/tagModel')(sequelize, DataTypes)
 
 class TagService extends ModelService {
   constructor () {

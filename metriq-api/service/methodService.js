@@ -3,18 +3,16 @@
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
-const Method = require('../model/methodModel').Method
+const config = require('../config')
+const { Sequelize, DataTypes } = require('sequelize')
+const sequelize = new Sequelize(config.pgConnectionString)
+const Method = require('../models/methodModel')(sequelize, DataTypes)
 
 // Service dependencies
 const SubmissionService = require('./submissionService')
 const submissionService = new SubmissionService()
 const SubmissionMethodRefService = require('./submissionMethodRefService')
 const submissionMethodRefService = new SubmissionMethodRefService()
-
-// Aggregation
-const { Sequelize } = require('sequelize')
-const config = require('../config')
-const sequelize = new Sequelize(config.pgConnectionString)
 
 class MethodService extends ModelService {
   constructor () {

@@ -5,15 +5,16 @@ const { Op } = require('sequelize')
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
-const User = require('../model/userModel').User
+const config = require('../config')
+const { Sequelize, DataTypes } = require('sequelize')
+const sequelize = new Sequelize(config.pgConnectionString)
+const User = require('../models/userModel')(sequelize, DataTypes)
 
 // Password hasher
 const bcrypt = require('bcrypt')
 const saltRounds = 10
 const { v4: uuidv4 } = require('uuid')
 const jwt = require('jsonwebtoken')
-// Config for JWT secret key
-const config = require('./../config')
 
 const recoveryExpirationMinutes = 30
 const millisPerMinute = 60000
