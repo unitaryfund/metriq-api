@@ -1,7 +1,7 @@
 import path from 'path'
 import { spawn } from 'child-process-promise'
 import { parseURL } from 'whatwg-url'
-import config from '../config.js'
+import config from '../../config.js'
 const spawnOptions = { cwd: path.join(__dirname, '../..'), stdio: 'inherit' };
 (async () => {
   const parts = parseURL(config.pgConnectionString)

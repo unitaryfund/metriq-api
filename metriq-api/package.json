@@ -20,6 +20,7 @@
   "dependencies": {
     "@types/sequelize": "^4.28.10",
     "bcrypt": "^5.0.1",
+    "child-process-promise": "^2.2.1",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "express": "^4.17.1",
@@ -40,6 +41,10 @@
     "testEnvironment": "node"
   },
   "devDependencies": {
+    "@babel/cli": "^7.17.0",
+    "@babel/core": "^7.17.2",
+    "@babel/node": "^7.16.8",
+    "@babel/preset-env": "^7.16.11",
     "sequelize-cli": "^6.4.1"
   }
 }
