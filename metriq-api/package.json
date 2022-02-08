@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --runInBand ./coverage",
-    "db:makemigrations": "./node_modules/sequelize-auto-migrations/bin/makemigration.js"
+    "db:makemigrations": "./node_modules/sequelize-auto-migrations/bin/makemigration.js",
+    "db:schema": "babel-node ./scripts/db/schema",
+    "db:migrate": "babel-node ./scripts/db/migrate"
   },
   "keywords": [
     "api",
