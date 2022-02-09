@@ -1,0 +1,49 @@
+{
+    "tables": {
+        "likes": {
+            "tableName": "likes",
+            "indexes": []
+        },
+        "methods": {
+            "tableName": "methods",
+            "indexes": []
+        },
+        "moderationReports": {
+            "tableName": "moderationReports",
+            "indexes": []
+        },
+        "results": {
+            "tableName": "results",
+            "indexes": []
+        },
+        "submissionMethodRefs": {
+            "tableName": "submissionMethodRefs",
+            "indexes": []
+        },
+        "submissions": {
+            "tableName": "submissions",
+            "indexes": []
+        },
+        "submissionTagRefs": {
+            "tableName": "submissionTagRefs",
+            "indexes": []
+        },
+        "submissionTaskRefs": {
+            "tableName": "submissionTaskRefs",
+            "indexes": []
+        },
+        "tags": {
+            "tableName": "tags",
+            "indexes": []
+        },
+        "tasks": {
+            "tableName": "tasks",
+            "indexes": []
+        },
+        "users": {
+            "tableName": "users",
+            "indexes": []
+        }
+    },
+    "revision": 1
+}
