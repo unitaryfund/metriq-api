@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --runInBand ./coverage",
-    "db:makemigrations": "./node_modules/sequelize-auto-migrations/bin/makemigration.js",
     "db:schema": "babel-node ./scripts/db/schema",
     "db:migrate": "babel-node ./scripts/db/migrate"
   },
@@ -33,7 +32,6 @@
     "pg": "^8.7.1",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.6.5",
-    "sequelize-auto-migrations": "^1.0.3",
     "standard": "^16.0.3",
     "uuid": "^8.3.2"
   },
