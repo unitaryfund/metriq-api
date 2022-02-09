@@ -20,6 +20,10 @@ module.exports = function (sequelize, DataTypes) {
       type: DataTypes.TEXT,
       allowNull: false
     },
+    affiliation: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
     email: {
       type: DataTypes.TEXT,
       allowNull: false
