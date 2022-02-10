@@ -23,7 +23,7 @@ module.exports = function (sequelize, DataTypes) {
     affiliation: {
       type: DataTypes.TEXT,
       defaultValue: '',
-      allowNull: true
+      allowNull: false
     },
     email: {
       type: DataTypes.TEXT,
