@@ -2,12 +2,10 @@
 
 'use strict'
 module.exports = function (sequelize, DataTypes) {
-  return sequelize.define('submissionTagRef', {}, {
-    classMethods: {
-      associate: function (db) {
-        db.user.hasMany(db.submissionTagRef)
-        db.submissionTagRef.belongsTo(db.tag)
-      }
-    }
-  })
+  const Model = sequelize.define('submissionTagRef', {}, {})
+  Model.associate = function (db) {
+    db.user.hasMany(db.submissionTagRef)
+    db.submissionTagRef.belongsTo(db.tag)
+  }
+  return Model
 }

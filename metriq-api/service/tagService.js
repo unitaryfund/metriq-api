@@ -3,10 +3,9 @@
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
-const config = require('../config')
-const { Sequelize, DataTypes } = require('sequelize')
-const sequelize = new Sequelize(config.pgConnectionString)
-const Tag = require('../models/tagModel')(sequelize, DataTypes)
+const db = require('../models/index')
+const sequelize = db.sequelize
+const Tag = db.tag
 
 class TagService extends ModelService {
   constructor () {

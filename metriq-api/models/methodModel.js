@@ -2,7 +2,7 @@
 
 'use strict'
 module.exports = function (sequelize, DataTypes) {
-  return sequelize.define('method', {
+  const Model = sequelize.define('method', {
     name: {
       type: DataTypes.TEXT,
       allowNull: false
@@ -15,11 +15,9 @@ module.exports = function (sequelize, DataTypes) {
       type: DataTypes.TEXT,
       allowNull: false
     }
-  }, {
-    classMethods: {
-      associate: function (db) {
-        db.user.hasMany(db.method)
-      }
-    }
-  })
+  }, {})
+  Model.associate = function (db) {
+    db.user.hasMany(db.method)
+  }
+  return Model
 }

@@ -1,13 +1,14 @@
 // submissionService.js
 
+const { Op } = require('sequelize')
+
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
 const config = require('../config')
-const { Sequelize, DataTypes, Op } = require('sequelize')
-const sequelize = new Sequelize(config.pgConnectionString)
-const Submission = require('../models/submissionModel')(sequelize, DataTypes)
-
+const db = require('../models/index')
+const sequelize = db.sequelize
+const Submission = db.submission
 // For email
 const nodemailer = require('nodemailer')
 
