@@ -2,7 +2,7 @@
 
 'use strict'
 module.exports = function (sequelize, DataTypes) {
-  return sequelize.define('submission', {
+  const Model = sequelize.define('submission', {
     name: {
       type: DataTypes.TEXT,
       allowNull: false
@@ -25,16 +25,14 @@ module.exports = function (sequelize, DataTypes) {
     approvedAt: {
       type: DataTypes.DATE
     }
-  }, {
-    classMethods: {
-      associate: function (db) {
-        db.user.hasMany(db.submission)
-        db.submission.hasMany(db.like)
-        db.submission.hasMany(db.submissionMethodRef)
-        db.submission.hasMany(db.submissionTaskRef)
-        db.submission.hasMany(db.submissionTagRef)
-        db.submission.hasMany(db.moderationReport)
-      }
-    }
-  })
+  }, {})
+  Model.associate = function (db) {
+    db.user.hasMany(db.submission)
+    db.submission.hasMany(db.like)
+    db.submission.hasMany(db.submissionMethodRef)
+    db.submission.hasMany(db.submissionTaskRef)
+    db.submission.hasMany(db.submissionTagRef)
+    db.submission.hasMany(db.moderationReport)
+  }
+  return Model
 }

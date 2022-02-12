@@ -2,7 +2,7 @@
 
 'use strict'
 module.exports = function (sequelize, DataTypes) {
-  return sequelize.define('moderationReport', {
+  const Model = sequelize.define('moderationReport', {
     description: {
       type: DataTypes.TEXT,
       allowNull: false
@@ -10,11 +10,9 @@ module.exports = function (sequelize, DataTypes) {
     resolvedAt: {
       type: DataTypes.DATE
     }
-  }, {
-    classMethods: {
-      associate: function (db) {
-        db.user.hasMany(db.moderationReport)
-      }
-    }
-  })
+  }, {})
+  Model.associate = function (db) {
+    db.user.hasMany(db.moderationReport)
+  }
+  return Model
 }

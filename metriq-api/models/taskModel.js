@@ -2,7 +2,7 @@
 
 'use strict'
 module.exports = function (sequelize, DataTypes) {
-  return sequelize.define('task', {
+  const Model = sequelize.define('task', {
     name: {
       type: DataTypes.TEXT,
       allowNull: false
@@ -15,12 +15,10 @@ module.exports = function (sequelize, DataTypes) {
       type: DataTypes.TEXT,
       allowNull: false
     }
-  }, {
-    classMethods: {
-      associate: function (db) {
-        db.user.hasMany(db.task)
-        db.task.belongsTo(db.task)
-      }
-    }
-  })
+  }, {})
+  Model.associate = function (db) {
+    db.user.hasMany(db.task)
+    db.task.belongsTo(db.task)
+  }
+  return Model
 }

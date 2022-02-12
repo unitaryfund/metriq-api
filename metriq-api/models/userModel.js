@@ -7,7 +7,7 @@ const recoveryExpirationMinutes = 30
 const millisPerMinute = 60000
 
 module.exports = function (sequelize, DataTypes) {
-  return sequelize.define('user', {
+  const Model = sequelize.define('user', {
     username: {
       type: DataTypes.TEXT,
       allowNull: false
@@ -41,16 +41,14 @@ module.exports = function (sequelize, DataTypes) {
     recoveryTokenExpiration: {
       type: DataTypes.DATE
     }
-  }, {
-    classMethods: {
-      associate: function (db) {
-        db.user.hasMany(db.task)
-        db.task.belongsTo(db.task)
-      },
-      generateRecovery: function () {
-        this.recoveryToken = uuidv4()
-        this.recoveryTokenExpiration = new Date((new Date()).getTime() + recoveryExpirationMinutes * millisPerMinute)
-      }
-    }
-  })
+  }, {})
+  Model.associate = function (db) {
+    db.user.hasMany(db.task)
+    db.task.belongsTo(db.task)
+  }
+  Model.generateRecovery = function () {
+    this.recoveryToken = uuidv4()
+    this.recoveryTokenExpiration = new Date((new Date()).getTime() + recoveryExpirationMinutes * millisPerMinute)
+  }
+  return Model
 }

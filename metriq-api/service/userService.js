@@ -6,9 +6,8 @@ const { Op } = require('sequelize')
 const ModelService = require('./modelService')
 // Database Model
 const config = require('../config')
-const { Sequelize, DataTypes } = require('sequelize')
-const sequelize = new Sequelize(config.pgConnectionString)
-const User = require('../models/userModel')(sequelize, DataTypes)
+const db = require('../models/index')
+const User = db.user
 
 // Password hasher
 const bcrypt = require('bcrypt')

@@ -2,7 +2,7 @@
 
 'use strict'
 module.exports = function (sequelize, DataTypes) {
-  return sequelize.define('result', {
+  const Model = sequelize.define('result', {
     isHigherBetter: {
       type: DataTypes.BOOLEAN,
       allowNull: false
@@ -23,11 +23,9 @@ module.exports = function (sequelize, DataTypes) {
       allowNull: false,
       defaultValue: ''
     }
-  }, {
-    classMethods: {
-      associate: function (db) {
-        db.user.hasMany(db.result)
-      }
-    }
-  })
+  }, {})
+  Model.associate = function (db) {
+    db.user.hasMany(db.result)
+  }
+  return Model
 }

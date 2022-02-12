@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest --runInBand ./coverage",
     "db:schema": "babel-node ./scripts/db/schema",
-    "db:migrate": "babel-node ./scripts/db/migrate"
+    "db:migrate": "babel-node ./scripts/db/migrate",
+    "db:migrate:undo": "npx sequelize-cli db:migrate:undo"
   },
   "keywords": [
     "api",

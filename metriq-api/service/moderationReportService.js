@@ -4,9 +4,8 @@
 const ModelService = require('./modelService')
 // Database Model
 const config = require('../config')
-const { Sequelize, DataTypes } = require('sequelize')
-const sequelize = new Sequelize(config.pgConnectionString)
-const ModerationReport = require('../models/moderationReportModel')(sequelize, DataTypes)
+const db = require('../models/index')
+const ModerationReport = db.moderationReport
 
 // For email
 const nodemailer = require('nodemailer')

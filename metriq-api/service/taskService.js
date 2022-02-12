@@ -3,10 +3,9 @@
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
-const config = require('../config')
-const { Sequelize, DataTypes } = require('sequelize')
-const sequelize = new Sequelize(config.pgConnectionString)
-const Task = require('../models/taskModel')(sequelize, DataTypes)
+const db = require('../models/index')
+const sequelize = db.sequelize
+const Task = db.task
 
 // Service dependencies
 const ResultService = require('./resultService')
