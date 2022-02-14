@@ -18,6 +18,7 @@ module.exports = function (sequelize, DataTypes) {
   }, {})
   Model.associate = function (db) {
     db.user.hasMany(db.method)
+    db.method.belongsTo(db.method)
   }
   return Model
 }
