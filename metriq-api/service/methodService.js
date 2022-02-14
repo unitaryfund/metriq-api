@@ -61,6 +61,14 @@ class MethodService extends ModelService {
     method.fullName = reqBody.fullName
     method.description = reqBody.description
 
+    if (reqBody.parentMethod && reqBody.parentMethod !== '') {
+      method.methodId = reqBody.parentMethod
+      const parentMethod = await this.getByPk(method.methodId)
+      if (!parentMethod) {
+        return { success: false, error: 'Parent method ID does not exist.' }
+      }
+    }
+
     // Get an ObjectId for the new object, first.
     const createResult = await this.create(method)
     method = createResult.body
