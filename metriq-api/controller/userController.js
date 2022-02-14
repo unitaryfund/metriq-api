@@ -39,6 +39,12 @@ exports.read = async function (req, res) {
     'Successfully retrieved user profile.')
 }
 
+exports.update = async function (req, res) {
+  routeWrapper(res,
+    async () => await userService.update(req.body),
+    'Successfully retrieved user profile.')
+}
+
 // Validate the delete request and delete the user.
 exports.delete = async function (req, res) {
   routeWrapper(res,

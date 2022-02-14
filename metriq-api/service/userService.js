@@ -109,6 +109,18 @@ class UserService extends ModelService {
     return { success: true, body: await this.sanitize(user) }
   }
 
+  async update (reqBody) {
+    const user = await this.getByPk(reqBody.id)
+    if (!user) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    user.affiliation = reqBody.affiliation
+    await user.save()
+
+    return { success: true, body: await this.sanitize(user) }
+  }
+
   async login (reqBody) {
     const user = await this.getByUsernameOrEmail(reqBody.username)
     if (!user) {
