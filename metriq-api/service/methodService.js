@@ -32,11 +32,11 @@ class MethodService extends ModelService {
     return { success: true, body: result }
   }
 
-  async getAllNamesAndCounts () {
+  async getTopLevelNamesAndCounts () {
     const result = (await sequelize.query(
       'SELECT * FROM (' +
       '  SELECT methods.id as id, methods.name as name, COUNT(DISTINCT "submissionMethodRefs".*) as "submissionCount", COUNT(DISTINCT likes.*) as "upvoteTotal" from "submissionMethodRefs" ' +
-      '  RIGHT JOIN methods on methods.id = "submissionMethodRefs"."methodId" and "submissionMethodRefs"."deletedAt" IS NULL ' +
+      '  RIGHT JOIN methods on methods.id = "submissionMethodRefs"."methodId" AND methods."methodId" IS NULL AND "submissionMethodRefs"."deletedAt" IS NULL ' +
       '  LEFT JOIN submissions on submissions.id = "submissionMethodRefs"."submissionId" AND (NOT submissions."approvedAt" IS NULL) AND submissions."deletedAt" IS NULL ' +
       '  LEFT JOIN likes on likes."submissionId" = "submissionMethodRefs"."submissionId" ' +
       '  GROUP BY methods.id' +
