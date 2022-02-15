@@ -23,7 +23,13 @@ class MethodService extends ModelService {
     if (!method) {
       return { success: false, error: 'Method not found.' }
     }
+
+    method.dataValues.parentMethod = await this.getByPk(method.dataValues.methodId)
+    delete method.dataValues.methodId
+
+    method.dataValues.childMethods = await this.getChildren(methodId)
     method.dataValues.submissions = (await submissionService.getByMethodId(methodId)).body
+
     return { success: true, body: method }
   }
 
@@ -32,17 +38,23 @@ class MethodService extends ModelService {
     return { success: true, body: result }
   }
 
-  async getAllNamesAndCounts () {
+  async getTopLevelNamesAndCounts () {
     const result = (await sequelize.query(
       'SELECT * FROM (' +
       '  SELECT methods.id as id, methods.name as name, COUNT(DISTINCT "submissionMethodRefs".*) as "submissionCount", COUNT(DISTINCT likes.*) as "upvoteTotal" from "submissionMethodRefs" ' +
-      '  RIGHT JOIN methods on methods.id = "submissionMethodRefs"."methodId" and "submissionMethodRefs"."deletedAt" IS NULL ' +
+      '  RIGHT JOIN methods on methods.id = "submissionMethodRefs"."methodId" AND methods."methodId" IS NULL AND "submissionMethodRefs"."deletedAt" IS NULL ' +
       '  LEFT JOIN submissions on submissions.id = "submissionMethodRefs"."submissionId" AND (NOT submissions."approvedAt" IS NULL) AND submissions."deletedAt" IS NULL ' +
       '  LEFT JOIN likes on likes."submissionId" = "submissionMethodRefs"."submissionId" ' +
       '  GROUP BY methods.id' +
       ') as a WHERE a."submissionCount" > 0'
     ))[0]
     return { success: true, body: result }
+  }
+
+  async getChildren (parentId) {
+    return (await sequelize.query(
+      'SELECT * FROM methods WHERE methods."methodId" = ' + parentId + ';'
+    ))[0]
   }
 
   async getByName (name) {
@@ -60,6 +72,14 @@ class MethodService extends ModelService {
     method.name = reqBody.name
     method.fullName = reqBody.fullName
     method.description = reqBody.description
+
+    if (reqBody.parentMethod && reqBody.parentMethod !== '') {
+      method.methodId = reqBody.parentMethod
+      const parentMethod = await this.getByPk(method.methodId)
+      if (!parentMethod) {
+        return { success: false, error: 'Parent method ID does not exist.' }
+      }
+    }
 
     // Get an ObjectId for the new object, first.
     const createResult = await this.create(method)

@@ -14,6 +14,11 @@ module.exports = function (sequelize, DataTypes) {
     description: {
       type: DataTypes.TEXT,
       allowNull: false
+    },
+    isHideChart: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false
     }
   }, {})
   Model.associate = function (db) {
