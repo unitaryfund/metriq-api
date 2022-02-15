@@ -52,7 +52,7 @@ exports.update = async function (req, res) {
 
 exports.readSubmissionCounts = async function (req, res) {
   routeWrapper(res,
-    async () => await taskService.getAllNamesAndCounts(),
+    async () => await taskService.getTopLevelNamesAndCounts(),
     'Retrieved all task names and counts.')
 }
 
