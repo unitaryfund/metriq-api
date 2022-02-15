@@ -23,7 +23,13 @@ class MethodService extends ModelService {
     if (!method) {
       return { success: false, error: 'Method not found.' }
     }
+
+    method.dataValues.parentMethod = await this.getByPk(method.dataValues.methodId)
+    delete method.dataValues.methodId
+
+    method.dataValues.childMethods = await this.getChildren(methodId)
     method.dataValues.submissions = (await submissionService.getByMethodId(methodId)).body
+
     return { success: true, body: method }
   }
 
@@ -43,6 +49,12 @@ class MethodService extends ModelService {
       ') as a WHERE a."submissionCount" > 0'
     ))[0]
     return { success: true, body: result }
+  }
+
+  async getChildren (parentId) {
+    return (await sequelize.query(
+      'SELECT * FROM methods WHERE methods."methodId" = ' + parentId + ';'
+    ))[0]
   }
 
   async getByName (name) {
