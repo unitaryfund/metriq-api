@@ -50,16 +50,52 @@ class TaskService extends ModelService {
   }
 
   async getTopLevelNamesAndCounts () {
-    const result = (await sequelize.query(
-      'SELECT * FROM (' +
-      '  SELECT tasks.id as id, tasks.name as name, tasks.description as description, COUNT(DISTINCT "submissionTaskRefs".*) as "submissionCount", COUNT(DISTINCT likes.*) as "upvoteTotal" from "submissionTaskRefs" ' +
-      '  RIGHT JOIN tasks on tasks.id = "submissionTaskRefs"."taskId" AND tasks."taskId" is NULL AND "submissionTaskRefs"."deletedAt" is NULL ' +
-      '  LEFT JOIN submissions on submissions.id = "submissionTaskRefs"."submissionId" AND (NOT submissions."approvedAt" IS NULL) AND submissions."deletedAt" IS NULL ' +
-      '  LEFT JOIN likes on likes."submissionId" = "submissionTaskRefs"."submissionId" ' +
-      '  GROUP BY tasks.id' +
-      ') as a WHERE a."submissionCount" > 0'
+    const result = await this.getTopLevelNames()
+    for (let i = 0; i < result.length; i++) {
+      result[i].submissionCount = await this.getParentSubmissionCount(result[i].id)
+      result[i].upvoteTotal = await this.getParentLikeCount(result[i].id)
+    }
+    const filtered = []
+    for (let i = 0; i < result.length; i++) {
+      if (result[i].submissionCount > 0) {
+        filtered.push(result[i])
+      }
+    }
+    return { success: true, body: filtered }
+  }
+
+  async getTopLevelNames () {
+    return (await sequelize.query(
+      'SELECT id, name, description FROM tasks WHERE tasks."taskId" is NULL '
     ))[0]
-    return { success: true, body: result }
+  }
+
+  async getParentSubmissionCount (parentId) {
+    return (await sequelize.query(
+      'WITH RECURSIVE c AS ( ' +
+      '  SELECT ' + parentId + ' as id ' +
+      '  UNION ALL ' +
+      '  SELECT tasks.id as id FROM tasks ' +
+      '    JOIN c on c.id = tasks."taskId" ' +
+      ') ' +
+      'SELECT COUNT(*) FROM "submissionTaskRefs" ' +
+      '  RIGHT JOIN c on c.id = "submissionTaskRefs"."taskId" AND ("submissionTaskRefs"."deletedAt" IS NULL) '
+    ))[0][0].count
+  }
+
+  async getParentLikeCount (parentId) {
+    return (await sequelize.query(
+      'WITH RECURSIVE c AS ( ' +
+      '  SELECT ' + parentId + ' as id ' +
+      '  UNION ALL ' +
+      '  SELECT tasks.id as id FROM tasks ' +
+      '    JOIN c on c.id = tasks."taskId" ' +
+      ') ' +
+      'SELECT COUNT(*) FROM likes ' +
+      '  RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
+      '  RIGHT JOIN "submissionTaskRefs" on submissions.id = "submissionTaskRefs"."submissionId" ' +
+      '  RIGHT JOIN c on c.id = "submissionTaskRefs"."taskId" AND ("submissionTaskRefs"."deletedAt" IS NULL) '
+    ))[0][0].count
   }
 
   async getChildren (parentId) {
