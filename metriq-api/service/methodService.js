@@ -156,16 +156,21 @@ class MethodService extends ModelService {
     }
 
     if (reqBody.parentMethod !== undefined) {
-      method.methodId = reqBody.parentMethod
-      const parentMethod = await this.getByPk(method.methodId)
-      if (!parentMethod) {
-        return { success: false, error: 'Parent method ID does not exist.' }
+      reqBody.parentMethod = parseInt(reqBody.parentMethod)
+      if (!reqBody.parentMethod) {
+        method.methodId = null
+      } else {
+        method.methodId = reqBody.parentMethod
+        const parentMethod = await this.getByPk(method.methodId)
+        if (!parentMethod) {
+          return { success: false, error: 'Parent method ID does not exist.' }
+        }
       }
     }
 
     await method.save()
 
-    return { success: true, body: method }
+    return await this.getSanitized(method.id)
   }
 
   async addOrRemoveSubmission (isAdd, methodId, submissionId, userId) {

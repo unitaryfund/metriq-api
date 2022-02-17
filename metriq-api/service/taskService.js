@@ -221,16 +221,19 @@ class TaskService extends ModelService {
     }
 
     if (reqBody.parentTask !== undefined) {
-      task.taskId = reqBody.parentTask
-      const parentTask = await this.getByPk(task.taskId)
-      if (!parentTask) {
-        return { success: false, error: 'Parent task ID does not exist.' }
+      reqBody.parentTask = parseInt(reqBody.parentTask)
+      if (reqBody.parentTask) {
+        task.taskId = reqBody.parentTask
+        const parentTask = await this.getByPk(task.taskId)
+        if (!parentTask) {
+          return { success: false, error: 'Parent task ID does not exist.' }
+        }
       }
     }
 
     await task.save()
 
-    return { success: true, body: task }
+    return await this.getSanitized(task.id)
   }
 
   async addOrRemoveSubmission (isAdd, taskId, submissionId, userId) {
