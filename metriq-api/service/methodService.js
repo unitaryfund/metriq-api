@@ -155,6 +155,14 @@ class MethodService extends ModelService {
       method.description = reqBody.description.trim()
     }
 
+    if (reqBody.parentMethod !== undefined) {
+      method.methodId = reqBody.parentMethod
+      const parentMethod = await this.getByPk(method.methodId)
+      if (!parentMethod) {
+        return { success: false, error: 'Parent method ID does not exist.' }
+      }
+    }
+
     await method.save()
 
     return { success: true, body: method }

@@ -176,12 +176,10 @@ class TaskService extends ModelService {
     task.fullName = reqBody.fullName.trim()
     task.description = reqBody.description.trim()
 
-    if (reqBody.parentTask && reqBody.parentTask !== '') {
-      task.taskId = reqBody.parentTask
-      const parentTask = await this.getByPk(task.taskId)
-      if (!parentTask) {
-        return { success: false, error: 'Parent task ID does not exist.' }
-      }
+    task.taskId = reqBody.parentTask
+    const parentTask = await this.getByPk(task.taskId)
+    if (!parentTask) {
+      return { success: false, error: 'Parent task ID does not exist.' }
     }
 
     // Get an ObjectId for the new object, first.
@@ -220,6 +218,14 @@ class TaskService extends ModelService {
     }
     if (reqBody.description !== undefined) {
       task.description = reqBody.description.trim()
+    }
+
+    if (reqBody.parentTask !== undefined) {
+      task.taskId = reqBody.parentTask
+      const parentTask = await this.getByPk(task.taskId)
+      if (!parentTask) {
+        return { success: false, error: 'Parent task ID does not exist.' }
+      }
     }
 
     await task.save()
