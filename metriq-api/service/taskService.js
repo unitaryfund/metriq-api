@@ -176,12 +176,10 @@ class TaskService extends ModelService {
     task.fullName = reqBody.fullName.trim()
     task.description = reqBody.description.trim()
 
-    if (reqBody.parentTask && reqBody.parentTask !== '') {
-      task.taskId = reqBody.parentTask
-      const parentTask = await this.getByPk(task.taskId)
-      if (!parentTask) {
-        return { success: false, error: 'Parent task ID does not exist.' }
-      }
+    task.taskId = reqBody.parentTask
+    const parentTask = await this.getByPk(task.taskId)
+    if (!parentTask) {
+      return { success: false, error: 'Parent task ID does not exist.' }
     }
 
     // Get an ObjectId for the new object, first.
@@ -222,9 +220,20 @@ class TaskService extends ModelService {
       task.description = reqBody.description.trim()
     }
 
+    if (reqBody.parentTask !== undefined) {
+      reqBody.parentTask = parseInt(reqBody.parentTask)
+      if (reqBody.parentTask) {
+        task.taskId = reqBody.parentTask
+        const parentTask = await this.getByPk(task.taskId)
+        if (!parentTask) {
+          return { success: false, error: 'Parent task ID does not exist.' }
+        }
+      }
+    }
+
     await task.save()
 
-    return { success: true, body: task }
+    return await this.getSanitized(task.id)
   }
 
   async addOrRemoveSubmission (isAdd, taskId, submissionId, userId) {
