@@ -6,6 +6,7 @@ module.exports = function (sequelize, DataTypes) {
   Model.associate = function (db) {
     db.user.hasMany(db.resultArchitectureRef)
     db.resultArchitectureRef.belongsTo(db.result)
+    db.resultArchitectureRef.belongsTo(db.architecture)
   }
   return Model
 }
