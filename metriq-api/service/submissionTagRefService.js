@@ -10,6 +10,10 @@ class SubmissionTagRefService extends SubmissionRefService {
   constructor () {
     super('tagId', SubmissionTagRef)
   }
+
+  async getBySubmissionId (submissionId) {
+    return await this.SequelizeServiceInstance.findAll({ submissionId: submissionId })
+  }
 }
 
 module.exports = SubmissionTagRefService
