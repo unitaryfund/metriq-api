@@ -183,7 +183,7 @@ class SubmissionService extends ModelService {
     delete toRet.likes
     toRet.user = await userService.getByPk(toRet.userId)
 
-    await this.populateTags(submission)
+    await this.populateTags(toRet)
 
     toRet.methods = []
     toRet.results = []
