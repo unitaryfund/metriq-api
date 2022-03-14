@@ -288,8 +288,8 @@ class SubmissionService extends ModelService {
       return { success: false, error: 'Submission not found.' }
     }
 
-    if (reqBody.submissionThumbnailUrl !== undefined) {
-      submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl.trim() ? reqBody.submissionThumbnailUrl.trim() : null
+    if (reqBody.thumbnailUrl !== undefined) {
+      submission.thumbnailUrl = reqBody.thumbnailUrl.trim() ? reqBody.thumbnailUrl.trim() : null
     }
     if (reqBody.description !== undefined) {
       submission.description = reqBody.description.trim() ? reqBody.description.trim() : ''
