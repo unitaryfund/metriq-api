@@ -31,7 +31,7 @@ class SubmissionService extends ModelService {
     return 'SELECT submissions.*, users.username as username, CAST("upvotesCount" AS integer) AS "upvotesCount", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
         '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
-        '    WHERE submissions."deletedAt" IS NULL AND submissions."approvedAt" IS NOT NULL ' +
+        '    WHERE submissions."deletedAt" IS NULL ' +
         '    GROUP BY submissions.id) as sl ' +
         'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
         'LEFT JOIN users on submissions."userId" = users.id ' +
@@ -44,7 +44,7 @@ class SubmissionService extends ModelService {
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
         '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
         '    LEFT JOIN "submissionTagRefs" on "submissionTagRefs"."submissionId" = submissions.id AND "submissionTagRefs"."tagId" = ' + tagId + ' ' +
-        '    WHERE submissions."deletedAt" IS NULL AND submissions."approvedAt" IS NOT NULL and "submissionTagRefs".id IS NOT NULL ' +
+        '    WHERE submissions."deletedAt" IS NULL AND "submissionTagRefs".id IS NOT NULL ' +
         '    GROUP BY submissions.id) as sl ' +
         'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
         'LEFT JOIN users on submissions."userId" = users.id ' +
@@ -56,7 +56,7 @@ class SubmissionService extends ModelService {
     return 'SELECT submissions.*, users.username as username, CAST("upvotesCount" AS integer) AS "upvotesCount", ("upvotesCount" * 3600) / EXTRACT(EPOCH FROM (NOW() - submissions."createdAt")) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
         '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
-        '    WHERE submissions."deletedAt" IS NULL AND submissions."approvedAt" IS NOT NULL ' +
+        '    WHERE submissions."deletedAt" IS NULL ' +
         '    GROUP BY submissions.id) as sl ' +
         'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
         'LEFT JOIN users on submissions."userId" = users.id ' +
@@ -69,7 +69,7 @@ class SubmissionService extends ModelService {
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
         '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
         '    LEFT JOIN "submissionTagRefs" on "submissionTagRefs"."submissionId" = submissions.id AND "submissionTagRefs"."tagId" = ' + tagId + ' ' +
-        '    WHERE submissions."deletedAt" IS NULL AND submissions."approvedAt" IS NOT NULL and "submissionTagRefs".id IS NOT NULL ' +
+        '    WHERE submissions."deletedAt" IS NULL AND "submissionTagRefs".id IS NOT NULL ' +
         '    GROUP BY submissions.id) as sl ' +
         'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
         'LEFT JOIN users on submissions."userId" = users.id ' +
@@ -265,7 +265,7 @@ class SubmissionService extends ModelService {
       }
     })
 
-    const mailBody = 'We have received your submission: \n\n' + submission.name + '\n\n There is a simple manual review process from an administrator, primarily to ensure that your submission is best categorized within our normal metadata categories. Once approved, your submission will be immediately visible to other users. If our administrators need further input from you, in order to properly categorize your submission, they will reach out to your email address, here.\n\nThank you for your submission!'
+    const mailBody = 'We have received your submission: \n\n' + submission.name + '\n\n There is a simple manual review process from an administrator, primarily to check link and image appropriateness for the safety of the community and to ensure that your submission is best categorized within our normal metadata categories. Your submission is already visible to other users, but its visibility may change pending review. If our administrators need further input from you, in order to properly categorize your submission, they will reach out to your email address, here.\n\nThank you for your submission!'
 
     const mailOptions = {
       from: config.supportEmail.address,
@@ -288,8 +288,8 @@ class SubmissionService extends ModelService {
       return { success: false, error: 'Submission not found.' }
     }
 
-    if (reqBody.submissionThumbnailUrl !== undefined) {
-      submission.submissionThumbnailUrl = reqBody.submissionThumbnailUrl.trim() ? reqBody.submissionThumbnailUrl.trim() : null
+    if (reqBody.thumbnailUrl !== undefined) {
+      submission.thumbnailUrl = reqBody.thumbnailUrl.trim() ? reqBody.thumbnailUrl.trim() : null
     }
     if (reqBody.description !== undefined) {
       submission.description = reqBody.description.trim() ? reqBody.description.trim() : ''
