@@ -289,7 +289,7 @@ class SubmissionService extends ModelService {
     }
 
     if (reqBody.thumbnailUrl !== undefined) {
-      submission.thumbnailUrl = reqBody.thumbnailUrl.trim() ? reqBody.thumbnailUrl.trim() : null
+      submission.thumbnailUrl = (reqBody.thumbnailUrl && reqBody.thumbnailUrl.trim()) ? reqBody.thumbnailUrl.trim() : null
     }
     if (reqBody.description !== undefined) {
       submission.description = reqBody.description.trim() ? reqBody.description.trim() : ''
