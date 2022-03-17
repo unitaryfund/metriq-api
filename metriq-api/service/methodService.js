@@ -28,6 +28,12 @@ class MethodService extends ModelService {
     delete method.dataValues.methodId
 
     method.dataValues.childMethods = await this.getChildren(methodId)
+    for (let i = 0; i < method.dataValues.childMethods.length; i++) {
+      method.dataValues.childMethods[i].submissionCount = await this.getParentSubmissionCount(method.dataValues.childMethods[i].id)
+      method.dataValues.childMethods[i].upvoteTotal = await this.getParentLikeCount(method.dataValues.childMethods[i].id)
+      method.dataValues.childMethods[i].resultCount = await this.getParentResultCount(method.dataValues.childMethods[i].id)
+    }
+
     method.dataValues.submissions = (await submissionService.getByMethodId(methodId)).body
 
     return { success: true, body: method }
@@ -43,6 +49,7 @@ class MethodService extends ModelService {
     for (let i = 0; i < result.length; i++) {
       result[i].submissionCount = await this.getParentSubmissionCount(result[i].id)
       result[i].upvoteTotal = await this.getParentLikeCount(result[i].id)
+      result[i].resultCount = await this.getParentResultCount(result[i].id)
     }
     const filtered = []
     for (let i = 0; i < result.length; i++) {
@@ -84,6 +91,20 @@ class MethodService extends ModelService {
       '  RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
       '  RIGHT JOIN "submissionMethodRefs" on submissions.id = "submissionMethodRefs"."submissionId" ' +
       '  RIGHT JOIN c on c.id = "submissionMethodRefs"."methodId" AND ("submissionMethodRefs"."deletedAt" IS NULL) '
+    ))[0][0].count
+  }
+
+  async getParentResultCount (parentId) {
+    return (await sequelize.query(
+      'WITH RECURSIVE c AS ( ' +
+      '  SELECT ' + parentId + ' as id ' +
+      '  UNION ALL ' +
+      '  SELECT methods.id as id FROM methods ' +
+      '    JOIN c on c.id = methods."methodId" ' +
+      ') ' +
+      'SELECT COUNT(*) FROM results ' +
+      '  RIGHT JOIN "submissionMethodRefs" on results."submissionMethodRefId" = "submissionMethodRefs".id ' +
+      '  RIGHT JOIN c on c.id = "submissionMethodRefs"."methodId" AND (results."deletedAt" IS NULL) '
     ))[0][0].count
   }
 
