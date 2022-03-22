@@ -87,6 +87,8 @@ class ResultService extends ModelService {
     result.metricValue = reqBody.metricValue
     result.evaluatedAt = reqBody.evaluatedAt
     result.notes = reqBody.notes ? reqBody.notes : ''
+    result.standardError = reqBody.standardError
+    result.sampleSize = reqBody.sampleSize
 
     const nResult = await this.create(result)
     if (!nResult.success) {
@@ -132,6 +134,8 @@ class ResultService extends ModelService {
     result.metricValue = reqBody.metricValue
     result.evaluatedAt = reqBody.evaluatedAt
     result.notes = reqBody.notes ? reqBody.notes : ''
+    result.standardError = reqBody.standardError
+    result.sampleSize = reqBody.sampleSize
 
     result.save()
 
