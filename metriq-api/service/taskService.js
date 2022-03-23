@@ -38,6 +38,12 @@ class TaskService extends ModelService {
     delete task.dataValues.taskId
 
     task.dataValues.childTasks = await this.getChildren(taskId)
+    for (let i = 0; i < task.dataValues.childTasks.length; i++) {
+      task.dataValues.childTasks[i].submissionCount = await this.getParentSubmissionCount(task.dataValues.childTasks[i].id)
+      task.dataValues.childTasks[i].upvoteTotal = await this.getParentLikeCount(task.dataValues.childTasks[i].id)
+      task.dataValues.childTasks[i].resultCount = await this.getParentResultCount(task.dataValues.childTasks[i].id)
+    }
+
     task.dataValues.submissions = (await submissionService.getByTaskId(taskId)).body
     task.dataValues.results = (await resultService.getByTaskId(taskId)).body
 
@@ -54,6 +60,7 @@ class TaskService extends ModelService {
     for (let i = 0; i < result.length; i++) {
       result[i].submissionCount = await this.getParentSubmissionCount(result[i].id)
       result[i].upvoteTotal = await this.getParentLikeCount(result[i].id)
+      result[i].resultCount = await this.getParentResultCount(result[i].id)
     }
     const filtered = []
     for (let i = 0; i < result.length; i++) {
@@ -95,6 +102,20 @@ class TaskService extends ModelService {
       '  RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
       '  RIGHT JOIN "submissionTaskRefs" on submissions.id = "submissionTaskRefs"."submissionId" ' +
       '  RIGHT JOIN c on c.id = "submissionTaskRefs"."taskId" AND ("submissionTaskRefs"."deletedAt" IS NULL) '
+    ))[0][0].count
+  }
+
+  async getParentResultCount (parentId) {
+    return (await sequelize.query(
+      'WITH RECURSIVE c AS ( ' +
+      '  SELECT ' + parentId + ' as id ' +
+      '  UNION ALL ' +
+      '  SELECT tasks.id as id FROM tasks ' +
+      '    JOIN c on c.id = tasks."taskId" ' +
+      ') ' +
+      'SELECT COUNT(*) FROM results ' +
+      '  RIGHT JOIN "submissionTaskRefs" on results."submissionTaskRefId" = "submissionTaskRefs".id ' +
+      '  RIGHT JOIN c on c.id = "submissionTaskRefs"."taskId" AND (results."deletedAt" IS NULL) '
     ))[0][0].count
   }
 

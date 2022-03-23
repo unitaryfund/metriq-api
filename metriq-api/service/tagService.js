@@ -27,7 +27,7 @@ class TagService extends ModelService {
       '  RIGHT JOIN tags on tags.id = "submissionTagRefs"."tagId" ' +
       '  LEFT JOIN likes on likes."submissionId" = "submissionTagRefs"."submissionId" ' +
       '  LEFT JOIN submissions on submissions.id = "submissionTagRefs"."submissionId" ' +
-      '  WHERE (submissions."approvedAt" IS NOT NULL) ' +
+      '  WHERE (submissions."deletedAt" IS NULL) ' +
       '  GROUP BY tags.id'
     ))[0]
     return { success: true, body: result }

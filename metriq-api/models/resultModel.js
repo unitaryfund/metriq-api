@@ -22,6 +22,14 @@ module.exports = function (sequelize, DataTypes) {
       type: DataTypes.TEXT,
       allowNull: false,
       defaultValue: ''
+    },
+    standardError: {
+      type: DataTypes.FLOAT,
+      allowNull: true
+    },
+    sampleSize: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     }
   }, {})
   Model.associate = function (db) {
