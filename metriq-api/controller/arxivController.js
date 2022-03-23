@@ -22,7 +22,7 @@ async function routeWrapper (res, serviceFn, successMessage) {
       res.json({ message: successMessage, data: result.body }).end()
     } else {
       // The service function handled an error, but we can't perform the intended action.
-      sendResponse(res, 400, result.error)
+      sendResponse(res, 404, result.error)
     }
   } catch (err) {
     // There was an unhandled exception.
