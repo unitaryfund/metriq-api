@@ -1,8 +1,8 @@
-// architectureModel.js
+// architectureDataTypeModel.js
 
 'use strict'
 module.exports = function (sequelize, DataTypes) {
-  const Model = sequelize.define('architecture', {
+  const Model = sequelize.define('architectureDataType', {
     name: {
       type: DataTypes.TEXT,
       allowNull: false
@@ -14,10 +14,18 @@ module.exports = function (sequelize, DataTypes) {
     description: {
       type: DataTypes.TEXT,
       allowNull: false
+    },
+    dataTypeId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    architectureId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
     }
   }, {})
   Model.associate = function (db) {
-    db.architecture.hasMany(db.architectureDataType)
+    db.architectureDataType.belongsTo(db.dataType)
   }
   return Model
 }
