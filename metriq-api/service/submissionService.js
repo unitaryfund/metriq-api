@@ -127,6 +127,11 @@ class SubmissionService extends ModelService {
     return { success: true, body: result }
   }
 
+  async getByArxivId (arxivId) {
+    const url = 'https://arxiv.org/abs/' + arxivId
+    return await this.SequelizeServiceInstance.findOne({ contentUrl: url })
+  }
+
   async get (submissionNameOrId) {
     const submission = await this.getByNameOrId(submissionNameOrId)
     return { success: true, body: submission }
