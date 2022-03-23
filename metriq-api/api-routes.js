@@ -18,6 +18,7 @@ const tagController = require('./controller/tagController')
 const taskController = require('./controller/taskController')
 const resultController = require('./controller/resultController')
 const methodController = require('./controller/methodController')
+const arxivController = require('./controller/arxivController')
 
 // Register routes.
 router.route('/register')
@@ -105,6 +106,8 @@ router.route('/result/metricNames')
 router.route('/result/:id')
   .post(resultController.update)
   .delete(resultController.delete)
+router.route('/v1/arxiv_id/:id')
+  .get(arxivController.read)
 
 // Export API routes.
 module.exports = router

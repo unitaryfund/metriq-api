@@ -21,7 +21,7 @@ app.use(cors())
 
 // Import routes.
 const apiRoutes = require('./api-routes')
-const publicApiRoutes = ['/api/login', '/api/register', '/api/recover', '/api/password', '/api/tag']
+const publicApiRoutes = ['/api/login', '/api/register', '/api/recover', '/api/password', '/api/tag', '/api/v1/arxiv_id']
 const unless = function (paths, middleware) {
   return function (req, res, next) {
     if ((req.method === 'GET') &&
