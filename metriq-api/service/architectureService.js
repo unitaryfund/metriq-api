@@ -40,6 +40,36 @@ class ArchitectureService extends ModelService {
     architecture = (await this.getByPk(architecture.id)).dataValues
     return { success: true, body: architecture }
   }
+
+  async getSanitized (architectureId) {
+    const architecture = await this.getByPk(architectureId)
+    if (!architecture) {
+      return { success: false, error: 'Architecture not found.' }
+    }
+
+    return { success: true, body: architecture }
+  }
+
+  async update (architectureId, reqBody) {
+    const architecture = await this.getByPk(architectureId)
+    if (!architecture) {
+      return { success: false, error: 'Architecture not found.' }
+    }
+
+    if (reqBody.name !== undefined) {
+      architecture.name = reqBody.name.trim()
+    }
+    if (reqBody.fullName !== undefined) {
+      architecture.fullName = reqBody.fullName.trim()
+    }
+    if (reqBody.description !== undefined) {
+      architecture.description = reqBody.description.trim()
+    }
+
+    await architecture.save()
+
+    return await this.getSanitized(architecture.id)
+  }
 }
 
 module.exports = ArchitectureService
