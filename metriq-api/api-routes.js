@@ -114,6 +114,8 @@ router.route('/architecture/names')
 router.route('/architecture/:id')
   .get(architectureController.read)
   .post(architectureController.update)
+router.route('/architecture/resultCount')
+  .get(architectureController.readResultCounts)
 router.route('/v1/arxiv_id/:id')
   .get(arxivController.read)
 

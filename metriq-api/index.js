@@ -21,7 +21,7 @@ app.use(cors())
 
 // Import routes.
 const apiRoutes = require('./api-routes')
-const publicApiRoutes = ['/api/login', '/api/register', '/api/recover', '/api/password', '/api/tag', '/api/v1/arxiv_id']
+const publicApiRoutes = ['/api/login', '/api/register', '/api/recover', '/api/password', '/api/tag', '/api/architecture', '/api/v1/arxiv_id']
 const unless = function (paths, middleware) {
   return function (req, res, next) {
     if ((req.method === 'GET') &&
@@ -29,6 +29,7 @@ const unless = function (paths, middleware) {
         req.path.startsWith('/api/method') ||
         req.path.startsWith('/api/task') ||
         req.path.startsWith('/api/result') ||
+        req.path.startsWith('/api/architecture') ||
         /\/api\/user\/\d+\/submission\/?/.test(req.path))) {
       if (req.cookies && req.cookies.token) {
         try {

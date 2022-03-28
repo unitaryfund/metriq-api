@@ -5,10 +5,32 @@ const ModelService = require('./modelService')
 // Database Model
 const db = require('../models/index')
 const Architecture = db.architecture
+const sequelize = db.sequelize
 
 class ArchitectureService extends ModelService {
   constructor () {
     super(Architecture)
+  }
+
+  async getResultCount (parentId) {
+    return (await sequelize.query(
+      'SELECT COUNT(*) FROM "resultArchitectureRefs" ' +
+      '  RIGHT JOIN architectures on architectures.id = "resultArchitectureRefs"."architectureId" AND ("resultArchitectureRefs"."deletedAt" IS NULL) '
+    ))[0]
+  }
+
+  async getTopLevelNamesAndCounts () {
+    const result = await this.getAllNames()
+    for (let i = 0; i < result.length; i++) {
+      result[i].resultCount = await this.getResultCount(result[i].id)
+    }
+    const filtered = []
+    for (let i = 0; i < result.length; i++) {
+      if (result[i].resultCount > 0) {
+        filtered.push(result[i])
+      }
+    }
+    return { success: true, body: filtered }
   }
 
   async getByName (name) {

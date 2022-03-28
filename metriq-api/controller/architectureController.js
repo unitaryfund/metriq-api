@@ -55,3 +55,9 @@ exports.readNames = async function (req, res) {
     async () => await architectureService.getAllNames(),
     'Retrieved all architecture names.')
 }
+
+exports.readResultCounts = async function (req, res) {
+  routeWrapper(res,
+    async () => await architectureService.getTopLevelNamesAndCounts(),
+    'Retrieved all task names and counts.')
+}

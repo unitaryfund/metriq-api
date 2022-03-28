@@ -10,7 +10,7 @@ module.exports = function (sequelize, DataTypes) {
     friendlyName: {
       type: DataTypes.TEXT,
       allowNull: false
-    },
+    }
   }, {})
   Model.associate = function (db) {}
   return Model

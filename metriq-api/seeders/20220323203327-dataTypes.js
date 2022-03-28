@@ -22,7 +22,7 @@ module.exports = {
       { name: 'GEOMETRY', friendlyName: 'Geometry (SQL type)' },
       { name: 'GEOGRAPHY', friendlyName: 'Geography (SQL type)' },
       { name: 'HSTORE', friendlyName: 'Key-value pair' },
-      { name: 'ENUM', friendlyName: 'Enumeration'  }
+      { name: 'ENUM', friendlyName: 'Enumeration' }
     ], {})
   },
 

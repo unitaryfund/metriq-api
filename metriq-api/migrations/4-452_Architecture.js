@@ -4,12 +4,14 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(t => {
       return Promise.all([
-        queryInterface.createTable('dataTypes', {
+        queryInterface.createTable('Sequelize', {
           id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true
           },
+          updatedAt: Sequelize.DATE,
+          createdAt: Sequelize.DATE,
           name: {
             type: Sequelize.TEXT,
             allowNull: false
@@ -25,6 +27,8 @@ module.exports = {
             primaryKey: true,
             autoIncrement: true
           },
+          updatedAt: Sequelize.DATE,
+          createdAt: Sequelize.DATE,
           name: {
             type: Sequelize.TEXT,
             allowNull: false
@@ -38,12 +42,14 @@ module.exports = {
             allowNull: false
           }
         }, { transaction: t }),
-        queryInterface.createTable('architectureDataTypes', {
+        queryInterface.createTable('architectureSequelize', {
           id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true
           },
+          updatedAt: Sequelize.DATE,
+          createdAt: Sequelize.DATE,
           name: {
             type: Sequelize.TEXT,
             allowNull: false
@@ -59,7 +65,7 @@ module.exports = {
           dataTypeId: {
             type: Sequelize.INTEGER,
             allowNull: false,
-            references: { model: 'dataTypes', key: 'id' }
+            references: { model: 'Sequelize', key: 'id' }
           },
           architectureId: {
             type: Sequelize.INTEGER,
@@ -73,6 +79,8 @@ module.exports = {
             primaryKey: true,
             autoIncrement: true
           },
+          updatedAt: Sequelize.DATE,
+          createdAt: Sequelize.DATE,
           value: {
             type: Sequelize.TEXT,
             allowNull: false
@@ -80,7 +88,7 @@ module.exports = {
           architectureDataTypeId: {
             type: Sequelize.INTEGER,
             allowNull: false,
-            references: { model: 'architectureDataTypes', key: 'id' }
+            references: { model: 'architectureSequelize', key: 'id' }
           }
         }, { transaction: t }),
         queryInterface.createTable('resultArchitectureRefModels', {
@@ -89,6 +97,9 @@ module.exports = {
             primaryKey: true,
             autoIncrement: true
           },
+          updatedAt: Sequelize.DATE,
+          createdAt: Sequelize.DATE,
+          deletedAt: Sequelize.DATE,
           userId: {
             type: Sequelize.INTEGER,
             allowNull: false,
@@ -113,9 +124,9 @@ module.exports = {
       return Promise.all([
         queryInterface.dropTable('resultArchitectureRefModel', { transaction: t }),
         queryInterface.dropTable('architectureDataTypeValues', { transaction: t }),
-        queryInterface.dropTable('architectureDataTypes', { transaction: t }),
+        queryInterface.dropTable('architectureSequelize', { transaction: t }),
         queryInterface.dropTable('architecture', { transaction: t }),
-        queryInterface.dropTable('dataTypes', { transaction: t })
+        queryInterface.dropTable('Sequelize', { transaction: t })
       ])
     })
   }
