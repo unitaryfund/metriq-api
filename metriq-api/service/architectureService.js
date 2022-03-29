@@ -44,7 +44,7 @@ class ArchitectureService extends ModelService {
   }
 
   async getTopLevelNamesAndCounts () {
-    const result = await this.getAllNames()
+    const result = (await this.getAllNames()).body
     for (let i = 0; i < result.length; i++) {
       result[i].submissionCount = await this.getSubmissionCount(result[i].id)
       result[i].upvoteTotal = await this.getLikeCount(result[i].id)

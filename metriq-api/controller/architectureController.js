@@ -59,5 +59,5 @@ exports.readNames = async function (req, res) {
 exports.readSubmissionCounts = async function (req, res) {
   routeWrapper(res,
     async () => await architectureService.getTopLevelNamesAndCounts(),
-    'Retrieved all task names and counts.')
+    'Retrieved all architecture names and counts.')
 }
