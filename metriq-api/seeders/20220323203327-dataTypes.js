@@ -16,13 +16,13 @@ module.exports = {
       { name: 'BOOLEAN', friendlyName: 'Boolean (true/false)' },
       { name: 'DATE', friendlyName: 'Date and time' },
       { name: 'DATEONLY', friendlyName: 'Date' },
-      { name: 'REAL', friendlyName: 'Number (32-bit floating point)' },
+      // { name: 'REAL', friendlyName: 'Number (32-bit floating point)' },
       { name: '\'DOUBLE PRECISION\'', friendlyName: 'Number (64-bit floating point)' },
-      // { name: 'FLOAT', friendlyName: 'Number (32-bit floating point)' },
+      { name: 'FLOAT', friendlyName: 'Number (32-bit floating point)' },
       { name: 'GEOMETRY', friendlyName: 'Geometry (SQL type)' },
-      { name: 'GEOGRAPHY', friendlyName: 'Geography (SQL type)' },
-      { name: 'HSTORE', friendlyName: 'Key-value pair' },
-      { name: 'ENUM', friendlyName: 'Enumeration' }
+      { name: 'GEOGRAPHY', friendlyName: 'Geography (SQL type)' }
+      // { name: 'HSTORE', friendlyName: 'Key-value pair' },
+      // { name: 'ENUM', friendlyName: 'Enumeration' }
     ], {})
   },
 

@@ -12,21 +12,47 @@ class ArchitectureService extends ModelService {
     super(Architecture)
   }
 
-  async getResultCount (parentId) {
+  async getResultCount (architectureId) {
     return (await sequelize.query(
       'SELECT COUNT(*) FROM "resultArchitectureRefs" ' +
-      '  RIGHT JOIN architectures on architectures.id = "resultArchitectureRefs"."architectureId" AND ("resultArchitectureRefs"."deletedAt" IS NULL) '
+      '  RIGHT JOIN architectures on architectures.id = "resultArchitectureRefs"."architectureId" AND ("resultArchitectureRefs"."deletedAt" IS NULL) ' +
+      '  WHERE architectures.id = ' + architectureId
+    ))[0]
+  }
+
+  async getSubmissionCount (architectureId) {
+    return (await sequelize.query(
+      'SELECT COUNT(*) FROM submissions' +
+      '  RIGHT JOIN "submissionTaskRefs" on submissions.id = "submissionTaskRefs"."submissionId" ' +
+      '  RIGHT JOIN results on results.id = "submissionTaskRefs"."resultId" AND (results."deletedAt" IS NULL) ' +
+      '  RIGHT JOIN "resultArchitectureRefs" on "resultArchitectureRefs"."resultsId" = results.id AND ("resultArchitectureRefs"."deletedAt" IS NULL) ' +
+      '  RIGHT JOIN architectures on architectures.id = "resultArchitectureRefs"."architectureId" ' +
+      '  WHERE architectures.id = ' + architectureId
+    ))[0]
+  }
+
+  async getLikeCount (architectureId) {
+    return (await sequelize.query(
+      'SELECT COUNT(*) FROM likes ' +
+      '  RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
+      '  RIGHT JOIN "submissionTaskRefs" on submissions.id = "submissionTaskRefs"."submissionId" ' +
+      '  RIGHT JOIN results on results.id = "submissionTaskRefs"."resultId" AND (results."deletedAt" IS NULL) ' +
+      '  RIGHT JOIN "resultArchitectureRefs" on "resultArchitectureRefs"."resultsId" = results.id AND ("resultArchitectureRefs"."deletedAt" IS NULL) ' +
+      '  RIGHT JOIN architectures on architectures.id = "resultArchitectureRefs"."architectureId" ' +
+      '  WHERE architectures.id = ' + architectureId
     ))[0]
   }
 
   async getTopLevelNamesAndCounts () {
     const result = await this.getAllNames()
     for (let i = 0; i < result.length; i++) {
+      result[i].submissionCount = await this.getSubmissionCount(result[i].id)
+      result[i].upvoteTotal = await this.getLikeCount(result[i].id)
       result[i].resultCount = await this.getResultCount(result[i].id)
     }
     const filtered = []
     for (let i = 0; i < result.length; i++) {
-      if (result[i].resultCount > 0) {
+      if (result[i].submissionCount > 0) {
         filtered.push(result[i])
       }
     }
