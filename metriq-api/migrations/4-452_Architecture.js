@@ -4,7 +4,7 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(t => {
       return Promise.all([
-        queryInterface.createTable('Sequelize', {
+        queryInterface.createTable('dataTypes', {
           id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
@@ -65,7 +65,7 @@ module.exports = {
           dataTypeId: {
             type: Sequelize.INTEGER,
             allowNull: false,
-            references: { model: 'Sequelize', key: 'id' }
+            references: { model: 'dataTypes', key: 'id' }
           },
           architectureId: {
             type: Sequelize.INTEGER,
@@ -126,7 +126,7 @@ module.exports = {
         queryInterface.dropTable('architectureDataTypeValues', { transaction: t }),
         queryInterface.dropTable('architectureSequelize', { transaction: t }),
         queryInterface.dropTable('architecture', { transaction: t }),
-        queryInterface.dropTable('Sequelize', { transaction: t })
+        queryInterface.dropTable('dataTypes', { transaction: t })
       ])
     })
   }
