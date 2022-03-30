@@ -95,6 +95,9 @@ class ArchitectureService extends ModelService {
       return { success: false, error: 'Architecture not found.' }
     }
 
+    // TODO
+    architecture.dataValues.properties = []
+
     return { success: true, body: architecture }
   }
 
