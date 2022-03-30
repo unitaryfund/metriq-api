@@ -17,7 +17,7 @@ class ArchitectureService extends ModelService {
       'SELECT COUNT(*) FROM "resultArchitectureRefs" ' +
       '  RIGHT JOIN architectures on architectures.id = "resultArchitectureRefs"."architectureId" AND ("resultArchitectureRefs"."deletedAt" IS NULL) ' +
       '  WHERE architectures.id = ' + architectureId
-    ))[0]
+    ))[0][0].count
   }
 
   async getSubmissionCount (architectureId) {
@@ -28,7 +28,7 @@ class ArchitectureService extends ModelService {
       '  RIGHT JOIN "resultArchitectureRefs" on "resultArchitectureRefs"."resultId" = results.id AND ("resultArchitectureRefs"."deletedAt" IS NULL) ' +
       '  RIGHT JOIN architectures on architectures.id = "resultArchitectureRefs"."architectureId" ' +
       '  WHERE architectures.id = ' + architectureId
-    ))[0]
+    ))[0][0].count
   }
 
   async getLikeCount (architectureId) {
@@ -40,15 +40,15 @@ class ArchitectureService extends ModelService {
       '  RIGHT JOIN "resultArchitectureRefs" on "resultArchitectureRefs"."resultId" = results.id AND ("resultArchitectureRefs"."deletedAt" IS NULL) ' +
       '  RIGHT JOIN architectures on architectures.id = "resultArchitectureRefs"."architectureId" ' +
       '  WHERE architectures.id = ' + architectureId
-    ))[0]
+    ))[0][0].count
   }
 
   async getTopLevelNamesAndCounts () {
     const result = (await this.getAllNames()).body
     for (let i = 0; i < result.length; i++) {
-      result[i].submissionCount = await this.getSubmissionCount(result[i].id)
-      result[i].upvoteTotal = await this.getLikeCount(result[i].id)
-      result[i].resultCount = await this.getResultCount(result[i].id)
+      result[i].dataValues.submissionCount = parseInt(await this.getSubmissionCount(result[i].id))
+      result[i].dataValues.upvoteTotal = parseInt(await this.getLikeCount(result[i].id))
+      result[i].dataValues.resultCount = parseInt(await this.getResultCount(result[i].id))
     }
     const filtered = []
     for (let i = 0; i < result.length; i++) {
@@ -56,7 +56,7 @@ class ArchitectureService extends ModelService {
         filtered.push(result[i])
       }
     }
-    return { success: true, body: filtered }
+    return { success: true, body: result }
   }
 
   async getByName (name) {
