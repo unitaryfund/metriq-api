@@ -24,8 +24,8 @@ class ArchitectureService extends ModelService {
     return (await sequelize.query(
       'SELECT COUNT(*) FROM submissions' +
       '  RIGHT JOIN "submissionTaskRefs" on submissions.id = "submissionTaskRefs"."submissionId" ' +
-      '  RIGHT JOIN results on results.id = "submissionTaskRefs"."resultId" AND (results."deletedAt" IS NULL) ' +
-      '  RIGHT JOIN "resultArchitectureRefs" on "resultArchitectureRefs"."resultsId" = results.id AND ("resultArchitectureRefs"."deletedAt" IS NULL) ' +
+      '  RIGHT JOIN results on results."submissionTaskRefId" = "submissionTaskRefs".id AND (results."deletedAt" IS NULL) ' +
+      '  RIGHT JOIN "resultArchitectureRefs" on "resultArchitectureRefs"."resultId" = results.id AND ("resultArchitectureRefs"."deletedAt" IS NULL) ' +
       '  RIGHT JOIN architectures on architectures.id = "resultArchitectureRefs"."architectureId" ' +
       '  WHERE architectures.id = ' + architectureId
     ))[0]
@@ -36,8 +36,8 @@ class ArchitectureService extends ModelService {
       'SELECT COUNT(*) FROM likes ' +
       '  RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
       '  RIGHT JOIN "submissionTaskRefs" on submissions.id = "submissionTaskRefs"."submissionId" ' +
-      '  RIGHT JOIN results on results.id = "submissionTaskRefs"."resultId" AND (results."deletedAt" IS NULL) ' +
-      '  RIGHT JOIN "resultArchitectureRefs" on "resultArchitectureRefs"."resultsId" = results.id AND ("resultArchitectureRefs"."deletedAt" IS NULL) ' +
+      '  RIGHT JOIN results on results."submissionTaskRefId" = "submissionTaskRefs".id AND (results."deletedAt" IS NULL) ' +
+      '  RIGHT JOIN "resultArchitectureRefs" on "resultArchitectureRefs"."resultId" = results.id AND ("resultArchitectureRefs"."deletedAt" IS NULL) ' +
       '  RIGHT JOIN architectures on architectures.id = "resultArchitectureRefs"."architectureId" ' +
       '  WHERE architectures.id = ' + architectureId
     ))[0]
