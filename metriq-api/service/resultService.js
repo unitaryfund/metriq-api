@@ -12,10 +12,14 @@ const SubmissionService = require('../service/submissionService')
 const submissionService = new SubmissionService()
 const MethodService = require('../service/methodService')
 const methodService = new MethodService()
+const ArchitectureService = require('../service/architectureService')
+const architectureService = new ArchitectureService()
 const SubmissionTaskRefService = require('./submissionTaskRefService')
 const submissionTaskRefService = new SubmissionTaskRefService()
 const SubmissionMethodRefService = require('./submissionMethodRefService')
 const submissionMethodRefService = new SubmissionMethodRefService()
+const ResultArchitectureRefService = require('./resultArchitectureRefService')
+const resultArchitectureRefService = new ResultArchitectureRefService()
 
 class ResultService extends ModelService {
   constructor () {
@@ -77,6 +81,14 @@ class ResultService extends ModelService {
       return { success: false, error: 'Result requires method to be present in database.' }
     }
 
+    // Architecture must be not null and valid (present in database) for a valid result object.
+    if (reqBody.architecture) {
+      const architecture = await architectureService.getByPk(reqBody.architecture)
+      if (!architecture) {
+        return { success: false, error: 'Result requires architecture to be present in database.' }
+      }
+    }
+
     const result = await this.SequelizeServiceInstance.new()
     result.userId = userId
     result.submissionId = submissionId
@@ -94,6 +106,8 @@ class ResultService extends ModelService {
     if (!nResult.success) {
       return nResult
     }
+    nResult.resultArchitectureRefId = (await resultArchitectureRefService.createOrFetch(reqBody.architecture, userId, nResult.id)).body.id
+    await nResult.save()
 
     submission = await submissionService.getEagerByPk(submissionId)
     submission = await submissionService.populate(submission, userId)
@@ -127,6 +141,14 @@ class ResultService extends ModelService {
       return { success: false, error: 'Result requires method to be present in database.' }
     }
 
+    // If specified, architecture must valid (present in database) for a valid result object.
+    if (reqBody.architecture) {
+      const architecture = await architectureService.getByPk(reqBody.architecture)
+      if (!architecture) {
+        return { success: false, error: 'Result requires architecture to be present in database.' }
+      }
+      result.resultArchitectureRefId = (await resultArchitectureRefService.createOrFetch(architecture.id, userId, result.id)).body.id
+    }
     result.submissionTaskRefId = (await submissionTaskRefService.getByFks(reqBody.submissionId, parseInt(reqBody.task.id))).id
     result.submissionMethodRefId = (await submissionMethodRefService.getByFks(reqBody.submissionId, method.id)).id
     result.isHigherBetter = reqBody.isHigherBetter

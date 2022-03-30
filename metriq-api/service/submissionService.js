@@ -21,6 +21,10 @@ const LikeService = require('./likeService')
 const likeService = new LikeService()
 const SubmissionTagRefService = require('./submissionTagRefService')
 const submissionTagRefService = new SubmissionTagRefService()
+const ResultArchitectureRefService = require('./resultArchitectureRefService')
+const resultArchitectureRefService = new ResultArchitectureRefService()
+const ArchitectureService = require('./architectureService')
+const architectureService = new ArchitectureService()
 
 class SubmissionService extends ModelService {
   constructor () {
@@ -198,6 +202,10 @@ class SubmissionService extends ModelService {
       for (let j = 0; j < results.length; j++) {
         results[j] = results[j].dataValues
         results[j].method = toRet.methods[i]
+        const raRef = await resultArchitectureRefService.getByFk(results[j].id)
+        if (raRef) {
+          results[j].architecture = (await architectureService.getByPk(raRef.architectureId))
+        }
       }
       toRet.results.push(...results)
     }
