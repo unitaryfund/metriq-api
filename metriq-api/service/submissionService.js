@@ -196,6 +196,7 @@ class SubmissionService extends ModelService {
 
     toRet.methods = []
     toRet.results = []
+    toRet.architectures = []
     for (let i = 0; i < toRet.submissionMethodRefs.length; i++) {
       toRet.methods.push(await toRet.submissionMethodRefs[i].getMethod())
       const results = await toRet.submissionMethodRefs[i].getResults()
@@ -205,6 +206,7 @@ class SubmissionService extends ModelService {
         const raRef = await resultArchitectureRefService.getByFk(results[j].id)
         if (raRef) {
           results[j].architecture = (await architectureService.getByPk(raRef.architectureId))
+          toRet.architectures.push(results[j].architecture)
         }
       }
       toRet.results.push(...results)
@@ -278,7 +280,7 @@ class SubmissionService extends ModelService {
       }
     })
 
-    const mailBody = 'We have received your submission: \n\n' + submission.name + ' (' + config.web.getUri() + '/Submission/' + submission.id + ')' +'\n\nThere is a simple manual review process from an administrator, primarily to check link and image appropriateness for the safety of the community and to ensure that your submission is best categorized within our normal metadata categories. Your submission is already visible to other users, but its visibility may change pending review. If our administrators need further input from you, in order to properly categorize your submission, they will reach out to your email address, here.\n\nThank you for your submission!'
+    const mailBody = 'We have received your submission: \n\n' + submission.name + ' (' + config.web.getUri() + '/Submission/' + submission.id + ')' + '\n\nThere is a simple manual review process from an administrator, primarily to check link and image appropriateness for the safety of the community and to ensure that your submission is best categorized within our normal metadata categories. Your submission is already visible to other users, but its visibility may change pending review. If our administrators need further input from you, in order to properly categorize your submission, they will reach out to your email address, here.\n\nThank you for your submission!'
 
     const mailOptions = {
       from: config.supportEmail.address,

@@ -162,9 +162,9 @@ app.get('/', (req, res) => res.send('Metriq API'))
 // Use API routes in the app.
 app.use('/api', apiRoutes)
 
-app.get('*',function (req, res) {
-  res.redirect('/');
-});
+app.get('*', function (req, res) {
+  res.redirect('/')
+})
 
 // Launch the app, to listen to the specified port.
 app.listen(config.app.port, function () {

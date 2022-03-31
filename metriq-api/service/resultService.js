@@ -106,8 +106,9 @@ class ResultService extends ModelService {
     if (!nResult.success) {
       return nResult
     }
-    nResult.resultArchitectureRefId = (await resultArchitectureRefService.createOrFetch(reqBody.architecture, userId, nResult.id)).body.id
-    await nResult.save()
+    if (reqBody.architecture) {
+      await resultArchitectureRefService.createOrFetch(reqBody.architecture, userId, nResult.id)
+    }
 
     submission = await submissionService.getEagerByPk(submissionId)
     submission = await submissionService.populate(submission, userId)
@@ -147,7 +148,10 @@ class ResultService extends ModelService {
       if (!architecture) {
         return { success: false, error: 'Result requires architecture to be present in database.' }
       }
-      result.resultArchitectureRefId = (await resultArchitectureRefService.createOrFetch(architecture.id, userId, result.id)).body.id
+      await resultArchitectureRefService.createOrFetch(architecture.id, userId, result.id)
+    } else {
+      const refId = (await resultArchitectureRefService.getByFk(result.id)).id
+      await resultArchitectureRefService.deleteByPk(refId)
     }
     result.submissionTaskRefId = (await submissionTaskRefService.getByFks(reqBody.submissionId, parseInt(reqBody.task.id))).id
     result.submissionMethodRefId = (await submissionMethodRefService.getByFks(reqBody.submissionId, method.id)).id
