@@ -12,7 +12,7 @@ class DataTypeService extends ModelService {
   }
 
   async getAllNames () {
-    const result = await this.SequelizeServiceInstance.projectAll(['id', ['friendlyName', 'name']])
+    const result = await this.SequelizeServiceInstance.projectAll(['id', ['friendlyName', 'name'], 'friendlyType'])
     return { success: true, body: result }
   }
 }

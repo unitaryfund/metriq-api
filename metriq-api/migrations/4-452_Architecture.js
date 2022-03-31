@@ -19,6 +19,10 @@ module.exports = {
           friendlyName: {
             type: Sequelize.TEXT,
             allowNull: false
+          },
+          friendlyType: {
+            type: Sequelize.TEXT,
+            allowNull: false
           }
         }, { transaction: t }),
         queryInterface.createTable('architectures', {
