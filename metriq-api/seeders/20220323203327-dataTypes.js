@@ -4,7 +4,7 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.bulkInsert('dataTypes', [
       { name: 'DECIMAL', friendlyName: 'Decimal (high-precision)' },
-      { name: 'BLOB', friendlyName: 'File ("blob")' },
+      // { name: 'BLOB', friendlyName: 'File ("blob")' },
       { name: 'STRING', friendlyName: 'String' },
       { name: 'CHAR', friendlyName: 'Character' },
       { name: 'TEXT', friendlyName: 'Text' },

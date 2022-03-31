@@ -19,6 +19,7 @@ const taskController = require('./controller/taskController')
 const resultController = require('./controller/resultController')
 const methodController = require('./controller/methodController')
 const architectureController = require('./controller/architectureController')
+const dataTypeController = require('./controller/dataTypeController')
 const arxivController = require('./controller/arxivController')
 
 // Register routes.
@@ -116,6 +117,8 @@ router.route('/architecture/:id')
   .post(architectureController.update)
 router.route('/architecture')
   .post(architectureController.new)
+router.route('/dataType/names')
+  .get(dataTypeController.readNames)
 router.route('/v1/arxiv_id/:id')
   .get(arxivController.read)
 
