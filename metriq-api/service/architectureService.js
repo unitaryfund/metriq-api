@@ -43,6 +43,16 @@ class ArchitectureService extends ModelService {
     ))[0][0].count
   }
 
+  async getPropertiesByPk (architectureId) {
+    return (await sequelize.query(
+      'SELECT "architectureDataTypes".name AS name, "dataTypes".name AS type, "dataTypes"."friendlyName" AS "typeFriendlyName", "architectureDataTypeValues".value AS value FROM architectures ' +
+      '  LEFT JOIN "architectureDataTypes" on architectures.id = "architectureDataTypes"."architectureId" ' +
+      '  LEFT JOIN "dataTypes" on "architectureDataTypes"."dataTypeId" = "dataTypes".id ' +
+      '  LEFT JOIN "architectureDataTypeValues" on "architectureDataTypes".id = "architectureDataTypeValues"."architectureDataTypeId" ' +
+      '  WHERE architectures.id = ' + architectureId
+    ))[0]
+  }
+
   async getTopLevelNamesAndCounts () {
     const result = (await this.getAllNames()).body
     for (let i = 0; i < result.length; i++) {
@@ -94,9 +104,12 @@ class ArchitectureService extends ModelService {
     if (!architecture) {
       return { success: false, error: 'Architecture not found.' }
     }
-
-    // TODO
-    architecture.dataValues.properties = []
+    const properties = await this.getPropertiesByPk(architectureId)
+    if (properties[0].name) {
+      architecture.dataValues.properties = properties
+    } else {
+      architecture.dataValues.properties = []
+    }
 
     return { success: true, body: architecture }
   }
