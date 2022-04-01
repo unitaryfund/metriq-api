@@ -1,14 +1,14 @@
-// resultArchitectureRefService.js
+// resultPlatformRefService.js
 
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
 const db = require('../models/index')
-const resultArchitectureRef = db.resultArchitectureRef
+const resultPlatformRef = db.resultPlatformRef
 
-class ResultArchitectureRefService extends ModelService {
+class ResultPlatformRefService extends ModelService {
   constructor (foreignKey, Ref) {
-    super(resultArchitectureRef)
+    super(resultPlatformRef)
     this.foreignKey = 'resultId'
   }
 
@@ -16,20 +16,20 @@ class ResultArchitectureRefService extends ModelService {
     return await this.SequelizeServiceInstance.findOne({ [this.foreignKey]: fkId })
   }
 
-  async getByFks (architectureId, fkId) {
-    return await this.SequelizeServiceInstance.findOne({ architectureId: architectureId, [this.foreignKey]: fkId })
+  async getByFks (platformId, fkId) {
+    return await this.SequelizeServiceInstance.findOne({ platformId: platformId, [this.foreignKey]: fkId })
   }
 
   async getFkCount (fkId) {
     return await this.SequelizeServiceInstance.count({ [this.foreignKey]: fkId })
   }
 
-  async createOrFetch (architectureId, userId, fkId) {
-    let ref = await this.getByFks(architectureId, fkId)
+  async createOrFetch (platformId, userId, fkId) {
+    let ref = await this.getByFks(platformId, fkId)
 
     if (!ref) {
       ref = await this.SequelizeServiceInstance.new()
-      ref.architectureId = architectureId
+      ref.platformId = platformId
       ref.userId = userId
       ref[this.foreignKey] = fkId
       ref = (await this.create(ref)).body
@@ -40,4 +40,4 @@ class ResultArchitectureRefService extends ModelService {
   }
 }
 
-module.exports = ResultArchitectureRefService
+module.exports = ResultPlatformRefService

@@ -1,9 +1,9 @@
-// architectureController.js
+// platformController.js
 
 // Service classes
-const ArchitectureService = require('../service/architectureService')
+const PlatformService = require('../service/platformService')
 // Service instances
-const architectureService = new ArchitectureService()
+const platformService = new PlatformService()
 
 function sendResponse (res, code, m) {
   const body = JSON.stringify({ message: m })
@@ -34,30 +34,30 @@ async function routeWrapper (res, serviceFn, successMessage) {
 // Validate the submission request and create the submission model.
 exports.new = async function (req, res) {
   routeWrapper(res,
-    async () => await architectureService.submit(req.user.id, req.body),
-    'New architecture added!')
+    async () => await platformService.submit(req.user.id, req.body),
+    'New platform added!')
 }
 
 exports.read = async function (req, res) {
   routeWrapper(res,
-    async () => await architectureService.getSanitized(req.params.id),
-    'Retrieved architecture by Id.')
+    async () => await platformService.getSanitized(req.params.id),
+    'Retrieved platform by Id.')
 }
 
 exports.update = async function (req, res) {
   routeWrapper(res,
-    async () => await architectureService.update(req.params.id, req.body),
-    'Updated architecture.')
+    async () => await platformService.update(req.params.id, req.body),
+    'Updated platform.')
 }
 
 exports.readNames = async function (req, res) {
   routeWrapper(res,
-    async () => await architectureService.getAllNames(),
-    'Retrieved all architecture names.')
+    async () => await platformService.getAllNames(),
+    'Retrieved all platform names.')
 }
 
 exports.readSubmissionCounts = async function (req, res) {
   routeWrapper(res,
-    async () => await architectureService.getTopLevelNamesAndCounts(),
-    'Retrieved all architecture names and counts.')
+    async () => await platformService.getTopLevelNamesAndCounts(),
+    'Retrieved all platform names and counts.')
 }

@@ -1,19 +1,19 @@
-// architectureDataValueModel.js
+// platformDataValueModel.js
 
 'use strict'
 module.exports = function (sequelize, DataTypes) {
-  const Model = sequelize.define('architectureDataValue', {
+  const Model = sequelize.define('platformDataValue', {
     value: {
       type: DataTypes.TEXT,
       allowNull: false
     },
-    architectureDataTypeId: {
+    platformDataTypeId: {
       type: DataTypes.INTEGER,
       allowNull: false
     }
   }, {})
   Model.associate = function (db) {
-    db.architectureDataValue.belongsTo(db.architectureDataType)
+    db.platformDataValue.belongsTo(db.platformDataType)
   }
   return Model
 }

@@ -12,14 +12,14 @@ const SubmissionService = require('../service/submissionService')
 const submissionService = new SubmissionService()
 const MethodService = require('../service/methodService')
 const methodService = new MethodService()
-const ArchitectureService = require('../service/architectureService')
-const architectureService = new ArchitectureService()
+const PlatformService = require('../service/platformService')
+const platformService = new PlatformService()
 const SubmissionTaskRefService = require('./submissionTaskRefService')
 const submissionTaskRefService = new SubmissionTaskRefService()
 const SubmissionMethodRefService = require('./submissionMethodRefService')
 const submissionMethodRefService = new SubmissionMethodRefService()
-const ResultArchitectureRefService = require('./resultArchitectureRefService')
-const resultArchitectureRefService = new ResultArchitectureRefService()
+const ResultPlatformRefService = require('./resultPlatformRefService')
+const resultPlatformRefService = new ResultPlatformRefService()
 
 class ResultService extends ModelService {
   constructor () {
@@ -81,11 +81,11 @@ class ResultService extends ModelService {
       return { success: false, error: 'Result requires method to be present in database.' }
     }
 
-    // Architecture must be not null and valid (present in database) for a valid result object.
-    if (reqBody.architecture) {
-      const architecture = await architectureService.getByPk(reqBody.architecture)
-      if (!architecture) {
-        return { success: false, error: 'Result requires architecture to be present in database.' }
+    // Platform must be not null and valid (present in database) for a valid result object.
+    if (reqBody.platform) {
+      const platform = await platformService.getByPk(reqBody.platform)
+      if (!platform) {
+        return { success: false, error: 'Result requires platform to be present in database.' }
       }
     }
 
@@ -106,8 +106,8 @@ class ResultService extends ModelService {
     if (!nResult.success) {
       return nResult
     }
-    if (reqBody.architecture) {
-      await resultArchitectureRefService.createOrFetch(reqBody.architecture, userId, nResult.id)
+    if (reqBody.platform) {
+      await resultPlatformRefService.createOrFetch(reqBody.platform, userId, nResult.id)
     }
 
     submission = await submissionService.getEagerByPk(submissionId)
@@ -142,16 +142,16 @@ class ResultService extends ModelService {
       return { success: false, error: 'Result requires method to be present in database.' }
     }
 
-    // If specified, architecture must valid (present in database) for a valid result object.
-    if (reqBody.architecture) {
-      const architecture = await architectureService.getByPk(reqBody.architecture)
-      if (!architecture) {
-        return { success: false, error: 'Result requires architecture to be present in database.' }
+    // If specified, platform must valid (present in database) for a valid result object.
+    if (reqBody.platform) {
+      const platform = await platformService.getByPk(reqBody.platform)
+      if (!platform) {
+        return { success: false, error: 'Result requires platform to be present in database.' }
       }
-      await resultArchitectureRefService.createOrFetch(architecture.id, userId, result.id)
+      await resultPlatformRefService.createOrFetch(platform.id, userId, result.id)
     } else {
-      const refId = (await resultArchitectureRefService.getByFk(result.id)).id
-      await resultArchitectureRefService.deleteByPk(refId)
+      const refId = (await resultPlatformRefService.getByFk(result.id)).id
+      await resultPlatformRefService.deleteByPk(refId)
     }
     result.submissionTaskRefId = (await submissionTaskRefService.getByFks(reqBody.submissionId, parseInt(reqBody.task.id))).id
     result.submissionMethodRefId = (await submissionMethodRefService.getByFks(reqBody.submissionId, method.id)).id

@@ -25,7 +25,7 @@ module.exports = {
             allowNull: false
           }
         }, { transaction: t }),
-        queryInterface.createTable('architectures', {
+        queryInterface.createTable('platforms', {
           id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
@@ -46,7 +46,7 @@ module.exports = {
             allowNull: false
           }
         }, { transaction: t }),
-        queryInterface.createTable('architectureDataTypes', {
+        queryInterface.createTable('platformDataTypes', {
           id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
@@ -71,13 +71,13 @@ module.exports = {
             allowNull: false,
             references: { model: 'dataTypes', key: 'id' }
           },
-          architectureId: {
+          platformId: {
             type: Sequelize.INTEGER,
             allowNull: false,
-            references: { model: 'architectures', key: 'id' }
+            references: { model: 'platforms', key: 'id' }
           }
         }, { transaction: t }),
-        queryInterface.createTable('architectureDataTypeValues', {
+        queryInterface.createTable('platformDataTypeValues', {
           id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
@@ -89,13 +89,13 @@ module.exports = {
             type: Sequelize.TEXT,
             allowNull: false
           },
-          architectureDataTypeId: {
+          platformDataTypeId: {
             type: Sequelize.INTEGER,
             allowNull: false,
-            references: { model: 'architectureDataTypes', key: 'id' }
+            references: { model: 'platformDataTypes', key: 'id' }
           }
         }, { transaction: t }),
-        queryInterface.createTable('resultArchitectureRefs', {
+        queryInterface.createTable('resultPlatformRefs', {
           id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
@@ -114,10 +114,10 @@ module.exports = {
             allowNull: false,
             references: { model: 'results', key: 'id' }
           },
-          architectureId: {
+          platformId: {
             type: Sequelize.INTEGER,
             allowNull: false,
-            references: { model: 'architectures', key: 'id' }
+            references: { model: 'platforms', key: 'id' }
           }
         }, { transaction: t })
       ])
@@ -126,10 +126,10 @@ module.exports = {
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(t => {
       return Promise.all([
-        queryInterface.dropTable('resultArchitectureRefs', { transaction: t }),
-        queryInterface.dropTable('architectureDataTypeValues', { transaction: t }),
-        queryInterface.dropTable('architectureDataTypes', { transaction: t }),
-        queryInterface.dropTable('architectures', { transaction: t }),
+        queryInterface.dropTable('resultPlatformRefs', { transaction: t }),
+        queryInterface.dropTable('platformDataTypeValues', { transaction: t }),
+        queryInterface.dropTable('platformDataTypes', { transaction: t }),
+        queryInterface.dropTable('platforms', { transaction: t }),
         queryInterface.dropTable('dataTypes', { transaction: t })
       ])
     })
