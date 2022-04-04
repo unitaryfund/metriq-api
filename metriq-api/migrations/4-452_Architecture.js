@@ -123,13 +123,39 @@ module.exports = {
             allowNull: false,
             references: { model: 'platforms', key: 'id' }
           }
-        }, { transaction: t })
+        }, { transaction: t }),
+        queryInterface.createTable('submissionPlatformRefs', {
+          id: {
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+          },
+          updatedAt: Sequelize.DATE,
+          createdAt: Sequelize.DATE,
+          deletedAt: Sequelize.DATE,
+          userId: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            references: { model: 'users', key: 'id' }
+          },
+          submissionId: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            references: { model: 'submissions', key: 'id' }
+          },
+          taskId: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            references: { model: 'tasks', key: 'id' }
+          }
+        }, { transaction: t }),
       ])
     })
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(t => {
       return Promise.all([
+        queryInterface.dropTable('submissionPlatformRefs', { transaction: t }),
         queryInterface.dropTable('resultPlatformRefs', { transaction: t }),
         queryInterface.dropTable('platformDataTypeValues', { transaction: t }),
         queryInterface.dropTable('platformDataTypes', { transaction: t }),
