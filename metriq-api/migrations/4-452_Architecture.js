@@ -93,6 +93,10 @@ module.exports = {
             type: Sequelize.INTEGER,
             allowNull: false,
             references: { model: 'platformDataTypes', key: 'id' }
+          },
+          notes: {
+            type: Sequelize.TEXT,
+            allowNull: false
           }
         }, { transaction: t }),
         queryInterface.createTable('resultPlatformRefs', {

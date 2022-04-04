@@ -33,7 +33,7 @@ async function routeWrapper (res, serviceFn, successMessage) {
 
 exports.new = async function (req, res) {
   routeWrapper(res,
-    async () => await propertyService.submit(req.user.id, req.body),
+    async () => await propertyService.submit(req.user.id, req.params.id, req.body),
     'New platform property created!')
 }
 
