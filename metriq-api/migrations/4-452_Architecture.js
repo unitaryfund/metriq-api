@@ -130,8 +130,8 @@ module.exports = {
             primaryKey: true,
             autoIncrement: true
           },
-          updatedAt: Sequelize.DATE,
           createdAt: Sequelize.DATE,
+          updatedAt: Sequelize.DATE,
           deletedAt: Sequelize.DATE,
           userId: {
             type: Sequelize.INTEGER,
@@ -143,18 +143,19 @@ module.exports = {
             allowNull: false,
             references: { model: 'submissions', key: 'id' }
           },
-          taskId: {
+          platformId: {
             type: Sequelize.INTEGER,
             allowNull: false,
-            references: { model: 'tasks', key: 'id' }
+            references: { model: 'platforms', key: 'id' }
           }
-        }, { transaction: t }),
+        }, { transaction: t })
       ])
     })
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(t => {
       return Promise.all([
+        queryInterface.removeColumn('results', 'submissionPlatformRefId', { transaction: t }),
         queryInterface.dropTable('submissionPlatformRefs', { transaction: t }),
         queryInterface.dropTable('resultPlatformRefs', { transaction: t }),
         queryInterface.dropTable('platformDataTypeValues', { transaction: t }),

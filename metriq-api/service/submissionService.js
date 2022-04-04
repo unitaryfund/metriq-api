@@ -196,18 +196,12 @@ class SubmissionService extends ModelService {
 
     toRet.methods = []
     toRet.results = []
-    toRet.platforms = []
     for (let i = 0; i < toRet.submissionMethodRefs.length; i++) {
       toRet.methods.push(await toRet.submissionMethodRefs[i].getMethod())
       const results = await toRet.submissionMethodRefs[i].getResults()
       for (let j = 0; j < results.length; j++) {
         results[j] = results[j].dataValues
         results[j].method = toRet.methods[i]
-        const raRef = await resultPlatformRefService.getByFk(results[j].id)
-        if (raRef) {
-          results[j].platform = (await platformService.getByPk(raRef.platformId))
-          toRet.platforms.push(results[j].platform)
-        }
       }
       toRet.results.push(...results)
     }
@@ -223,6 +217,17 @@ class SubmissionService extends ModelService {
       }
     }
     delete toRet.submissionTaskRefs
+
+    toRet.platforms = []
+    for (let i = 0; i < toRet.submissionPlatformRefs.length; i++) {
+      toRet.platforms.push(await toRet.submissionPlatformRefs[i].getPlatform())
+      for (let j = 0; j < toRet.results.length; j++) {
+        if (toRet.submissionPlatformRefs[i].id === toRet.results[j].submissionPlatformRefs) {
+          toRet.results[j].platform = toRet.platforms[i]
+        }
+      }
+    }
+    delete toRet.submissionPlatformRefs
 
     return toRet
   }

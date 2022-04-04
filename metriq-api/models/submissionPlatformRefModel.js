@@ -1,4 +1,4 @@
-// submissionPPlatformRefModel.js
+// submissionPlatformRefModel.js
 
 'use strict'
 module.exports = function (sequelize, DataTypes) {
