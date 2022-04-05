@@ -7,6 +7,8 @@ const MethodService = require('../service/methodService')
 const methodService = new MethodService()
 const TaskService = require('../service/taskService')
 const taskService = new TaskService()
+const PlatformService = require('../service/platformService')
+const platformService = new PlatformService()
 const ModerationReportService = require('../service/moderationReportService')
 const moderationReportService = new ModerationReportService()
 
@@ -96,6 +98,18 @@ exports.deleteTask = async function (req, res) {
   routeWrapper(res,
     async () => await taskService.addOrRemoveSubmission(false, req.params.taskId, req.params.submissionId, req.user.id),
     'Successfully removed task from submission.')
+}
+
+exports.newPlatform = async function (req, res) {
+  routeWrapper(res,
+    async () => await platformService.addOrRemoveSubmission(true, req.params.platformId, req.params.submissionId, req.user.id),
+    'Successfully added platform to submission.')
+}
+
+exports.deletePlatform = async function (req, res) {
+  routeWrapper(res,
+    async () => await platformService.addOrRemoveSubmission(false, req.params.platformId, req.params.submissionId, req.user.id),
+    'Successfully removed platform from submission.')
 }
 
 exports.upvote = async function (req, res) {

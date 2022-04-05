@@ -155,7 +155,6 @@ module.exports = {
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(t => {
       return Promise.all([
-        queryInterface.removeColumn('results', 'submissionPlatformRefId', { transaction: t }),
         queryInterface.dropTable('submissionPlatformRefs', { transaction: t }),
         queryInterface.dropTable('resultPlatformRefs', { transaction: t }),
         queryInterface.dropTable('platformDataTypeValues', { transaction: t }),

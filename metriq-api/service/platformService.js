@@ -2,10 +2,17 @@
 
 // Data Access Layer
 const ModelService = require('./modelService')
+
 // Database Model
 const db = require('../models/index')
 const Platform = db.platform
 const sequelize = db.sequelize
+
+// Service dependencies
+const SubmissionService = require('./submissionService')
+const submissionService = new SubmissionService()
+const SubmissionPlatformRefService = require('./submissionPlatformRefService')
+const submissionPlatformRefService = new SubmissionPlatformRefService()
 
 class PlatformService extends ModelService {
   constructor () {
@@ -90,16 +97,31 @@ class PlatformService extends ModelService {
     platform.fullName = reqBody.fullName
     platform.description = reqBody.description
 
-    platform.platformId = reqBody.parentPlatform
-    const parentPlatform = await this.getByPk(platform.platformId)
-    if (!parentPlatform) {
-      return { success: false, error: 'Parent platform ID does not exist.' }
+    if (reqBody.parentPlatform) {
+      platform.platformId = reqBody.parentPlatform
+      const parentPlatform = await this.getByPk(platform.platformId)
+      if (!parentPlatform) {
+        return { success: false, error: 'Parent platform ID does not exist.' }
+      }
     }
 
     // Get an ObjectId for the new object, first.
     const createResult = await this.create(platform)
     platform = createResult.body
     await platform.save()
+
+    const submissionsSplit = reqBody.submissions ? reqBody.submissions.split(',') : []
+    for (let i = 0; i < submissionsSplit.length; i++) {
+      const submissionId = submissionsSplit[i].trim()
+      if (submissionId) {
+        const submission = await submissionService.getByPk(parseInt(submissionId))
+        if (!submission) {
+          return { success: false, error: 'Submission reference in Method collection not found.' }
+        }
+        // Reference to submission goes in reference collection on method
+        await submissionPlatformRefService.createOrFetch(submissionId, userId, platform.id)
+      }
+    }
 
     platform = (await this.getByPk(platform.id)).dataValues
     return { success: true, body: platform }
@@ -139,6 +161,32 @@ class PlatformService extends ModelService {
     await platform.save()
 
     return await this.getSanitized(platform.id)
+  }
+
+  async addOrRemoveSubmission (isAdd, platformId, submissionId, userId) {
+    const platform = await this.getByPk(platformId)
+    if (!platform) {
+      return { success: false, error: 'Platform not found.' }
+    }
+
+    let submission = await submissionService.getByPk(submissionId)
+    if (!submission) {
+      return { success: false, error: 'Submission not found.' }
+    }
+
+    if (isAdd) {
+      await submissionPlatformRefService.createOrFetch(submission.id, userId, platform.id)
+    } else {
+      const ref = await submissionPlatformRefService.getByFks(submission.id, platform.id)
+      if (ref) {
+        await submissionPlatformRefService.deleteByPk(ref.id)
+      }
+    }
+
+    submission = await submissionService.getEagerByPk(submissionId)
+    submission = await submissionService.populate(submission, userId)
+
+    return { success: true, body: submission }
   }
 }
 

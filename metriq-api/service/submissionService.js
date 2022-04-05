@@ -219,7 +219,7 @@ class SubmissionService extends ModelService {
     for (let i = 0; i < toRet.submissionPlatformRefs.length; i++) {
       toRet.platforms.push(await toRet.submissionPlatformRefs[i].getPlatform())
       for (let j = 0; j < toRet.results.length; j++) {
-        if (toRet.submissionPlatformRefs[i].id === toRet.results[j].submissionPlatformRefs) {
+        if (toRet.submissionPlatformRefs[i].id === toRet.results[j].submissionPlatformRefId) {
           toRet.results[j].platform = toRet.platforms[i]
         }
       }
