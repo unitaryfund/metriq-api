@@ -21,10 +21,6 @@ const LikeService = require('./likeService')
 const likeService = new LikeService()
 const SubmissionTagRefService = require('./submissionTagRefService')
 const submissionTagRefService = new SubmissionTagRefService()
-const ResultPlatformRefService = require('./resultPlatformRefService')
-const resultPlatformRefService = new ResultPlatformRefService()
-const PlatformService = require('./platformService')
-const platformService = new PlatformService()
 
 class SubmissionService extends ModelService {
   constructor () {
@@ -202,6 +198,7 @@ class SubmissionService extends ModelService {
       for (let j = 0; j < results.length; j++) {
         results[j] = results[j].dataValues
         results[j].method = toRet.methods[i]
+        results[j].platform = null
       }
       toRet.results.push(...results)
     }

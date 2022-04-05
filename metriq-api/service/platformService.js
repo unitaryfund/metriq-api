@@ -90,6 +90,12 @@ class PlatformService extends ModelService {
     platform.fullName = reqBody.fullName
     platform.description = reqBody.description
 
+    platform.platformId = reqBody.parentPlatform
+    const parentPlatform = await this.getByPk(platform.platformId)
+    if (!parentPlatform) {
+      return { success: false, error: 'Parent platform ID does not exist.' }
+    }
+
     // Get an ObjectId for the new object, first.
     const createResult = await this.create(platform)
     platform = createResult.body
