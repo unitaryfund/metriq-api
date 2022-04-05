@@ -6,6 +6,8 @@
 // Data Access Layer
 const PlatformDataTypeService = require('./platformDataTypeService')
 const platformDataTypeService = new PlatformDataTypeService()
+const PlatformDataTypeValueService = require('./platformDataTypeValueService')
+const platformDataTypeValueService = new PlatformDataTypeValueService()
 const PlatformService = require('./platformService')
 const platformService = new PlatformService()
 
@@ -19,8 +21,8 @@ class PropertyService {
     const platformDateTypeReq = {
       id: property.id ? property.id : undefined,
       name: property.name,
-      fullName: property.fullName,
-      description: property.description,
+      fullName: property.fullName ? property.fullName : property.name,
+      description: property.description ? property.description : '',
       dataTypeId: property.dataTypeId,
       platformId: platformId
     }
@@ -31,15 +33,29 @@ class PropertyService {
 
     const platformDataType = property.id
       ? (await platformDataTypeService.getByPk(property.id))
-      : (await platformDataTypeService.create(platformDateTypeReq))
-
-    platformDataType.name = platformDateTypeReq.name
-    platformDataType.fullName = platformDateTypeReq.fullName
-    platformDataType.description = platformDateTypeReq.description
-    platformDataType.dataTypeId = platformDateTypeReq.dataTypeId
-    platformDataType.platformId = platformDateTypeReq.platformId
+      : (await platformDataTypeService.create(platformDateTypeReq)).body
+    if (property.id) {
+      platformDataType.name = platformDateTypeReq.name
+      platformDataType.fullName = platformDateTypeReq.fullName
+      platformDataType.description = platformDateTypeReq.description
+      platformDataType.dataTypeId = platformDateTypeReq.dataTypeId
+      platformDataType.platformId = platformDateTypeReq.platformId
+    }
 
     await platformDataType.save()
+
+    const platformDataTypeValueReq = {
+      value: property.value,
+      platformDataTypeId: platformDataType.id,
+      notes: ''
+    }
+
+    const platformDataTypeValue = await platformDataTypeValueService.create(platformDataTypeValueReq)
+    platformDataTypeValue.save()
+
+    property.id = platformDataType.id
+
+    return { success: true, body: property }
   }
 
   async update (params, property, userId) {
