@@ -32,7 +32,7 @@ class PlatformDataTypeService extends ModelService {
   }
 
   async getAll () {
-    const result = await this.SequelizeServiceInstance.projectAll(['id', 'name', 'fullName', ['description', 'typeDescription'], 'dataTypeId', 'platformId'])
+    const result = await this.SequelizeServiceInstance.projectAll(['id', 'name', 'fullName', ['description', 'typeDescription'], 'dataTypeId'])
     return { success: true, body: result }
   }
 }
