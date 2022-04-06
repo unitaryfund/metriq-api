@@ -61,8 +61,37 @@ class PropertyService {
     return { success: true, body: property }
   }
 
-  async update (params, property, userId) {
-    // TODO
+  async update (propertyId, property, userId) {
+    const platformDataTypeValue = await platformDataTypeValueService.getByPk(propertyId)
+    if (!platformDataTypeValue) {
+      return { success: false, message: 'Property ID not found.' }
+    }
+    const platformDataType = await platformDataTypeValue.getPlatformDataType()
+
+    platformDataType.name = property.name
+    platformDataType.fullName = property.fullName ? property.fullName : property.name
+    platformDataType.description = property.typeDescription ? property.typeDescription : ''
+    platformDataType.dataTypeId = property.dataTypeId
+    platformDataType.userId = userId
+
+    const platformDataTypeValidateResponse = await platformDataTypeService.validate(platformDataType)
+    if (!platformDataTypeValidateResponse.success) {
+      return platformDataTypeValidateResponse
+    }
+
+    platformDataTypeValue.value = property.value
+    platformDataTypeValue.notes = property.valueDescription ? property.valueDescription : ''
+    platformDataTypeValue.userId = userId
+
+    const platformDataTypeValueValidateResponse = await platformDataTypeValueService.validate(platformDataTypeValue)
+    if (!platformDataTypeValueValidateResponse.success) {
+      return platformDataTypeValueValidateResponse
+    }
+
+    await platformDataTypeValue.save()
+    await platformDataType.save()
+
+    return { success: true, body: property }
   }
 
   async getAllNames () {

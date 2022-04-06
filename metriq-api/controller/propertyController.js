@@ -40,7 +40,7 @@ exports.new = async function (req, res) {
 exports.update = async function (req, res) {
   routeWrapper(res,
     async () => await propertyService.update(req.params.id, req.body, req.user.id),
-    'New platform property created!')
+    'Platform property updated!')
 }
 
 exports.readNames = async function (req, res) {
