@@ -64,6 +64,11 @@ module.exports = {
           },
           updatedAt: Sequelize.DATE,
           createdAt: Sequelize.DATE,
+          userId: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            references: { model: 'users', key: 'id' }
+          },
           name: {
             type: Sequelize.TEXT,
             allowNull: false
@@ -90,6 +95,11 @@ module.exports = {
           },
           updatedAt: Sequelize.DATE,
           createdAt: Sequelize.DATE,
+          userId: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            references: { model: 'users', key: 'id' }
+          },
           value: {
             type: Sequelize.TEXT,
             allowNull: false

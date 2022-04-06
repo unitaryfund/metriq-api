@@ -11,24 +11,21 @@ class PlatformDataTypeService extends ModelService {
     super(PlatformDataType)
   }
 
-  async validate (property) {
-    if (!property.dataTypeId) {
+  async validate (propertyType) {
+    if (!propertyType.dataTypeId) {
       return { success: false, error: 'Property data type ID cannot be blank.' }
     }
-    if (!property.platformId) {
-      return { success: false, error: 'Property platform ID cannot be blank.' }
-    }
-    if (!property.name) {
+    if (!propertyType.name) {
       return { success: false, error: 'Property name cannot be blank.' }
     }
-    if (!property.fullName) {
-      property.fullName = property.name
+    if (!propertyType.fullName) {
+      propertyType.fullName = propertyType.name
     }
-    if (!property.description) {
-      property.description = ''
+    if (!propertyType.description) {
+      propertyType.description = ''
     }
 
-    return { success: true, body: property }
+    return { success: true, body: propertyType }
   }
 
   async getAll () {

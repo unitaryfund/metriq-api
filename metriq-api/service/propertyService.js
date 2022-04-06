@@ -26,11 +26,22 @@ class PropertyService {
     platformDataType.fullName = property.fullName ? property.fullName : property.name
     platformDataType.description = property.typeDescription ? property.typeDescription : ''
     platformDataType.dataTypeId = property.dataTypeId
-    platformDataType.platformId = platformId
+    platformDataType.userId = userId
 
     const platformDataTypeValidateResponse = await platformDataTypeService.validate(platformDataType)
     if (!platformDataTypeValidateResponse.success) {
       return platformDataTypeValidateResponse
+    }
+
+    const platformDataTypeValue = (await platformDataTypeValueService.SequelizeServiceInstance.new())
+    platformDataTypeValue.value = property.value
+    platformDataTypeValue.platformId = platformId
+    platformDataTypeValue.notes = property.valueDescription ? property.valueDescription : ''
+    platformDataTypeValue.userId = userId
+
+    const platformDataTypeValueValidateResponse = await platformDataTypeValueService.validate(platformDataTypeValue)
+    if (!platformDataTypeValueValidateResponse.success) {
+      return platformDataTypeValueValidateResponse
     }
 
     const platformDataTypeCreateResponse = await platformDataTypeValueService.create(platformDataType)
@@ -38,10 +49,7 @@ class PropertyService {
       return platformDataTypeCreateResponse
     }
 
-    const platformDataTypeValue = (await platformDataTypeValueService.SequelizeServiceInstance.new())
-    platformDataTypeValue.value = property.value
     platformDataTypeValue.platformDataTypeId = platformDataType.id
-    platformDataTypeValue.notes = property.valueDescription ? property.valueDescription : ''
 
     const platformDataTypeValueCreateResponse = await platformDataTypeValueService.create(platformDataTypeValue)
     if (!platformDataTypeValueCreateResponse.success) {

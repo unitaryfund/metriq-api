@@ -52,7 +52,7 @@ class PlatformService extends ModelService {
 
   async getPropertiesByPk (platformId) {
     return (await sequelize.query(
-      'SELECT "platformDataTypes".name AS name, "dataTypes".name AS type, "dataTypes"."friendlyName" AS "typeFriendlyName", "platformDataTypeValues".value AS value FROM platforms ' +
+      'SELECT "platformDataTypeValues".id as id, "platformDataTypes".name AS name, "platformDataTypes"."dataTypeId" as "dataTypeId", "dataTypes".name AS type, "dataTypes"."friendlyName" AS "typeFriendlyName", "platformDataTypeValues".value AS value FROM platforms ' +
       '  LEFT JOIN "platformDataTypeValues" on platforms.id = "platformDataTypeValues"."platformId" ' +
       '  LEFT JOIN "platformDataTypes" on "platformDataTypes".id = "platformDataTypeValues"."platformDataTypeId" ' +
       '  LEFT JOIN "dataTypes" on "platformDataTypes"."dataTypeId" = "dataTypes".id ' +
@@ -133,7 +133,6 @@ class PlatformService extends ModelService {
       return { success: false, error: 'Platform not found.' }
     }
     const properties = await this.getPropertiesByPk(platformId)
-    console.log(properties)
     if (properties[0].name) {
       platform.dataValues.properties = properties
     } else {
