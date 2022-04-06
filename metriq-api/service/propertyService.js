@@ -18,40 +18,35 @@ class PropertyService {
       return { success: false, message: 'Platform ID not found.' }
     }
 
-    const platformDateTypeReq = {
-      id: property.id ? property.id : undefined,
-      name: property.name,
-      fullName: property.fullName ? property.fullName : property.name,
-      description: property.description ? property.description : '',
-      dataTypeId: property.dataTypeId,
-      platformId: platformId
-    }
-    const platformDataTypeValidateResponse = await platformDataTypeService.validate(platformDateTypeReq)
+    const platformDataType = property.id
+      ? (await platformDataTypeService.getByPk(property.id))
+      : (await platformDataTypeService.SequelizeServiceInstance.new())
+
+    platformDataType.name = property.name
+    platformDataType.fullName = property.fullName ? property.fullName : property.name
+    platformDataType.description = property.description ? property.description : ''
+    platformDataType.dataTypeId = property.dataTypeId
+    platformDataType.platformId = platformId
+
+    const platformDataTypeValidateResponse = await platformDataTypeService.validate(platformDataType)
     if (!platformDataTypeValidateResponse.success) {
       return platformDataTypeValidateResponse
     }
 
-    const platformDataType = property.id
-      ? (await platformDataTypeService.getByPk(property.id))
-      : (await platformDataTypeService.create(platformDateTypeReq)).body
-    if (property.id) {
-      platformDataType.name = platformDateTypeReq.name
-      platformDataType.fullName = platformDateTypeReq.fullName
-      platformDataType.description = platformDateTypeReq.description
-      platformDataType.dataTypeId = platformDateTypeReq.dataTypeId
-      platformDataType.platformId = platformDateTypeReq.platformId
+    const platformDataTypeCreateResponse = await platformDataTypeValueService.create(platformDataType)
+    if (!platformDataTypeCreateResponse.success) {
+      return platformDataTypeCreateResponse
     }
 
-    await platformDataType.save()
+    const platformDataTypeValue = (await platformDataTypeValueService.SequelizeServiceInstance.new())
+    platformDataTypeValue.value = property.value
+    platformDataTypeValue.platformDataTypeId = platformDataType.id
+    platformDataTypeValue.notes = ''
 
-    const platformDataTypeValueReq = {
-      value: property.value,
-      platformDataTypeId: platformDataType.id,
-      notes: ''
+    const platformDataTypeValueCreateResponse = await platformDataTypeValueService.create(platformDataTypeValue)
+    if (!platformDataTypeValueCreateResponse.success) {
+      return platformDataTypeValueCreateResponse
     }
-
-    const platformDataTypeValue = await platformDataTypeValueService.create(platformDataTypeValueReq)
-    platformDataTypeValue.save()
 
     property.id = platformDataType.id
 
