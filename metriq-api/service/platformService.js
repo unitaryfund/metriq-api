@@ -123,8 +123,7 @@ class PlatformService extends ModelService {
       }
     }
 
-    platform = (await this.getByPk(platform.id)).dataValues
-    return { success: true, body: platform }
+    return { success: true, body: await this.getSanitized(platform.id) }
   }
 
   async getSanitized (platformId) {
@@ -132,6 +131,14 @@ class PlatformService extends ModelService {
     if (!platform) {
       return { success: false, error: 'Platform not found.' }
     }
+
+    if (platform.dataValues.platformId) {
+      platform.dataValues.parentPlatform = (await this.getSanitized(platform.dataValues.platformId)).body
+    } else {
+      platform.dataValues.parentPlatform = null
+    }
+    delete platform.dataValues.platformId
+
     const properties = await this.getPropertiesByPk(platformId)
     if (properties[0].name) {
       platform.dataValues.properties = properties
@@ -148,6 +155,8 @@ class PlatformService extends ModelService {
       return { success: false, error: 'Platform not found.' }
     }
 
+    console.log(reqBody)
+
     if (reqBody.name !== undefined) {
       platform.name = reqBody.name.trim()
     }
@@ -156,6 +165,9 @@ class PlatformService extends ModelService {
     }
     if (reqBody.description !== undefined) {
       platform.description = reqBody.description.trim()
+    }
+    if (reqBody.parentPlatform !== undefined) {
+      platform.platformId = reqBody.parentPlatform ? parseInt(reqBody.parentPlatform) : null
     }
 
     await platform.save()
