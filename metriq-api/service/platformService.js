@@ -139,6 +139,8 @@ class PlatformService extends ModelService {
     }
     delete platform.dataValues.platformId
 
+    platform.dataValues.childPlatforms = await platform.getPlatforms()
+
     const properties = await this.getPropertiesByPk(platformId)
     if (properties[0].name) {
       platform.dataValues.properties = properties

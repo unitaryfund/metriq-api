@@ -19,6 +19,7 @@ module.exports = function (sequelize, DataTypes) {
   Model.associate = function (db) {
     db.user.hasMany(db.platform)
     db.platform.belongsTo(db.platform)
+    db.platform.hasMany(db.platform)
     db.platform.hasMany(db.platformDataTypeValue)
   }
   return Model
