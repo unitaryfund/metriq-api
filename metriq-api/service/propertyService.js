@@ -24,7 +24,7 @@ class PropertyService {
 
     platformDataType.name = property.name
     platformDataType.fullName = property.fullName ? property.fullName : property.name
-    platformDataType.description = property.description ? property.description : ''
+    platformDataType.description = property.typeDescription ? property.typeDescription : ''
     platformDataType.dataTypeId = property.dataTypeId
     platformDataType.platformId = platformId
 
@@ -41,7 +41,7 @@ class PropertyService {
     const platformDataTypeValue = (await platformDataTypeValueService.SequelizeServiceInstance.new())
     platformDataTypeValue.value = property.value
     platformDataTypeValue.platformDataTypeId = platformDataType.id
-    platformDataTypeValue.notes = ''
+    platformDataTypeValue.notes = property.valueDescription ? property.valueDescription : ''
 
     const platformDataTypeValueCreateResponse = await platformDataTypeValueService.create(platformDataTypeValue)
     if (!platformDataTypeValueCreateResponse.success) {
@@ -55,6 +55,10 @@ class PropertyService {
 
   async update (params, property, userId) {
     // TODO
+  }
+
+  async getAllNames () {
+    return await platformDataTypeService.getAll()
   }
 }
 

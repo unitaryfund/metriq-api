@@ -30,6 +30,11 @@ class PlatformDataTypeService extends ModelService {
 
     return { success: true, body: property }
   }
+
+  async getAll () {
+    const result = await this.SequelizeServiceInstance.projectAll(['id', 'name', 'fullName', ['description', 'typeDescription'], 'dataTypeId', 'platformId'])
+    return { success: true, body: result }
+  }
 }
 
 module.exports = PlatformDataTypeService
