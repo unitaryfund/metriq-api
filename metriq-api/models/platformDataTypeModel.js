@@ -18,10 +18,6 @@ module.exports = function (sequelize, DataTypes) {
     dataTypeId: {
       type: DataTypes.INTEGER,
       allowNull: false
-    },
-    platformId: {
-      type: DataTypes.INTEGER,
-      allowNull: false
     }
   }, {})
   Model.associate = function (db) {

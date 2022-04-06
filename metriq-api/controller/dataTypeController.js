@@ -34,5 +34,5 @@ async function routeWrapper (res, serviceFn, successMessage) {
 exports.readNames = async function (req, res) {
   routeWrapper(res,
     async () => await dataTypeService.getAllNames(),
-    'Retrieved all task names.')
+    'Retrieved all data type names.')
 }

@@ -31,8 +31,8 @@ module.exports = {
             primaryKey: true,
             autoIncrement: true
           },
-          updatedAt: Sequelize.DATE,
           createdAt: Sequelize.DATE,
+          updatedAt: Sequelize.DATE,
           name: {
             type: Sequelize.TEXT,
             allowNull: false
@@ -44,6 +44,16 @@ module.exports = {
           description: {
             type: Sequelize.TEXT,
             allowNull: false
+          },
+          userId: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            references: { model: 'users', key: 'id' }
+          },
+          platformId: {
+            type: Sequelize.INTEGER,
+            allowNull: true,
+            references: { model: 'platforms', key: 'id' }
           }
         }, { transaction: t }),
         queryInterface.createTable('platformDataTypes', {
@@ -70,11 +80,6 @@ module.exports = {
             type: Sequelize.INTEGER,
             allowNull: false,
             references: { model: 'dataTypes', key: 'id' }
-          },
-          platformId: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            references: { model: 'platforms', key: 'id' }
           }
         }, { transaction: t }),
         queryInterface.createTable('platformDataTypeValues', {
@@ -88,6 +93,11 @@ module.exports = {
           value: {
             type: Sequelize.TEXT,
             allowNull: false
+          },
+          platformId: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            references: { model: 'platforms', key: 'id' }
           },
           platformDataTypeId: {
             type: Sequelize.INTEGER,

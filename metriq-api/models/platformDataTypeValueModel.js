@@ -7,6 +7,10 @@ module.exports = function (sequelize, DataTypes) {
       type: DataTypes.TEXT,
       allowNull: false
     },
+    platformId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     platformDataTypeId: {
       type: DataTypes.INTEGER,
       allowNull: false
