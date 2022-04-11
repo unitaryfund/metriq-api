@@ -31,7 +31,7 @@ async function routeWrapper (res, serviceFn, successMessage) {
   }
 }
 
-// Validate the submission request and create the submission model.
+// Validate the platform request and create the platform model.
 exports.new = async function (req, res) {
   routeWrapper(res,
     async () => await platformService.submit(req.user.id, req.body),
