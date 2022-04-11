@@ -11,18 +11,6 @@ module.exports = {
       { name: 'DECIMAL', friendlyName: 'Decimal (high-precision)', friendlyType: 'number' },
       { name: 'DATE', friendlyName: 'Date and time', friendlyType: 'datetime' },
       { name: 'DATEONLY', friendlyName: 'Date', friendlyType: 'date' }
-      // { name: 'BLOB', friendlyName: 'File ("blob")' },
-      // { name: 'STRING', friendlyName: 'String', friendlyType: 'string' },
-      // { name: 'CHAR', friendlyName: 'Character', friendlyType: 'char' },
-      // { name: 'TINYINT', friendlyName: 'Integer (8-bit)', friendlyType: 'int' },
-      // { name: 'SMALLINT', friendlyName: 'Integer (16-bit)', friendlyType: 'int'},
-      // { name: 'INTEGER', friendlyName: 'Integer (32-bit)', friendlyType: 'int' },
-      // { name: 'FLOAT', friendlyName: 'Number (32-bit floating point)', friendlyType: 'number' },
-      // { name: 'REAL', friendlyName: 'Number (32-bit floating point)' },
-      // { name: 'GEOMETRY', friendlyName: 'Geometry (SQL type)' },
-      // { name: 'GEOGRAPHY', friendlyName: 'Geography (SQL type)' }
-      // { name: 'HSTORE', friendlyName: 'Key-value pair' },
-      // { name: 'ENUM', friendlyName: 'Enumeration' }
     ], {})
   },
 
