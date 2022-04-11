@@ -46,5 +46,5 @@ exports.update = async function (req, res) {
 exports.readNames = async function (req, res) {
   routeWrapper(res,
     async () => await propertyService.getAllNames(),
-    'Retrieved all platform names.')
+    'Retrieved all property names.')
 }
