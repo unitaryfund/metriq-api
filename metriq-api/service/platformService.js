@@ -105,7 +105,7 @@ class PlatformService extends ModelService {
       }
     }
 
-    // Get an ObjectId for the new object, first.
+    // We need to create the model instance first, so it has a primary key, in the database.
     const createResult = await this.create(platform)
     platform = createResult.body
     await platform.save()
