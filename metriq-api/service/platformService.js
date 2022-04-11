@@ -118,7 +118,7 @@ class PlatformService extends ModelService {
         if (!submission) {
           return { success: false, error: 'Submission reference in Method collection not found.' }
         }
-        // Reference to submission goes in reference collection on method
+        // Reference to submission goes in reference collection on method.
         await submissionPlatformRefService.createOrFetch(submissionId, userId, platform.id)
       }
     }
