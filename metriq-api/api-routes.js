@@ -12,16 +12,16 @@ router.get('/', function (req, res) {
 })
 
 const accountController = require('./controller/accountController')
-const userController = require('./controller/userController')
-const submissionController = require('./controller/submissionController')
-const tagController = require('./controller/tagController')
-const taskController = require('./controller/taskController')
-const resultController = require('./controller/resultController')
+const arxivController = require('./controller/arxivController')
+const dataTypeController = require('./controller/dataTypeController')
 const methodController = require('./controller/methodController')
 const platformController = require('./controller/platformController')
 const propertyController = require('./controller/propertyController')
-const dataTypeController = require('./controller/dataTypeController')
-const arxivController = require('./controller/arxivController')
+const resultController = require('./controller/resultController')
+const submissionController = require('./controller/submissionController')
+const tagController = require('./controller/tagController')
+const taskController = require('./controller/taskController')
+const userController = require('./controller/userController')
 
 // Register routes.
 router.route('/register')
