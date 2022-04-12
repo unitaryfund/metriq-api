@@ -18,8 +18,8 @@ const SubmissionTaskRefService = require('./submissionTaskRefService')
 const submissionTaskRefService = new SubmissionTaskRefService()
 const SubmissionMethodRefService = require('./submissionMethodRefService')
 const submissionMethodRefService = new SubmissionMethodRefService()
-const ResultPlatformRefService = require('./resultPlatformRefService')
-const resultPlatformRefService = new ResultPlatformRefService()
+const SubmissionPlatformRefService = require('./submissionPlatformRefService')
+const submissionPlatformRefService = new SubmissionPlatformRefService()
 
 class ResultService extends ModelService {
   constructor () {
@@ -81,15 +81,19 @@ class ResultService extends ModelService {
       return { success: false, error: 'Result requires method to be present in database.' }
     }
 
+    const result = await this.SequelizeServiceInstance.new()
+
     // Platform must be not null and valid (present in database) for a valid result object.
     if (reqBody.platform) {
       const platform = await platformService.getByPk(reqBody.platform)
       if (!platform) {
         return { success: false, error: 'Result requires platform to be present in database.' }
       }
+      result.submissionPlatformRefId = (await submissionPlatformRefService.getByFks(submissionId, platform.id)).id
+    } else {
+      result.submissionPlatformRefId = null
     }
 
-    const result = await this.SequelizeServiceInstance.new()
     result.userId = userId
     result.submissionId = submissionId
     result.submissionTaskRefId = (await submissionTaskRefService.getByFks(submissionId, parseInt(reqBody.task))).id
@@ -105,9 +109,6 @@ class ResultService extends ModelService {
     const nResult = await this.create(result)
     if (!nResult.success) {
       return nResult
-    }
-    if (reqBody.platform) {
-      await resultPlatformRefService.createOrFetch(reqBody.platform, userId, nResult.id)
     }
 
     submission = await submissionService.getEagerByPk(submissionId)
@@ -148,12 +149,13 @@ class ResultService extends ModelService {
       if (!platform) {
         return { success: false, error: 'Result requires platform to be present in database.' }
       }
-      await resultPlatformRefService.createOrFetch(platform.id, userId, result.id)
+      result.submissionPlatformRefId = (await submissionPlatformRefService.getByFks(reqBody.submissionId, platform.id)).id
     } else {
       const ref = (await resultPlatformRefService.getByFk(result.id))
       if (ref) {
         await resultPlatformRefService.deleteByPk(refId)
       }
+      result.submissionPlatformRefId = null
     }
     result.submissionTaskRefId = (await submissionTaskRefService.getByFks(reqBody.submissionId, parseInt(reqBody.task.id))).id
     result.submissionMethodRefId = (await submissionMethodRefService.getByFks(reqBody.submissionId, method.id)).id
