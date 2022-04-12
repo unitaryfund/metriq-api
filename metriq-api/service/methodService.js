@@ -121,7 +121,7 @@ class MethodService extends ModelService {
   async submit (userId, reqBody) {
     const nameMatch = await this.getByName(reqBody.name)
     if (nameMatch) {
-      return { success: false, error: 'Submission name already in use.' }
+      return { success: false, error: 'Method name already in use.' }
     }
 
     let method = await this.SequelizeServiceInstance.new()

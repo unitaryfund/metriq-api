@@ -21,7 +21,7 @@ app.use(cors())
 
 // Import routes.
 const apiRoutes = require('./api-routes')
-const publicApiRoutes = ['/api/login', '/api/register', '/api/recover', '/api/password', '/api/tag', '/api/v1/arxiv_id']
+const publicApiRoutes = ['/api/login', '/api/register', '/api/recover', '/api/password', '/api/tag', '/api/platform', '/api/property', '/api/dataType', '/api/v1/arxiv_id']
 const unless = function (paths, middleware) {
   return function (req, res, next) {
     if ((req.method === 'GET') &&
@@ -29,6 +29,9 @@ const unless = function (paths, middleware) {
         req.path.startsWith('/api/method') ||
         req.path.startsWith('/api/task') ||
         req.path.startsWith('/api/result') ||
+        req.path.startsWith('/api/platform') ||
+        req.path.startsWith('/api/property') ||
+        req.path.startsWith('/api/dataType') ||
         /\/api\/user\/\d+\/submission\/?/.test(req.path))) {
       if (req.cookies && req.cookies.token) {
         try {
@@ -161,9 +164,9 @@ app.get('/', (req, res) => res.send('Metriq API'))
 // Use API routes in the app.
 app.use('/api', apiRoutes)
 
-app.get('*',function (req, res) {
-  res.redirect('/');
-});
+app.get('*', function (req, res) {
+  res.redirect('/')
+})
 
 // Launch the app, to listen to the specified port.
 app.listen(config.app.port, function () {

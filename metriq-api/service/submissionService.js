@@ -198,6 +198,7 @@ class SubmissionService extends ModelService {
       for (let j = 0; j < results.length; j++) {
         results[j] = results[j].dataValues
         results[j].method = toRet.methods[i]
+        results[j].platform = null
       }
       toRet.results.push(...results)
     }
@@ -213,6 +214,17 @@ class SubmissionService extends ModelService {
       }
     }
     delete toRet.submissionTaskRefs
+
+    toRet.platforms = []
+    for (let i = 0; i < toRet.submissionPlatformRefs.length; i++) {
+      toRet.platforms.push(await toRet.submissionPlatformRefs[i].getPlatform())
+      for (let j = 0; j < toRet.results.length; j++) {
+        if (toRet.submissionPlatformRefs[i].id === toRet.results[j].submissionPlatformRefId) {
+          toRet.results[j].platform = toRet.platforms[i]
+        }
+      }
+    }
+    delete toRet.submissionPlatformRefs
 
     return toRet
   }
@@ -270,7 +282,7 @@ class SubmissionService extends ModelService {
       }
     })
 
-    const mailBody = 'We have received your submission: \n\n' + submission.name + ' (' + config.web.getUri() + '/Submission/' + submission.id + ')' +'\n\nThere is a simple manual review process from an administrator, primarily to check link and image appropriateness for the safety of the community and to ensure that your submission is best categorized within our normal metadata categories. Your submission is already visible to other users, but its visibility may change pending review. If our administrators need further input from you, in order to properly categorize your submission, they will reach out to your email address, here.\n\nThank you for your submission!'
+    const mailBody = 'We have received your submission: \n\n' + submission.name + ' (' + config.web.getUri() + '/Submission/' + submission.id + ')' + '\n\nThere is a simple manual review process from an administrator, primarily to check link and image appropriateness for the safety of the community and to ensure that your submission is best categorized within our normal metadata categories. Your submission is already visible to other users, but its visibility may change pending review. If our administrators need further input from you, in order to properly categorize your submission, they will reach out to your email address, here.\n\nThank you for your submission!'
 
     const mailOptions = {
       from: config.supportEmail.address,

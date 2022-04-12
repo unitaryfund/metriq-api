@@ -29,6 +29,7 @@ module.exports = function (sequelize, DataTypes) {
   Model.associate = function (db) {
     db.user.hasMany(db.submission)
     db.submission.hasMany(db.like)
+    db.submission.hasMany(db.submissionPlatformRef)
     db.submission.hasMany(db.submissionMethodRef)
     db.submission.hasMany(db.submissionTaskRef)
     db.submission.hasMany(db.submissionTagRef)
