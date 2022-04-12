@@ -151,10 +151,6 @@ class ResultService extends ModelService {
       }
       result.submissionPlatformRefId = (await submissionPlatformRefService.getByFks(reqBody.submissionId, platform.id)).id
     } else {
-      const ref = (await resultPlatformRefService.getByFk(result.id))
-      if (ref) {
-        await resultPlatformRefService.deleteByPk(refId)
-      }
       result.submissionPlatformRefId = null
     }
     result.submissionTaskRefId = (await submissionTaskRefService.getByFks(reqBody.submissionId, parseInt(reqBody.task.id))).id
