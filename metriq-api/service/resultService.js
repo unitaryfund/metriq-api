@@ -150,8 +150,10 @@ class ResultService extends ModelService {
       }
       await resultPlatformRefService.createOrFetch(platform.id, userId, result.id)
     } else {
-      const refId = (await resultPlatformRefService.getByFk(result.id)).id
-      await resultPlatformRefService.deleteByPk(refId)
+      const ref = (await resultPlatformRefService.getByFk(result.id))
+      if (ref) {
+        await resultPlatformRefService.deleteByPk(refId)
+      }
     }
     result.submissionTaskRefId = (await submissionTaskRefService.getByFks(reqBody.submissionId, parseInt(reqBody.task.id))).id
     result.submissionMethodRefId = (await submissionMethodRefService.getByFks(reqBody.submissionId, method.id)).id
