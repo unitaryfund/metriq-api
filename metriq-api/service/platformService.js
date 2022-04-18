@@ -148,6 +148,10 @@ class PlatformService extends ModelService {
       platform.dataValues.properties = []
     }
 
+    console.log('Hit!')
+
+    platform.dataValues.submissions = (await submissionService.getByPlatformId(platformId)).body
+
     return { success: true, body: platform }
   }
 

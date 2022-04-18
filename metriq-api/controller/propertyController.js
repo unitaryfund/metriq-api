@@ -48,3 +48,9 @@ exports.readNames = async function (req, res) {
     async () => await propertyService.getAllNames(),
     'Retrieved all property names.')
 }
+
+exports.delete = async function (req, res) {
+  routeWrapper(res,
+    async () => await propertyService.delete(req.params.id),
+    'Successfully deleted platform property.')
+}

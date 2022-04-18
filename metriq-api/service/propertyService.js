@@ -56,7 +56,7 @@ class PropertyService {
       return platformDataTypeValueCreateResponse
     }
 
-    property.id = platformDataType.id
+    property.id = platformDataTypeValue.id
 
     return { success: true, body: property }
   }
@@ -96,6 +96,18 @@ class PropertyService {
 
   async getAllNames () {
     return await platformDataTypeService.getAll()
+  }
+
+  async delete (propertyId) {
+    const property = await platformDataTypeValueService.getByPk(propertyId)
+    if (!property) {
+      return { success: false, error: 'Platform property not found.' }
+    }
+    const platformId = property.platformId
+    await property.destroy()
+    const platform = await platformService.getSanitized(platformId)
+
+    return { success: true, body: platform }
   }
 }
 

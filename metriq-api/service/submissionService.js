@@ -100,6 +100,13 @@ class SubmissionService extends ModelService {
         '    WHERE s."deletedAt" IS NULL AND str."deletedAt" IS NULL AND str."methodId" = ' + methodId
   }
 
+  sqlByPlatform (platformId) {
+    return 'SELECT s.*, CAST(l."upvoteCount" AS integer) AS "upvoteCount" FROM submissions AS s ' +
+        '    RIGHT JOIN public."submissionPlatformRefs" AS str ON s.id = str."submissionId" ' +
+        '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
+        '    WHERE s."deletedAt" IS NULL AND str."deletedAt" IS NULL AND str."platformId" = ' + platformId
+  }
+
   async getEagerByPk (submissionId) {
     return await this.SequelizeServiceInstance.findOneEager({ id: submissionId })
   }
@@ -124,6 +131,11 @@ class SubmissionService extends ModelService {
 
   async getByMethodId (methodId) {
     const result = (await sequelize.query(this.sqlByMethod(methodId)))[0]
+    return { success: true, body: result }
+  }
+
+  async getByPlatformId (platformId) {
+    const result = (await sequelize.query(this.sqlByPlatform(platformId)))[0]
     return { success: true, body: result }
   }
 
