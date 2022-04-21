@@ -61,11 +61,11 @@ class PlatformService extends ModelService {
   }
 
   async getTopLevelNamesAndCounts () {
-    const result = (await this.getAllNames()).body
+    const result = await this.getTopLevelNames()
     for (let i = 0; i < result.length; i++) {
-      result[i].dataValues.submissionCount = parseInt(await this.getSubmissionCount(result[i].id))
-      result[i].dataValues.upvoteTotal = parseInt(await this.getLikeCount(result[i].id))
-      result[i].dataValues.resultCount = parseInt(await this.getResultCount(result[i].id))
+      result[i].submissionCount = await this.getParentSubmissionCount(result[i].id)
+      result[i].upvoteTotal = await this.getParentLikeCount(result[i].id)
+      result[i].resultCount = await this.getParentResultCount(result[i].id)
     }
     const filtered = []
     for (let i = 0; i < result.length; i++) {
@@ -73,7 +73,61 @@ class PlatformService extends ModelService {
         filtered.push(result[i])
       }
     }
-    return { success: true, body: result }
+    return { success: true, body: filtered }
+  }
+
+  async getTopLevelNames () {
+    return (await sequelize.query(
+      'SELECT id, name, description FROM platforms WHERE platforms."platformId" is NULL '
+    ))[0]
+  }
+
+  async getParentSubmissionCount (parentId) {
+    return (await sequelize.query(
+      'WITH RECURSIVE c AS ( ' +
+      '  SELECT ' + parentId + ' as id ' +
+      '  UNION ALL ' +
+      '  SELECT platforms.id as id FROM platforms ' +
+      '    JOIN c on c.id = platforms."platformId" ' +
+      ') ' +
+      'SELECT COUNT(*) FROM "submissionPlatformRefs" ' +
+      '  RIGHT JOIN c on c.id = "submissionPlatformRefs"."platformId" AND ("submissionPlatformRefs"."deletedAt" IS NULL) '
+    ))[0][0].count
+  }
+
+  async getParentLikeCount (parentId) {
+    return (await sequelize.query(
+      'WITH RECURSIVE c AS ( ' +
+      '  SELECT ' + parentId + ' as id ' +
+      '  UNION ALL ' +
+      '  SELECT platforms.id as id FROM platforms ' +
+      '    JOIN c on c.id = platforms."platformId" ' +
+      ') ' +
+      'SELECT COUNT(*) FROM likes ' +
+      '  RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
+      '  RIGHT JOIN "submissionPlatformRefs" on submissions.id = "submissionPlatformRefs"."submissionId" ' +
+      '  RIGHT JOIN c on c.id = "submissionPlatformRefs"."platformId" AND ("submissionPlatformRefs"."deletedAt" IS NULL) '
+    ))[0][0].count
+  }
+
+  async getParentResultCount (parentId) {
+    return (await sequelize.query(
+      'WITH RECURSIVE c AS ( ' +
+      '  SELECT ' + parentId + ' as id ' +
+      '  UNION ALL ' +
+      '  SELECT platforms.id as id FROM platforms ' +
+      '    JOIN c on c.id = platforms."platformId" ' +
+      ') ' +
+      'SELECT COUNT(*) FROM results ' +
+      '  RIGHT JOIN "submissionPlatformRefs" on results."submissionPlatformRefId" = "submissionPlatformRefs".id ' +
+      '  RIGHT JOIN c on c.id = "submissionPlatformRefs"."platformId" AND (results."deletedAt" IS NULL) '
+    ))[0][0].count
+  }
+
+  async getChildren (parentId) {
+    return (await sequelize.query(
+      'SELECT * FROM platforms WHERE platforms."platformId" = ' + parentId + ';'
+    ))[0]
   }
 
   async getByName (name) {
@@ -116,9 +170,9 @@ class PlatformService extends ModelService {
       if (submissionId) {
         const submission = await submissionService.getByPk(parseInt(submissionId))
         if (!submission) {
-          return { success: false, error: 'Submission reference in Method collection not found.' }
+          return { success: false, error: 'Submission reference in Platform collection not found.' }
         }
-        // Reference to submission goes in reference collection on method.
+        // Reference to submission goes in reference collection on platform.
         await submissionPlatformRefService.createOrFetch(submissionId, userId, platform.id)
       }
     }
