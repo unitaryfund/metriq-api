@@ -51,7 +51,7 @@ class TaskService extends ModelService {
   }
 
   async getAllNames () {
-    const result = await this.SequelizeServiceInstance.projectAll(['id', 'name'])
+    const result = await this.SequelizeServiceInstance.projectAll(['id', 'name', [sequelize.literal('CASE WHEN "taskId" IS NULL THEN 1 ELSE 0 END'), 'top']])
     return { success: true, body: result }
   }
 
