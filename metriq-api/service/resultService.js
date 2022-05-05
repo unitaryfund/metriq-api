@@ -138,7 +138,7 @@ class ResultService extends ModelService {
     if (reqBody.method === null) {
       return { success: false, error: 'Result requires method to be defined.' }
     }
-    const method = await methodService.getByPk(reqBody.method.id)
+    const method = await methodService.getByPk(reqBody.method)
     if (!method) {
       return { success: false, error: 'Result requires method to be present in database.' }
     }
@@ -153,7 +153,8 @@ class ResultService extends ModelService {
     } else {
       result.submissionPlatformRefId = null
     }
-    result.submissionTaskRefId = (await submissionTaskRefService.getByFks(reqBody.submissionId, parseInt(reqBody.task.id))).id
+
+    result.submissionTaskRefId = (await submissionTaskRefService.getByFks(reqBody.submissionId, parseInt(reqBody.task))).id
     result.submissionMethodRefId = (await submissionMethodRefService.getByFks(reqBody.submissionId, method.id)).id
     result.isHigherBetter = reqBody.isHigherBetter
     result.metricName = reqBody.metricName
