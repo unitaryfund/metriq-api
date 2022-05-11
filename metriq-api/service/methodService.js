@@ -75,7 +75,8 @@ class MethodService extends ModelService {
       '    JOIN c on c.id = methods."methodId" ' +
       ') ' +
       'SELECT COUNT(*) FROM "submissionMethodRefs" ' +
-      '  RIGHT JOIN c on c.id = "submissionMethodRefs"."methodId" AND ("submissionMethodRefs"."deletedAt" IS NULL) '
+      '  RIGHT JOIN c on c.id = "submissionMethodRefs"."methodId" ' +
+      '  WHERE "submissionMethodRefs"."deletedAt" IS NULL'
     ))[0][0].count
   }
 
@@ -90,7 +91,8 @@ class MethodService extends ModelService {
       'SELECT COUNT(*) FROM likes ' +
       '  RIGHT JOIN submissions on (submissions."deletedAt" IS NULL) AND likes."submissionId" = submissions.id ' +
       '  RIGHT JOIN "submissionMethodRefs" on ("submissionMethodRefs"."deletedAt" IS NULL) AND submissions.id = "submissionMethodRefs"."submissionId" ' +
-      '  RIGHT JOIN c on c.id = "submissionMethodRefs"."methodId" '
+      '  RIGHT JOIN c on c.id = "submissionMethodRefs"."methodId" ' +
+      '  WHERE "submissionMethodRefs"."deletedAt" IS NULL '
     ))[0][0].count
   }
 
@@ -103,8 +105,9 @@ class MethodService extends ModelService {
       '    JOIN c on c.id = methods."methodId" ' +
       ') ' +
       'SELECT COUNT(*) FROM results ' +
-      '  RIGHT JOIN "submissionMethodRefs" on ("submissionMethodRefs"."deletedAt" IS NULL) AND results."submissionMethodRefId" = "submissionMethodRefs".id ' +
-      '  RIGHT JOIN c on (c.id = "submissionMethodRefs"."methodId") AND (results."deletedAt" IS NULL) '
+      '  RIGHT JOIN "submissionMethodRefs" on results."submissionMethodRefId" = "submissionMethodRefs".id ' +
+      '  RIGHT JOIN c on (c.id = "submissionMethodRefs"."methodId") ' +
+      '  WHERE "submissionMethodRefs"."deletedAt" IS NULL AND results."deletedAt" IS NULL '
     ))[0][0].count
   }
 
