@@ -86,7 +86,8 @@ class TaskService extends ModelService {
       '    JOIN c on c.id = tasks."taskId" ' +
       ') ' +
       'SELECT COUNT(*) FROM "submissionTaskRefs" ' +
-      '  RIGHT JOIN c on c.id = "submissionTaskRefs"."taskId" AND ("submissionTaskRefs"."deletedAt" IS NULL) '
+      '  RIGHT JOIN c on c.id = "submissionTaskRefs"."taskId" ' +
+      '  WHERE "submissionTaskRefs"."deletedAt" IS NULL '
     ))[0][0].count
   }
 
@@ -101,7 +102,8 @@ class TaskService extends ModelService {
       'SELECT COUNT(*) FROM likes ' +
       '  RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
       '  RIGHT JOIN "submissionTaskRefs" on submissions.id = "submissionTaskRefs"."submissionId" ' +
-      '  RIGHT JOIN c on c.id = "submissionTaskRefs"."taskId" AND ("submissionTaskRefs"."deletedAt" IS NULL) '
+      '  RIGHT JOIN c on c.id = "submissionTaskRefs"."taskId" ' +
+      '  WHERE submissions."deletedAt" IS NULL AND "submissionTaskRefs"."deletedAt" IS NULL '
     ))[0][0].count
   }
 
@@ -115,7 +117,8 @@ class TaskService extends ModelService {
       ') ' +
       'SELECT COUNT(*) FROM results ' +
       '  RIGHT JOIN "submissionTaskRefs" on results."submissionTaskRefId" = "submissionTaskRefs".id ' +
-      '  RIGHT JOIN c on c.id = "submissionTaskRefs"."taskId" AND (results."deletedAt" IS NULL) '
+      '  RIGHT JOIN c on c.id = "submissionTaskRefs"."taskId" ' +
+      '  WHERE "submissionTaskRefs"."deletedAt" IS NULL AND results."deletedAt" IS NULL '
     ))[0][0].count
   }
 

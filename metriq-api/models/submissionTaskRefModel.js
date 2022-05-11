@@ -2,7 +2,7 @@
 
 'use strict'
 module.exports = function (sequelize, DataTypes) {
-  const Model = sequelize.define('submissionTaskRef', {}, {})
+  const Model = sequelize.define('submissionTaskRef', {}, { paranoid: true })
   Model.associate = function (db) {
     db.user.hasMany(db.submissionTaskRef)
     db.submissionTaskRef.hasMany(db.result)

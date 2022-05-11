@@ -2,7 +2,7 @@
 
 'use strict'
 module.exports = function (sequelize, DataTypes) {
-  const Model = sequelize.define('submissionPlatformRef', {}, {})
+  const Model = sequelize.define('submissionPlatformRef', {}, { paranoid: true })
   Model.associate = function (db) {
     db.user.hasMany(db.submissionPlatformRef)
     db.submissionPlatformRef.belongsTo(db.platform)
