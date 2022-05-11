@@ -25,7 +25,7 @@ module.exports = function (sequelize, DataTypes) {
     approvedAt: {
       type: DataTypes.DATE
     }
-  }, {})
+  }, { paranoid: true })
   Model.associate = function (db) {
     db.user.hasMany(db.submission)
     db.submission.hasMany(db.like)
