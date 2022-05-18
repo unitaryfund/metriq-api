@@ -89,10 +89,10 @@ class MethodService extends ModelService {
       '    JOIN c on c.id = methods."methodId" ' +
       ') ' +
       'SELECT COUNT(*) FROM likes ' +
-      '  RIGHT JOIN submissions on (submissions."deletedAt" IS NULL) AND likes."submissionId" = submissions.id ' +
+      '  RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
       '  RIGHT JOIN "submissionMethodRefs" on ("submissionMethodRefs"."deletedAt" IS NULL) AND submissions.id = "submissionMethodRefs"."submissionId" ' +
       '  RIGHT JOIN c on c.id = "submissionMethodRefs"."methodId" ' +
-      '  WHERE "submissionMethodRefs"."deletedAt" IS NULL '
+      '  WHERE "submissionMethodRefs"."deletedAt" IS NULL AND submissions."deletedAt" IS NULL '
     ))[0][0].count
   }
 
