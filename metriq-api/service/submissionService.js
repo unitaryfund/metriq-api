@@ -84,12 +84,13 @@ class SubmissionService extends ModelService {
     '    SELECT t.id FROM tasks AS t ' +
     '    JOIN c on c.id = t."taskId" ' +
     ') ' +
-    'SELECT s.* from submissions AS s ' +
+    'SELECT s.*, CAST(l."upvoteCount" AS integer) AS "upvoteCount" from submissions AS s ' +
     '    RIGHT JOIN ( ' +
     '        SELECT DISTINCT "submissionId" FROM public."submissionTaskRefs" ' +
     '            RIGHT JOIN c on c.id = "taskId" ' +
     '            WHERE "deletedAt" IS NULL ' +
     '    ) as i on i."submissionId" = s.id ' +
+    '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
     '    WHERE s."deletedAt" IS NULL;'
   }
 
