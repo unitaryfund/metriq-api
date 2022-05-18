@@ -90,8 +90,8 @@ class PlatformService extends ModelService {
       '  SELECT platforms.id as id FROM platforms ' +
       '    JOIN c on c.id = platforms."platformId" ' +
       ') ' +
-      'SELECT COUNT(*) FROM "submissionPlatformRefs" ' +
-      '  RIGHT JOIN c on c.id = "submissionPlatformRefs"."platformId" AND ("submissionPlatformRefs"."deletedAt" IS NULL) '
+      'SELECT COUNT(*) FROM "submissionPlatformRefs" AS spr ' +
+      '  RIGHT JOIN c on c.id = spr."platformId" AND spr."deletedAt" IS NULL AND spr.id IS NOT NULL '
     ))[0][0].count
   }
 
@@ -105,8 +105,8 @@ class PlatformService extends ModelService {
       ') ' +
       'SELECT COUNT(*) FROM likes ' +
       '  RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
-      '  RIGHT JOIN "submissionPlatformRefs" on submissions.id = "submissionPlatformRefs"."submissionId" ' +
-      '  RIGHT JOIN c on c.id = "submissionPlatformRefs"."platformId" AND ("submissionPlatformRefs"."deletedAt" IS NULL) '
+      '  RIGHT JOIN "submissionPlatformRefs" spr on submissions.id = spr."submissionId" ' +
+      '  RIGHT JOIN c on c.id = spr."platformId" AND spr."deletedAt" IS NULL AND spr.id IS NOT NULL '
     ))[0][0].count
   }
 
@@ -119,8 +119,8 @@ class PlatformService extends ModelService {
       '    JOIN c on c.id = platforms."platformId" ' +
       ') ' +
       'SELECT COUNT(*) FROM results ' +
-      '  RIGHT JOIN "submissionPlatformRefs" on results."submissionPlatformRefId" = "submissionPlatformRefs".id ' +
-      '  RIGHT JOIN c on c.id = "submissionPlatformRefs"."platformId" AND (results."deletedAt" IS NULL) '
+      '  RIGHT JOIN "submissionPlatformRefs" spr on results."submissionPlatformRefId" = spr.id ' +
+      '  RIGHT JOIN c on c.id = spr."platformId" AND spr.id IS NOT NULL AND results."deletedAt" IS NULL '
     ))[0][0].count
   }
 

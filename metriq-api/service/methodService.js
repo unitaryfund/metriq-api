@@ -74,9 +74,9 @@ class MethodService extends ModelService {
       '  SELECT methods.id as id FROM methods ' +
       '    JOIN c on c.id = methods."methodId" ' +
       ') ' +
-      'SELECT COUNT(*) FROM "submissionMethodRefs" ' +
-      '  RIGHT JOIN c on c.id = "submissionMethodRefs"."methodId" ' +
-      '  WHERE "submissionMethodRefs"."deletedAt" IS NULL'
+      'SELECT COUNT(*) FROM "submissionMethodRefs" AS smr ' +
+      '  RIGHT JOIN c on c.id = smr."methodId" ' +
+      '  WHERE smr."deletedAt" IS NULL AND smr.id IS NOT NULL'
     ))[0][0].count
   }
 
@@ -90,9 +90,9 @@ class MethodService extends ModelService {
       ') ' +
       'SELECT COUNT(*) FROM likes ' +
       '  RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
-      '  RIGHT JOIN "submissionMethodRefs" on ("submissionMethodRefs"."deletedAt" IS NULL) AND submissions.id = "submissionMethodRefs"."submissionId" ' +
-      '  RIGHT JOIN c on c.id = "submissionMethodRefs"."methodId" ' +
-      '  WHERE "submissionMethodRefs"."deletedAt" IS NULL AND submissions."deletedAt" IS NULL '
+      '  RIGHT JOIN "submissionMethodRefs" smr on (smr."deletedAt" IS NULL) AND submissions.id = smr."submissionId" ' +
+      '  RIGHT JOIN c on c.id = smr."methodId" ' +
+      '  WHERE submissions."deletedAt" IS NULL AND smr."deletedAt" IS NULL and smr.id IS NOT NULL '
     ))[0][0].count
   }
 
@@ -105,9 +105,9 @@ class MethodService extends ModelService {
       '    JOIN c on c.id = methods."methodId" ' +
       ') ' +
       'SELECT COUNT(*) FROM results ' +
-      '  RIGHT JOIN "submissionMethodRefs" on results."submissionMethodRefId" = "submissionMethodRefs".id ' +
-      '  RIGHT JOIN c on (c.id = "submissionMethodRefs"."methodId") ' +
-      '  WHERE "submissionMethodRefs"."deletedAt" IS NULL AND results."deletedAt" IS NULL '
+      '  RIGHT JOIN "submissionMethodRefs" smr on results."submissionMethodRefId" = smr.id ' +
+      '  RIGHT JOIN c on (c.id = smr."methodId") ' +
+      '  WHERE smr."deletedAt" IS NULL AND smr.id IS NOT NULL AND results."deletedAt" IS NULL '
     ))[0][0].count
   }
 
