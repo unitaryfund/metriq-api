@@ -276,6 +276,10 @@ class TaskService extends ModelService {
     } else {
       const ref = await submissionTaskRefService.getByFks(submission.id, task.id)
       if (ref) {
+        const results = (await resultService.getByTaskIdAndSubmissionId(task.id, submission.id)).body
+        if (results && results.length) {
+          return { success: false, error: 'Cannot delete submission task reference with result. Change or delete results in the submission that use this task, first.' }
+        }
         await submissionTaskRefService.deleteByPk(ref.id)
       }
     }

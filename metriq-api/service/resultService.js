@@ -10,10 +10,6 @@ const Result = db.result
 // Service dependencies
 const SubmissionService = require('../service/submissionService')
 const submissionService = new SubmissionService()
-const MethodService = require('../service/methodService')
-const methodService = new MethodService()
-const PlatformService = require('../service/platformService')
-const platformService = new PlatformService()
 const SubmissionTaskRefService = require('./submissionTaskRefService')
 const submissionTaskRefService = new SubmissionTaskRefService()
 const SubmissionMethodRefService = require('./submissionMethodRefService')
@@ -45,13 +41,81 @@ class ResultService extends ModelService {
     '    WHERE str."deletedAt" IS NULL;'
   }
 
+  sqlByTaskSubmission (taskId, submissionId) {
+    return 'WITH RECURSIVE c AS ( ' +
+    '    SELECT ' + taskId + ' as id ' +
+    '    UNION ALL ' +
+    '    SELECT t.id FROM tasks AS t ' +
+    '    JOIN c on c.id = t."taskId" ' +
+    ') ' +
+    'SELECT r.*, s.name AS "submissionName", CASE WHEN t.id = ' + taskId + ' THEN m.name ELSE m.name || \' | \' || t.name END AS "methodName", COALESCE(p.name, \'\') as "platformName"  FROM "submissionTaskRefs" AS str ' +
+    '    RIGHT JOIN c on c.id = str."taskId" ' +
+    '    JOIN results AS r on r."submissionTaskRefId" = str.id AND r."deletedAt" IS NULL ' +
+    '    LEFT JOIN submissions AS s on str."submissionId" = s.id AND s."deletedAt" IS NULL ' +
+    '    LEFT JOIN "submissionMethodRefs" AS smr on r."submissionMethodRefId" = smr.id AND smr."deletedAt" IS NULL ' +
+    '    LEFT JOIN methods AS m on smr."methodId" = m.id ' +
+    '    LEFT JOIN "submissionPlatformRefs" AS spr on r."submissionPlatformRefId" = spr.id AND spr."deletedAt" IS NULL ' +
+    '    LEFT JOIN platforms AS p on spr."platformId" = p.id ' +
+    '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
+    '    WHERE str."deletedAt" IS NULL AND s.id = ' + submissionId + ';'
+  }
+
+  sqlByMethodSubmission (methodId, submissionId) {
+    return 'WITH RECURSIVE c AS ( ' +
+    '    SELECT ' + methodId + ' as id ' +
+    '    UNION ALL ' +
+    '    SELECT t.id FROM methods AS t ' +
+    '    JOIN c on c.id = t."methodId" ' +
+    ') ' +
+    'SELECT r.*, s.name AS "submissionName", COALESCE(p.name, \'\') as "platformName"  FROM "submissionMethodRefs" AS smr ' +
+    '    RIGHT JOIN c on c.id = smr."methodId" ' +
+    '    JOIN results AS r on r."submissionMethodRefId" = smr.id AND r."deletedAt" IS NULL ' +
+    '    LEFT JOIN submissions AS s on smr."submissionId" = s.id AND s."deletedAt" IS NULL ' +
+    '    LEFT JOIN "submissionTaskRefs" AS str on r."submissionTaskRefId" = str.id AND str."deletedAt" IS NULL ' +
+    '    LEFT JOIN methods AS m on smr."methodId" = m.id ' +
+    '    LEFT JOIN "submissionPlatformRefs" AS spr on r."submissionPlatformRefId" = spr.id AND spr."deletedAt" IS NULL ' +
+    '    LEFT JOIN platforms AS p on spr."platformId" = p.id ' +
+    '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
+    '    WHERE str."deletedAt" IS NULL AND s.id=' + submissionId + ';'
+  }
+
+  sqlByPlatformSubmission (platformId, submissionId) {
+    return 'WITH RECURSIVE c AS ( ' +
+    '    SELECT ' + platformId + ' as id ' +
+    '    UNION ALL ' +
+    '    SELECT t.id FROM platforms AS t ' +
+    '    JOIN c on c.id = t."platformId" ' +
+    ') ' +
+    'SELECT r.*, s.name AS "submissionName", COALESCE(p.name, \'\') as "platformName"  FROM "submissionPlatformRefs" AS spr ' +
+    '    RIGHT JOIN c on c.id = spr."platformId" ' +
+    '    JOIN results AS r on r."submissionPlatformRefId" = spr.id AND r."deletedAt" IS NULL ' +
+    '    LEFT JOIN submissions AS s on spr."submissionId" = s.id AND s."deletedAt" IS NULL ' +
+    '    LEFT JOIN "submissionMethodRefs" AS smr on r."submissionMethodRefId" = smr.id AND smr."deletedAt" IS NULL ' +
+    '    LEFT JOIN methods AS m on smr."methodId" = m.id ' +
+    '    LEFT JOIN "submissionTaskRefs" AS str on r."submissionTaskRefId" = spr.id AND str."deletedAt" IS NULL ' +
+    '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
+    '    LEFT JOIN platforms AS p on spr."platformId" = p.id ' +
+    '    WHERE str."deletedAt" IS NULL AND s.id = ' + submissionId + ';'
+  }
+
   async getByTaskId (taskId) {
     const result = (await sequelize.query(this.sqlByTask(taskId)))[0]
     return { success: true, body: result }
   }
 
-  async getBySubmissionId (submissionId) {
-    return await this.SequelizeServiceInstance.findOne({ submission: submissionId })
+  async getByTaskIdAndSubmissionId (taskId, submissionId) {
+    const result = (await sequelize.query(this.sqlByTaskSubmission(taskId, submissionId)))[0]
+    return { success: true, body: result }
+  }
+
+  async getByMethodIdAndSubmissionId (methodId, submissionId) {
+    const result = (await sequelize.query(this.sqlByMethodSubmission(methodId, submissionId)))[0]
+    return { success: true, body: result }
+  }
+
+  async getByPlatformIdSubmissionId (platformId, submissionId) {
+    const result = (await sequelize.query(this.sqlByPlatformSubmission(platformId, submissionId)))[0]
+    return { success: true, body: result }
   }
 
   async listMetricNames () {
@@ -78,20 +142,12 @@ class ResultService extends ModelService {
     if (reqBody.method == null) {
       return { success: false, error: 'Result requires method to be defined.' }
     }
-    const method = await methodService.getByPk(reqBody.method)
-    if (!method) {
-      return { success: false, error: 'Result requires method to be present in database.' }
-    }
 
     const result = await this.SequelizeServiceInstance.new()
 
     // Platform must be not null and valid (present in database) for a valid result object.
     if (reqBody.platform) {
-      const platform = await platformService.getByPk(reqBody.platform)
-      if (!platform) {
-        return { success: false, error: 'Result requires platform to be present in database.' }
-      }
-      result.submissionPlatformRefId = (await submissionPlatformRefService.getByFks(submissionId, platform.id)).id
+      result.submissionPlatformRefId = (await submissionPlatformRefService.getByFks(submissionId, parseInt(reqBody.platform))).id
     } else {
       result.submissionPlatformRefId = null
     }
@@ -99,7 +155,7 @@ class ResultService extends ModelService {
     result.userId = userId
     result.submissionId = submissionId
     result.submissionTaskRefId = (await submissionTaskRefService.getByFks(submissionId, parseInt(reqBody.task))).id
-    result.submissionMethodRefId = (await submissionMethodRefService.getByFks(submissionId, method.id)).id
+    result.submissionMethodRefId = (await submissionMethodRefService.getByFks(submissionId, parseInt(reqBody.method))).id
     result.isHigherBetter = reqBody.isHigherBetter
     result.metricName = reqBody.metricName
     result.metricValue = reqBody.metricValue
@@ -140,24 +196,16 @@ class ResultService extends ModelService {
     if (reqBody.method === null) {
       return { success: false, error: 'Result requires method to be defined.' }
     }
-    const method = await methodService.getByPk(reqBody.method)
-    if (!method) {
-      return { success: false, error: 'Result requires method to be present in database.' }
-    }
 
     // If specified, platform must valid (present in database) for a valid result object.
     if (reqBody.platform) {
-      const platform = await platformService.getByPk(reqBody.platform)
-      if (!platform) {
-        return { success: false, error: 'Result requires platform to be present in database.' }
-      }
-      result.submissionPlatformRefId = (await submissionPlatformRefService.getByFks(reqBody.submissionId, platform.id)).id
+      result.submissionPlatformRefId = (await submissionPlatformRefService.getByFks(reqBody.submissionId, parseInt(reqBody.platform))).id
     } else {
       result.submissionPlatformRefId = null
     }
 
     result.submissionTaskRefId = (await submissionTaskRefService.getByFks(reqBody.submissionId, parseInt(reqBody.task))).id
-    result.submissionMethodRefId = (await submissionMethodRefService.getByFks(reqBody.submissionId, method.id)).id
+    result.submissionMethodRefId = (await submissionMethodRefService.getByFks(reqBody.submissionId, parseInt(reqBody.method))).id
     result.isHigherBetter = reqBody.isHigherBetter
     result.metricName = reqBody.metricName
     result.metricValue = reqBody.metricValue
