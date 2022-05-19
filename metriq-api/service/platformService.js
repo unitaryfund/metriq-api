@@ -13,6 +13,8 @@ const SubmissionService = require('./submissionService')
 const submissionService = new SubmissionService()
 const SubmissionPlatformRefService = require('./submissionPlatformRefService')
 const submissionPlatformRefService = new SubmissionPlatformRefService()
+const ResultService = require('./resultService')
+const resultService = new ResultService()
 
 class PlatformService extends ModelService {
   constructor () {
@@ -251,6 +253,10 @@ class PlatformService extends ModelService {
     } else {
       const ref = await submissionPlatformRefService.getByFks(submission.id, platform.id)
       if (ref) {
+        const results = (await resultService.getByPlatformIdSubmissionId(platform.id, submission.id)).body
+        if (results && results.length) {
+          return { success: false, error: 'Cannot delete submission platform reference with result. Change or delete results in the submission that use this platform, first.' }
+        }
         await submissionPlatformRefService.deleteByPk(ref.id)
       }
     }

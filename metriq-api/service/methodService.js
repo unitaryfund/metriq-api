@@ -12,6 +12,8 @@ const SubmissionService = require('./submissionService')
 const submissionService = new SubmissionService()
 const SubmissionMethodRefService = require('./submissionMethodRefService')
 const submissionMethodRefService = new SubmissionMethodRefService()
+const ResultService = require('./resultService')
+const resultService = new ResultService()
 
 class MethodService extends ModelService {
   constructor () {
@@ -213,6 +215,10 @@ class MethodService extends ModelService {
     } else {
       const ref = await submissionMethodRefService.getByFks(submission.id, method.id)
       if (ref) {
+        const results = (await resultService.getByMethodIdAndSubmissionId(method.id, submission.id)).body
+        if (results && results.length) {
+          return { success: false, error: 'Cannot delete submission method reference with result. Change or delete results in the submission that use this method, first.' }
+        }
         await submissionMethodRefService.deleteByPk(ref.id)
       }
     }
