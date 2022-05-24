@@ -17,16 +17,16 @@ function sendResponse (res, code, m) {
     .end(body)
 }
 
-async function routeWrapper (res, serviceFn, successMessage, isUserLogin) {
+async function routeWrapper (res, serviceFn, successMessage, userId) {
   try {
     // Call the service function, to perform the intended action.
     const result = await serviceFn()
     if (result.success) {
       // If successful, pass the service function result as the API response.
       const jsonResponse = { message: successMessage, data: result.body }
-      if (isUserLogin) {
+      if (userId) {
         // If this route should log in a web user, also generate a token and set a cookie for it.
-        const token = await userService.generateWebJwt(result.body.id)
+        const token = await userService.generateWebJwt(userId)
         setJwtCookie(res, token)
         jsonResponse.token = token
       }
@@ -55,7 +55,7 @@ exports.new = async function (req, res) {
   routeWrapper(res,
     async () => await userService.register(req.body),
     'New account created!',
-    true)
+    req.body.id)
 }
 
 // Validate the login request and log the user in.
@@ -63,7 +63,7 @@ exports.login = async function (req, res) {
   routeWrapper(res,
     async () => await userService.login(req.body),
     'Login was successful.',
-    true)
+    req.body.id)
 }
 
 exports.logout = async function (req, res) {
@@ -86,7 +86,7 @@ exports.newToken = async function (req, res) {
   routeWrapper(res,
     async () => await userService.saveClientTokenForUserId(req.user.id),
     'Client token was generated successfully.',
-    false)
+    req.user.id)
 }
 
 // Delete any client token for the user ID claim
@@ -99,7 +99,7 @@ exports.deleteToken = async function (req, res) {
   routeWrapper(res,
     async () => await userService.deleteClientTokenForUserId(req.user.id),
     'Client token was deleted successfully.',
-    false)
+    req.user.id)
 }
 
 // Generate a new recovery UUID and email.
@@ -110,7 +110,7 @@ exports.recover = async function (req, res) {
       return { success: true, body: '' }
     },
     'Request received.',
-    false)
+    0)
 }
 
 // Change password if UUID is valid for user.
@@ -118,7 +118,7 @@ exports.password = async function (req, res) {
   routeWrapper(res,
     async () => await userService.tryPasswordRecoveryChange(req.body),
     'Successfully changed password.',
-    true)
+    0)
 }
 
 // Change password if cookie and old password are valid.
@@ -131,5 +131,5 @@ exports.update_password = async function (req, res) {
   routeWrapper(res,
     async () => await userService.tryPasswordChange(req.user.id, req.body),
     'Successfully changed password.',
-    true)
+    req.user.id)
 }
