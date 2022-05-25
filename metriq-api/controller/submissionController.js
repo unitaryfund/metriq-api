@@ -1,5 +1,8 @@
 // submissionController.js
 
+// Config for JWT expiration
+const config = require('../config')
+
 // Services
 const SubmissionService = require('../service/submissionService')
 const submissionService = new SubmissionService()
@@ -11,6 +14,8 @@ const PlatformService = require('../service/platformService')
 const platformService = new PlatformService()
 const ModerationReportService = require('../service/moderationReportService')
 const moderationReportService = new ModerationReportService()
+const UserService = require('../service/userService')
+const userService = new UserService()
 
 function sendResponse (res, code, m) {
   const body = JSON.stringify({ message: m })
@@ -21,13 +26,21 @@ function sendResponse (res, code, m) {
     .end(body)
 }
 
-async function routeWrapper (res, serviceFn, successMessage) {
+async function routeWrapper (res, serviceFn, successMessage, userId) {
   try {
     // Call the service function, to perform the intended action.
     const result = await serviceFn()
     if (result.success) {
       // If successful, pass the service function result as the API response.
-      res.json({ message: successMessage, data: result.body }).end()
+      const jsonResponse = { message: successMessage, data: result.body }
+      if (userId) {
+        // If this route should log in a web user, also generate a token and set a cookie for it.
+        const token = await userService.generateWebJwt(userId)
+        setJwtCookie(res, token)
+        jsonResponse.token = token
+      }
+      // Success - send the API response.
+      res.json(jsonResponse).end()
     } else {
       // The service function handled an error, but we can't perform the intended action.
       sendResponse(res, 400, result.error)
@@ -38,84 +51,92 @@ async function routeWrapper (res, serviceFn, successMessage) {
   }
 }
 
+function setJwtCookie (res, token) {
+  if (config.isDebug) {
+    res.cookie('token', token, { maxAge: config.api.token.expiresIn * 1000, httpOnly: true, sameSite: 'Strict' })
+  } else {
+    res.cookie('token', token, { maxAge: config.api.token.expiresIn * 1000, httpOnly: true, sameSite: 'Strict', secure: true })
+  }
+}
+
 // Validate the submission request and create the submission model.
 exports.new = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.submit(req.user.id, req.body, true),
-    'New submission created!')
+    'New submission created!', req.user ? req.user.id : 0)
 }
 
 exports.read = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.getSanitized(req.params.id, req.user ? req.user.id : null),
-    'Retrieved submission by Id.')
+    'Retrieved submission by Id.', req.user ? req.user.id : 0)
 }
 
 exports.update = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.update(req.params.id, req.body, req.user.id),
-    'Updated submission!')
+    'Updated submission!', req.user ? req.user.id : 0)
 }
 
 // Validate the delete request and delete the submission.
 exports.delete = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.deleteIfOwner(req.user.id, req.params.id),
-    'Successfully deleted submission.')
+    'Successfully deleted submission.', req.user ? req.user.id : 0)
 }
 
 exports.newMethod = async function (req, res) {
   routeWrapper(res,
     async () => await methodService.addOrRemoveSubmission(true, req.params.methodId, req.params.submissionId, req.user.id),
-    'Successfully added method to submission.')
+    'Successfully added method to submission.', req.user ? req.user.id : 0)
 }
 
 exports.deleteMethod = async function (req, res) {
   routeWrapper(res,
     async () => await methodService.addOrRemoveSubmission(false, req.params.methodId, req.params.submissionId, req.user.id),
-    'Successfully removed method from submission.')
+    'Successfully removed method from submission.', req.user ? req.user.id : 0)
 }
 
 exports.newTag = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.addOrRemoveTag(true, req.params.submissionId, req.params.tagName, req.user.id),
-    'Successfully added tag to submission.')
+    'Successfully added tag to submission.', req.user ? req.user.id : 0)
 }
 
 exports.deleteTag = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.addOrRemoveTag(false, req.params.submissionId, req.params.tagName, req.user.id),
-    'Successfully removed tag from submission.')
+    'Successfully removed tag from submission.', req.user ? req.user.id : 0)
 }
 
 exports.newTask = async function (req, res) {
   routeWrapper(res,
     async () => await taskService.addOrRemoveSubmission(true, req.params.taskId, req.params.submissionId, req.user.id),
-    'Successfully added task to submission.')
+    'Successfully added task to submission.', req.user ? req.user.id : 0)
 }
 
 exports.deleteTask = async function (req, res) {
   routeWrapper(res,
     async () => await taskService.addOrRemoveSubmission(false, req.params.taskId, req.params.submissionId, req.user.id),
-    'Successfully removed task from submission.')
+    'Successfully removed task from submission.', req.user ? req.user.id : 0)
 }
 
 exports.newPlatform = async function (req, res) {
   routeWrapper(res,
     async () => await platformService.addOrRemoveSubmission(true, req.params.platformId, req.params.submissionId, req.user.id),
-    'Successfully added platform to submission.')
+    'Successfully added platform to submission.', req.user ? req.user.id : 0)
 }
 
 exports.deletePlatform = async function (req, res) {
   routeWrapper(res,
     async () => await platformService.addOrRemoveSubmission(false, req.params.platformId, req.params.submissionId, req.user.id),
-    'Successfully removed platform from submission.')
+    'Successfully removed platform from submission.', req.user ? req.user.id : 0)
 }
 
 exports.upvote = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.upvote(req.params.id, req.user.id),
-    'Up-voted submission!')
+    'Up-voted submission!', req.user ? req.user.id : 0)
 }
 
 const itemsPerPage = 5
@@ -123,41 +144,41 @@ const itemsPerPage = 5
 exports.trending = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.getTrending(parseInt(req.params.page) * itemsPerPage, itemsPerPage, req.user ? req.user.id : null),
-    'Retrieved top results.')
+    'Retrieved top results.', req.user ? req.user.id : 0)
 }
 
 exports.latest = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.getLatest(parseInt(req.params.page) * itemsPerPage, itemsPerPage, req.user ? req.user.id : null),
-    'Retrieved top results.')
+    'Retrieved top results.', req.user ? req.user.id : 0)
 }
 
 exports.popular = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.getPopular(parseInt(req.params.page) * itemsPerPage, itemsPerPage, req.user ? req.user.id : null),
-    'Retrieved top results.')
+    'Retrieved top results.', req.user ? req.user.id : 0)
 }
 
 exports.tagTrending = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.getTrendingByTag(req.params.tag, parseInt(req.params.page) * itemsPerPage, itemsPerPage, req.user ? req.user.id : null),
-    'Retrieved top results.')
+    'Retrieved top results.', req.user ? req.user.id : 0)
 }
 
 exports.tagPopular = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.getPopularByTag(req.params.tag, parseInt(req.params.page) * itemsPerPage, itemsPerPage, req.user ? req.user.id : null),
-    'Retrieved top results.')
+    'Retrieved top results.', req.user ? req.user.id : 0)
 }
 
 exports.tagLatest = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.getLatestByTag(req.params.tag, parseInt(req.params.page) * itemsPerPage, itemsPerPage, req.user ? req.user.id : null),
-    'Retrieved top results.')
+    'Retrieved top results.', req.user ? req.user.id : 0)
 }
 
 exports.newReport = async function (req, res) {
   routeWrapper(res,
     async () => await moderationReportService.submit(req.user.id, req.params.id, req.body, true),
-    'Submitted moderation report.')
+    'Submitted moderation report.', req.user ? req.user.id : 0)
 }
