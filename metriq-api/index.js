@@ -5,8 +5,6 @@ const config = require('./config')
 const express = require('express')
 // Import Sequelize
 const { Sequelize } = require('sequelize')
-// Import CORS
-const cors = require('cors')
 // Import express JWT auth
 const jwt = require('express-jwt')
 // Import JWT decoder
@@ -16,8 +14,6 @@ const cookieParser = require('cookie-parser')
 
 // Initialize the app
 const app = express()
-// Use CORS for cross-origin API consumption.
-app.use(cors())
 
 // Import routes.
 const apiRoutes = require('./api-routes')
