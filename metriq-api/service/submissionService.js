@@ -242,7 +242,7 @@ class SubmissionService extends ModelService {
     return toRet
   }
 
-  async submit (userId, reqBody, sendEmail) {
+  async submit (userId, reqBody, sendEmail) {    
     const validationResult = await this.validateSubmission(reqBody)
     if (!validationResult.success) {
       return validationResult
@@ -260,6 +260,24 @@ class SubmissionService extends ModelService {
     submission.contentUrl = reqBody.contentUrl.trim()
     submission.thumbnailUrl = reqBody.thumbnailUrl ? reqBody.thumbnailUrl.trim() : null
     submission.description = reqBody.description ? reqBody.description.trim() : ''
+
+    const validURL = (str) =>  {
+      const pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+        '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+      return !!pattern.test(str);
+    }
+
+    if (!validURL(submission.contentUrl)){
+      return  { success: false, error: 'Invalid content url' } 
+    }
+
+    if (!validURL(submission.thumbnailUrl)){
+      return  { success: false, error: 'Invalid thumbnail url' } 
+    }
 
     const result = await this.create(submission)
     if (!result.success) {
