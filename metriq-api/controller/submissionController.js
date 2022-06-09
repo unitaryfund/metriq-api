@@ -139,6 +139,12 @@ exports.upvote = async function (req, res) {
     'Up-voted submission!', req.user ? req.user.id : 0)
 }
 
+exports.getpagemetadata = async function (req, res) {
+  routeWrapper(res,
+    async () => await submissionService.getpagemetadata(req.user.id, req.body),
+    'get website metadata', req.user ? req.user.id : 0)
+}
+
 const itemsPerPage = 5
 
 exports.trending = async function (req, res) {

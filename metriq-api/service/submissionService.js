@@ -1,7 +1,7 @@
 // submissionService.js
 
 const { Op } = require('sequelize')
-
+const { parser } = require('html-metadata-parser');
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
@@ -392,6 +392,16 @@ class SubmissionService extends ModelService {
     submission = await this.getEagerByPk(submissionId)
     submission = await this.populate(submission, userId)
     return { success: true, body: submission }
+  }
+
+  async getpagemetadata (userId, reqBody) {
+    console.log("getpagemetadata ", userId, reqBody)
+    const user = await userService.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User not found.' }
+    }
+    const result = await parser(reqBody.url);
+    return { success: true, body: result }
   }
 
   async getByUserId (userId, startIndex, count) {
