@@ -94,7 +94,7 @@ class UserService extends ModelService {
     let user = await this.SequelizeServiceInstance.new()
     user.username = reqBody.username.trim()
     user.usernameNormal = reqBody.username.trim().toLowerCase()
-    user.affiliation = reqBody.affiliation
+    user.affiliation = reqBody.affiliation ? reqBody.affiliation :  ''
     user.email = reqBody.email.trim().toLowerCase()
     user.passwordHash = await bcrypt.hash(reqBody.password, saltRounds)
 
