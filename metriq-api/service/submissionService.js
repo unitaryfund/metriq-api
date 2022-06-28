@@ -275,7 +275,7 @@ class SubmissionService extends ModelService {
       return  { success: false, error: 'Invalid content url' } 
     }
 
-    if (!validURL(submission.thumbnailUrl)){
+    if (submission.thumbnailUrl && !validURL(submission.thumbnailUrl)){
       return  { success: false, error: 'Invalid thumbnail url' } 
     }
 
