@@ -35,6 +35,7 @@ class UserService extends ModelService {
       username: user.username,
       usernameNormal: user.usernameNormal,
       affiliation: user.affiliation,
+      name: user.name,
       createdAt: user.createdAt
     }
   }
@@ -95,6 +96,7 @@ class UserService extends ModelService {
     user.username = reqBody.username.trim()
     user.usernameNormal = reqBody.username.trim().toLowerCase()
     user.affiliation = reqBody.affiliation ? reqBody.affiliation :  ''
+    user.name = reqBody.name ? reqBody.name :  ''
     user.email = reqBody.email.trim().toLowerCase()
     user.passwordHash = await bcrypt.hash(reqBody.password, saltRounds)
 
@@ -116,6 +118,7 @@ class UserService extends ModelService {
     }
 
     user.affiliation = reqBody.affiliation
+    user.name = reqBody.name
     await user.save()
 
     return { success: true, body: await this.sanitize(user) }
