@@ -1,7 +1,7 @@
 // submissionService.js
 
 const { Op } = require('sequelize')
-const { parser } = require('html-metadata-parser');
+const { parser } = require('html-metadata-parser')
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
@@ -31,7 +31,7 @@ class SubmissionService extends ModelService {
     return 'SELECT submissions.*, users.username as username, CAST("upvotesCount" AS integer) AS "upvotesCount", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
         '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
-        '    WHERE submissions."deletedAt" IS NULL ' +
+        '    WHERE submissions."deletedAt" IS NULL AND submissions."publishedAt" IS NOT NULL ' +
         '    GROUP BY submissions.id) as sl ' +
         'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
         'LEFT JOIN users on submissions."userId" = users.id ' +
@@ -44,7 +44,7 @@ class SubmissionService extends ModelService {
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
         '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
         '    LEFT JOIN "submissionTagRefs" on "submissionTagRefs"."submissionId" = submissions.id AND "submissionTagRefs"."tagId" = ' + tagId + ' ' +
-        '    WHERE submissions."deletedAt" IS NULL AND "submissionTagRefs".id IS NOT NULL ' +
+        '    WHERE submissions."deletedAt" IS NULL AND submissions."publishedAt" IS NOT NULL AND "submissionTagRefs".id IS NOT NULL ' +
         '    GROUP BY submissions.id) as sl ' +
         'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
         'LEFT JOIN users on submissions."userId" = users.id ' +
@@ -56,7 +56,7 @@ class SubmissionService extends ModelService {
     return 'SELECT submissions.*, users.username as username, CAST("upvotesCount" AS integer) AS "upvotesCount", ("upvotesCount" * 3600) / EXTRACT(EPOCH FROM (NOW() - submissions."createdAt")) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
         '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
-        '    WHERE submissions."deletedAt" IS NULL ' +
+        '    WHERE submissions."deletedAt" IS NULL AND submissions."publishedAt" IS NOT NULL AND submissions."publishedAt" IS NOT NULL ' +
         '    GROUP BY submissions.id) as sl ' +
         'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
         'LEFT JOIN users on submissions."userId" = users.id ' +
@@ -69,7 +69,7 @@ class SubmissionService extends ModelService {
         '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
         '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
         '    LEFT JOIN "submissionTagRefs" on "submissionTagRefs"."submissionId" = submissions.id AND "submissionTagRefs"."tagId" = ' + tagId + ' ' +
-        '    WHERE submissions."deletedAt" IS NULL AND "submissionTagRefs".id IS NOT NULL ' +
+        '    WHERE submissions."deletedAt" IS NULL AND submissions."publishedAt" IS NOT NULL AND "submissionTagRefs".id IS NOT NULL ' +
         '    GROUP BY submissions.id) as sl ' +
         'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
         'LEFT JOIN users on submissions."userId" = users.id ' +
@@ -91,21 +91,21 @@ class SubmissionService extends ModelService {
     '            WHERE "deletedAt" IS NULL ' +
     '    ) as i on i."submissionId" = s.id ' +
     '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
-    '    WHERE s."deletedAt" IS NULL;'
+    '    WHERE s."deletedAt" IS NULL AND s."publishedAt" IS NOT NULL;'
   }
 
   sqlByMethod (methodId) {
     return 'SELECT s.*, CAST(l."upvoteCount" AS integer) AS "upvoteCount" FROM submissions AS s ' +
         '    RIGHT JOIN public."submissionMethodRefs" AS str ON s.id = str."submissionId" ' +
         '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
-        '    WHERE s."deletedAt" IS NULL AND str."deletedAt" IS NULL AND str."methodId" = ' + methodId
+        '    WHERE s."deletedAt" IS NULL AND s."publishedAt" IS NOT NULL AND str."deletedAt" IS NULL AND str."methodId" = ' + methodId
   }
 
   sqlByPlatform (platformId) {
     return 'SELECT s.*, CAST(l."upvoteCount" AS integer) AS "upvoteCount" FROM submissions AS s ' +
         '    RIGHT JOIN public."submissionPlatformRefs" AS str ON s.id = str."submissionId" ' +
         '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
-        '    WHERE s."deletedAt" IS NULL AND str."deletedAt" IS NULL AND str."platformId" = ' + platformId
+        '    WHERE s."deletedAt" IS NULL AND s."publishedAt" IS NOT NULL AND str."deletedAt" IS NULL AND str."platformId" = ' + platformId
   }
 
   async getEagerByPk (submissionId) {
@@ -242,7 +242,7 @@ class SubmissionService extends ModelService {
     return toRet
   }
 
-  async submit (userId, reqBody, sendEmail) {    
+  async submit (userId, reqBody, sendEmail) {
     const validationResult = await this.validateSubmission(reqBody)
     if (!validationResult.success) {
       return validationResult
@@ -262,22 +262,22 @@ class SubmissionService extends ModelService {
     submission.description = reqBody.description ? reqBody.description.trim() : ''
     submission.publishedAt = reqBody.isPublished ? new Date() : null
 
-    const validURL = (str) =>  {
-      const pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-        '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-        '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-        '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-      return !!pattern.test(str);
+    const validURL = (str) => {
+      const pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+        '(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
+      return !!pattern.test(str)
     }
 
-    if (!validURL(submission.contentUrl)){
-      return  { success: false, error: 'Invalid content url' } 
+    if (!validURL(submission.contentUrl)) {
+      return { success: false, error: 'Invalid content url' }
     }
 
-    if (submission.thumbnailUrl && !validURL(submission.thumbnailUrl)){
-      return  { success: false, error: 'Invalid thumbnail url' } 
+    if (submission.thumbnailUrl && !validURL(submission.thumbnailUrl)) {
+      return { success: false, error: 'Invalid thumbnail url' }
     }
 
     const result = await this.create(submission)
@@ -396,12 +396,12 @@ class SubmissionService extends ModelService {
   }
 
   async getpagemetadata (userId, reqBody) {
-    console.log("getpagemetadata ", userId, reqBody)
+    console.log('getpagemetadata ', userId, reqBody)
     const user = await userService.getByPk(userId)
     if (!user) {
       return { success: false, error: 'User not found.' }
     }
-    const result = await parser(reqBody.url);
+    const result = await parser(reqBody.url)
     return { success: true, body: result }
   }
 
