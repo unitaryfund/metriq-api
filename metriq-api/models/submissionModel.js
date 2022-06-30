@@ -24,6 +24,10 @@ module.exports = function (sequelize, DataTypes) {
     },
     approvedAt: {
       type: DataTypes.DATE
+    },
+    publishedAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
     }
   }, { paranoid: true })
   Model.associate = function (db) {
