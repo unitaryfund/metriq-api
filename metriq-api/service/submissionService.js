@@ -260,6 +260,7 @@ class SubmissionService extends ModelService {
     submission.contentUrl = reqBody.contentUrl.trim()
     submission.thumbnailUrl = reqBody.thumbnailUrl ? reqBody.thumbnailUrl.trim() : null
     submission.description = reqBody.description ? reqBody.description.trim() : ''
+    submission.publishedAt = reqBody.isPublished ? new Date() : null
 
     const validURL = (str) =>  {
       const pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
