@@ -155,14 +155,14 @@ exports.update_password = async function (req, res) {
     req.user.id)
 }
 
-exports.editDetails = async function (req, res) {
+exports.update = async function (req, res) {
   if (req.user.role !== 'web') {
     sendResponse(res, 403, 'Authorization role lacks privileges.')
     return
   }
 
   routeWrapper(res,
-    async () => await userService.tryEditDetails(req.user.id, req.body),
+    async () => await userService.update(req.user.id, req.body),
     'Details successfully updated.',
     req.user.id)
 }

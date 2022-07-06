@@ -111,19 +111,6 @@ class UserService extends ModelService {
     return { success: true, body: await this.sanitize(user) }
   }
 
-  async update (reqBody) {
-    const user = await this.getByPk(reqBody.id)
-    if (!user) {
-      return { success: false, error: 'User not found.' }
-    }
-
-    user.affiliation = reqBody.affiliation
-    user.name = reqBody.name
-    await user.save()
-
-    return { success: true, body: await this.sanitize(user) }
-  }
-
   async login (reqBody) {
     const user = await this.getByUsernameOrEmail(reqBody.username)
     if (!user) {
@@ -286,20 +273,20 @@ class UserService extends ModelService {
     return { success: true, body: await this.getSanitized(user.id) }
   }
 
-  async tryEditDetails(userId, reqBody) {
+  async update(userId, reqBody) {
     const user = await this.getByPk(userId)
     if (!user) {
       return { success: false, error: 'User not found.' }
     }
 
-    if (reqBody.newName) {
-      user.name = reqBody.newName
+    if (reqBody.name) {
+      user.name = reqBody.name
     }
-    if (reqBody.newEmail) {
-      user.email = reqBody.newEmail
+    if (reqBody.email) {
+      user.email = reqBody.email
     }
-    if (reqBody.newAffiliation) {
-      user.affiliation = reqBody.newAffiliation
+    if (reqBody.affiliation) {
+      user.affiliation = reqBody.affiliation
     }
 
     await user.save()
