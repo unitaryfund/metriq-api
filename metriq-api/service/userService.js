@@ -286,6 +286,26 @@ class UserService extends ModelService {
     return { success: true, body: await this.getSanitized(user.id) }
   }
 
+  async tryEditDetails(userId, reqBody) {
+    const user = await this.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    if (reqBody.newName) {
+      user.name = reqBody.newName
+    }
+    if (reqBody.newEmail) {
+      user.email = reqBody.newEmail
+    }
+    if (reqBody.newAffiliation) {
+      user.affiliation = reqBody.newAffiliation
+    }
+
+    await user.save()
+    return { success: true, body: await this.getSanitized(user.id) }
+  }
+
   async tryPasswordChange (userId, reqBody) {
     console.log('In method')
 
