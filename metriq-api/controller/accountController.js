@@ -154,15 +154,3 @@ exports.update_password = async function (req, res) {
     'Successfully changed password.',
     req.user.id)
 }
-
-exports.update = async function (req, res) {
-  if (req.user.role !== 'web') {
-    sendResponse(res, 403, 'Authorization role lacks privileges.')
-    return
-  }
-
-  routeWrapper(res,
-    async () => await userService.update(req.user.id, req.body),
-    'Details successfully updated.',
-    req.user.id)
-}

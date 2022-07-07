@@ -60,7 +60,7 @@ exports.read = async function (req, res) {
 
 exports.update = async function (req, res) {
   routeWrapper(res,
-    async () => await userService.update(req.body),
+    async () => await userService.update(req.user.id, req.body),
     'Successfully updated user profile.', req.user ? req.user.id : 0)
 }
 
