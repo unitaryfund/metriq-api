@@ -10,8 +10,8 @@ const Task = db.task
 // Service dependencies
 const ResultService = require('./resultService')
 const resultService = new ResultService()
-const SubmissionService = require('./submissionService')
-const submissionService = new SubmissionService()
+const SubmissionSqlService = require('./submissionSqlService')
+const submissionSqlService = new SubmissionSqlService()
 const SubmissionTaskRefService = require('./submissionTaskRefService')
 const submissionTaskRefService = new SubmissionTaskRefService()
 
@@ -44,7 +44,7 @@ class TaskService extends ModelService {
       task.dataValues.childTasks[i].resultCount = await this.getParentResultCount(task.dataValues.childTasks[i].id)
     }
 
-    task.dataValues.submissions = (await submissionService.getByTaskId(taskId)).body
+    task.dataValues.submissions = (await this.getSubmissionByTaskId(taskId)).body
     task.dataValues.results = (await resultService.getByTaskId(taskId)).body
 
     return { success: true, body: task }
@@ -215,7 +215,7 @@ class TaskService extends ModelService {
     for (let i = 0; i < submissionsSplit.length; i++) {
       const submissionId = submissionsSplit[i].trim()
       if (submissionId) {
-        const submission = await submissionService.getByPk(parseInt(submissionId))
+        const submission = await submissionSqlService.getByPk(parseInt(submissionId))
         if (!submission) {
           return { success: false, error: 'Submission reference in Task collection not found.' }
         }
@@ -266,7 +266,7 @@ class TaskService extends ModelService {
       return { success: false, error: 'Task not found.' }
     }
 
-    let submission = await submissionService.getByPk(submissionId)
+    let submission = await submissionSqlService.getByPk(submissionId)
     if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
@@ -284,8 +284,8 @@ class TaskService extends ModelService {
       }
     }
 
-    submission = await submissionService.getEagerByPk(submissionId)
-    submission = await submissionService.populate(submission, userId)
+    submission = await submissionSqlService.getEagerByPk(submissionId)
+    submission = await submissionSqlService.populate(submission, userId)
 
     return { success: true, body: submission }
   }

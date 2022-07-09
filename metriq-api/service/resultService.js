@@ -8,8 +8,8 @@ const sequelize = db.sequelize
 const Result = db.result
 
 // Service dependencies
-const SubmissionService = require('../service/submissionService')
-const submissionService = new SubmissionService()
+const SubmissionSqlService = require('../service/submissionSqlService')
+const submissionSqlService = new SubmissionSqlService()
 const SubmissionTaskRefService = require('./submissionTaskRefService')
 const submissionTaskRefService = new SubmissionTaskRefService()
 const SubmissionMethodRefService = require('./submissionMethodRefService')
@@ -128,7 +128,7 @@ class ResultService extends ModelService {
   }
 
   async submit (userId, submissionId, reqBody) {
-    let submission = await submissionService.getByPk(submissionId)
+    let submission = await submissionSqlService.getByPk(submissionId)
     if (!submission) {
       return { success: false, error: 'Submission not found' }
     }
@@ -169,8 +169,8 @@ class ResultService extends ModelService {
       return nResult
     }
 
-    submission = await submissionService.getEagerByPk(submissionId)
-    submission = await submissionService.populate(submission, userId)
+    submission = await submissionSqlService.getEagerByPk(submissionId)
+    submission = await submissionSqlService.populate(submission, userId)
 
     return { success: true, body: submission }
   }
@@ -216,8 +216,8 @@ class ResultService extends ModelService {
 
     result.save()
 
-    let submission = await submissionService.getEagerByPk(reqBody.submissionId)
-    submission = await submissionService.populate(submission, userId)
+    let submission = await submissionSqlService.getEagerByPk(reqBody.submissionId)
+    submission = await submissionSqlService.populate(submission, userId)
 
     return { success: true, body: submission }
   }
