@@ -265,17 +265,17 @@ class SubmissionService extends ModelService {
     }
     await submission.save()
 
-    if (reqBody.tasks) {
+    if (reqBody.tasks !== undefined) {
       await submissionTaskRefService.deleteBySubmission(submissionId)
       this.parseRefList(submissionId, userId, reqBody.tasks, taskService, submissionTaskRefService, 'Task in task reference list not found.')
     }
 
-    if (reqBody.methods) {
+    if (reqBody.methods !== undefined) {
       await submissionMethodRefService.deleteBySubmission(submissionId)
       this.parseRefList(submissionId, userId, reqBody.methods, methodService, submissionMethodRefService, 'Method in method reference list not found.')
     }
 
-    if (reqBody.platforms) {
+    if (reqBody.platforms !== undefined) {
       await submissionPlatformRefService.deleteBySubmission(submissionId)
       this.parseRefList(submissionId, userId, reqBody.platforms, platformService, submissionPlatformRefService, 'Platform in platform reference list not found.')
     }
