@@ -241,6 +241,22 @@ class SubmissionService extends ModelService {
       return { success: false, error: 'Submission not found.' }
     }
 
+    if (!submission.publishedAt) {
+      if (reqBody.name !== undefined) {
+        submission.name = reqBody.name.trim()
+        submission.nameNormal = reqBody.name.trim().toLowerCase()
+      }
+      if (reqBody.contentUrl !== undefined) {
+        submission.contentUrl = reqBody.contentUrl.trim()
+      }
+      if (reqBody.thumbnailUrl !== undefined) {
+        submission.thumbnailUrl = reqBody.thumbnailUrl ? reqBody.thumbnailUrl.trim() : null
+      }
+      if (reqBody.description !== undefined) {
+        submission.description = reqBody.description ? reqBody.description.trim() : ''
+      }
+      submission.publishedAt = reqBody.isPublished ? new Date() : null
+    }
     if (reqBody.thumbnailUrl !== undefined) {
       submission.thumbnailUrl = (reqBody.thumbnailUrl && reqBody.thumbnailUrl.trim()) ? reqBody.thumbnailUrl.trim() : null
     }
