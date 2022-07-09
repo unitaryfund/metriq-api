@@ -8,8 +8,8 @@ const sequelize = db.sequelize
 const Method = db.method
 
 // Service dependencies
-const SubmissionService = require('./submissionService')
-const submissionService = new SubmissionService()
+const SubmissionSqlService = require('./submissionSqlService')
+const submissionSqlService = new SubmissionSqlService()
 const SubmissionMethodRefService = require('./submissionMethodRefService')
 const submissionMethodRefService = new SubmissionMethodRefService()
 const ResultService = require('./resultService')
@@ -36,7 +36,7 @@ class MethodService extends ModelService {
       method.dataValues.childMethods[i].resultCount = await this.getParentResultCount(method.dataValues.childMethods[i].id)
     }
 
-    method.dataValues.submissions = (await submissionService.getByMethodId(methodId)).body
+    method.dataValues.submissions = (await submissionSqlService.getByMethodId(methodId)).body
 
     return { success: true, body: method }
   }
@@ -152,7 +152,7 @@ class MethodService extends ModelService {
     for (let i = 0; i < submissionsSplit.length; i++) {
       const submissionId = submissionsSplit[i].trim()
       if (submissionId) {
-        const submission = await submissionService.getByPk(parseInt(submissionId))
+        const submission = await submissionSqlService.getByPk(parseInt(submissionId))
         if (!submission) {
           return { success: false, error: 'Submission reference in Method collection not found.' }
         }
@@ -205,7 +205,7 @@ class MethodService extends ModelService {
       return { success: false, error: 'Method not found.' }
     }
 
-    let submission = await submissionService.getByPk(submissionId)
+    let submission = await submissionSqlService.getByPk(submissionId)
     if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
@@ -223,8 +223,8 @@ class MethodService extends ModelService {
       }
     }
 
-    submission = await submissionService.getEagerByPk(submissionId)
-    submission = await submissionService.populate(submission, userId)
+    submission = await submissionSqlService.getEagerByPk(submissionId)
+    submission = await submissionSqlService.populate(submission, userId)
 
     return { success: true, body: submission }
   }
