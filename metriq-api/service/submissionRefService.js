@@ -11,11 +11,12 @@ class SubmissionRefService extends ModelService {
   constructor (foreignKey, Ref) {
     super(Ref)
     this.foreignKey = foreignKey
+    this.ModelClass = Ref
     this.SubmissionSequelizeServiceInstance = new SequelizeService(Submission)
   }
 
   async deleteBySubmission (submissionId) {
-    await this.SequelizeServiceInstance.destroy({ where: { submissionId: submissionId } })
+    await this.ModelClass.destroy({ where: { submissionId: submissionId } })
   }
 
   async getByFks (submissionId, fkId) {
