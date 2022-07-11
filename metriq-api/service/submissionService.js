@@ -145,7 +145,7 @@ class SubmissionService extends ModelService {
       return { success: false, error: 'User not found.' }
     }
 
-    const submission = await this.SequelizeServiceInstance.new()
+    let submission = await this.SequelizeServiceInstance.new()
     submission.userId = userId
     submission.name = reqBody.name.trim()
     submission.nameNormal = reqBody.name.trim().toLowerCase()
@@ -190,24 +190,27 @@ class SubmissionService extends ModelService {
     }
 
     if (reqBody.tasks) {
-      this.parseRefList(submission.id, userId, reqBody.tasks, taskService, submissionTaskRefService, 'Task in task reference list not found.')
+      await this.parseRefList(submission.id, userId, reqBody.tasks, taskService, submissionTaskRefService, 'Task in task reference list not found.')
     }
 
     if (reqBody.methods) {
-      this.parseRefList(submission.id, userId, reqBody.methods, methodService, submissionMethodRefService, 'Method in method reference list not found.')
+      await this.parseRefList(submission.id, userId, reqBody.methods, methodService, submissionMethodRefService, 'Method in method reference list not found.')
     }
 
     if (reqBody.platforms) {
-      this.parseRefList(submission.id, userId, reqBody.platforms, platformService, submissionPlatformRefService, 'Platform in platform reference list not found.')
+      await this.parseRefList(submission.id, userId, reqBody.platforms, platformService, submissionPlatformRefService, 'Platform in platform reference list not found.')
     }
 
+    submission = await this.getEagerByPk(submission.id)
+    submission = await submissionSqlService.populate(submission, userId)
+
     if (!sendEmail) {
-      return result
+      return { success: true, body: submission }
     }
 
     if (!config.supportEmail.service) {
       console.log('Skipping email - account info not set.')
-      return result
+      return { success: true, body: submission }
     }
 
     const transporter = nodemailer.createTransport({
@@ -232,7 +235,7 @@ class SubmissionService extends ModelService {
       return { success: false, message: 'Could not send email.' }
     }
 
-    return result
+    return { success: true, body: submission }
   }
 
   async update (submissionId, reqBody, userId) {
@@ -267,17 +270,17 @@ class SubmissionService extends ModelService {
 
     if (reqBody.tasks !== undefined) {
       await submissionTaskRefService.deleteBySubmission(submissionId)
-      this.parseRefList(submissionId, userId, reqBody.tasks, taskService, submissionTaskRefService, 'Task in task reference list not found.')
+      await this.parseRefList(submissionId, userId, reqBody.tasks, taskService, submissionTaskRefService, 'Task in task reference list not found.')
     }
 
     if (reqBody.methods !== undefined) {
       await submissionMethodRefService.deleteBySubmission(submissionId)
-      this.parseRefList(submissionId, userId, reqBody.methods, methodService, submissionMethodRefService, 'Method in method reference list not found.')
+      await this.parseRefList(submissionId, userId, reqBody.methods, methodService, submissionMethodRefService, 'Method in method reference list not found.')
     }
 
     if (reqBody.platforms !== undefined) {
       await submissionPlatformRefService.deleteBySubmission(submissionId)
-      this.parseRefList(submissionId, userId, reqBody.platforms, platformService, submissionPlatformRefService, 'Platform in platform reference list not found.')
+      await this.parseRefList(submissionId, userId, reqBody.platforms, platformService, submissionPlatformRefService, 'Platform in platform reference list not found.')
     }
 
     submission = await this.getEagerByPk(submissionId)
