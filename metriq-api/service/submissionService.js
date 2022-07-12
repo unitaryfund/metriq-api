@@ -119,8 +119,9 @@ class SubmissionService extends ModelService {
     return { success: true, body: submission }
   }
 
-  async parseRefList (submissionId, userId, csv, service, refService, message) {
+  async parseRefList (submissionId, userId, csv, service, refService, message, oRefs) {
     const refSplit = csv.split(',')
+    const nRefs = []
     for (let i = 0; i < refSplit.length; i++) {
       const refId = refSplit[i].trim()
       if (refId) {
@@ -129,7 +130,28 @@ class SubmissionService extends ModelService {
           return { success: false, error: message }
         }
         // Reference goes in reference collection
-        await refService.createOrFetch(submissionId, userId, ref.id)
+        nRefs.push((await refService.createOrFetch(submissionId, userId, ref.id)).body)
+      }
+    }
+
+    console.log(nRefs)
+
+    if (!oRefs || !oRefs.length) {
+      return
+    }
+
+    console.log(oRefs)
+
+    for (let i = 0; i < oRefs.length; i++) {
+      const ref = oRefs[i]
+      let j = 0
+      for (j = 0; j < nRefs.length; j++) {
+        if (nRefs[j].id === ref.id) {
+          break
+        }
+      }
+      if (j === nRefs.length) {
+        await ref.destroy()
       }
     }
   }
@@ -268,19 +290,31 @@ class SubmissionService extends ModelService {
     }
     await submission.save()
 
+    if (reqBody.tags !== undefined) {
+      await submissionTagRefService.deleteBySubmission(submissionId)
+      const tagSplit = reqBody.tags.split(',')
+      for (let i = 0; i < tagSplit.length; i++) {
+        const tag = tagSplit[i].trim().toLowerCase()
+        if (tag) {
+          const tagModel = (await tagService.createOrFetch(tag, userId)).body
+          await submissionTagRefService.createOrFetch(submission.id, userId, tagModel.id)
+        }
+      }
+    }
+
     if (reqBody.tasks !== undefined) {
-      await submissionTaskRefService.deleteBySubmission(submissionId)
-      await this.parseRefList(submissionId, userId, reqBody.tasks, taskService, submissionTaskRefService, 'Task in task reference list not found.')
+      const refs = await submissionTaskRefService.getBySubmission(submissionId)
+      await this.parseRefList(submissionId, userId, reqBody.tasks, taskService, submissionTaskRefService, 'Task in task reference list not found.', refs)
     }
 
     if (reqBody.methods !== undefined) {
-      await submissionMethodRefService.deleteBySubmission(submissionId)
-      await this.parseRefList(submissionId, userId, reqBody.methods, methodService, submissionMethodRefService, 'Method in method reference list not found.')
+      const refs = await submissionMethodRefService.getBySubmission(submissionId)
+      await this.parseRefList(submissionId, userId, reqBody.methods, methodService, submissionMethodRefService, 'Method in method reference list not found.', refs)
     }
 
     if (reqBody.platforms !== undefined) {
-      await submissionPlatformRefService.deleteBySubmission(submissionId)
-      await this.parseRefList(submissionId, userId, reqBody.platforms, platformService, submissionPlatformRefService, 'Platform in platform reference list not found.')
+      const refs = await submissionPlatformRefService.deleteBySubmission(submissionId)
+      await this.parseRefList(submissionId, userId, reqBody.platforms, platformService, submissionPlatformRefService, 'Platform in platform reference list not found.', refs)
     }
 
     submission = await this.getEagerByPk(submissionId)
