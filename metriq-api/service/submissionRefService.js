@@ -19,6 +19,10 @@ class SubmissionRefService extends ModelService {
     await this.ModelClass.destroy({ where: { submissionId: submissionId } })
   }
 
+  async getBySubmission (submissionId) {
+    return await this.SequelizeServiceInstance.findAll({ submissionId: submissionId })
+  }
+
   async getByFks (submissionId, fkId) {
     return await this.SequelizeServiceInstance.findOne({ submissionId: submissionId, [this.foreignKey]: fkId })
   }
