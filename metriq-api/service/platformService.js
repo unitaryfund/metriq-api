@@ -179,7 +179,7 @@ class PlatformService extends ModelService {
       }
     }
 
-    return { success: true, body: await this.getSanitized(platform.id) }
+    return await this.getSanitized(platform.id)
   }
 
   async getSanitized (platformId) {
@@ -203,8 +203,6 @@ class PlatformService extends ModelService {
     } else {
       platform.dataValues.properties = []
     }
-
-    console.log('Hit!')
 
     platform.dataValues.submissions = (await submissionSqlService.getByPlatformId(platformId)).body
 
