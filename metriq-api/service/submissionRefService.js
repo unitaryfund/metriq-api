@@ -2,11 +2,25 @@
 
 // Data Access Layer
 const ModelService = require('./modelService')
+const SequelizeService = require('./sequelizeService')
+
+const db = require('../models/index')
+const Submission = db.submission
 
 class SubmissionRefService extends ModelService {
   constructor (foreignKey, Ref) {
     super(Ref)
     this.foreignKey = foreignKey
+    this.ModelClass = Ref
+    this.SubmissionSequelizeServiceInstance = new SequelizeService(Submission)
+  }
+
+  async deleteBySubmission (submissionId) {
+    await this.ModelClass.destroy({ where: { submissionId: submissionId } })
+  }
+
+  async getBySubmission (submissionId) {
+    return await this.SequelizeServiceInstance.findAll({ submissionId: submissionId })
   }
 
   async getByFks (submissionId, fkId) {

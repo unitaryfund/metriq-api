@@ -1,7 +1,7 @@
 // submissionService.js
 
 const { Op } = require('sequelize')
-const { parser } = require('html-metadata-parser');
+const { parser } = require('html-metadata-parser')
 // Data Access Layer
 const ModelService = require('./modelService')
 // Database Model
@@ -13,10 +13,24 @@ const Submission = db.submission
 const nodemailer = require('nodemailer')
 
 // Service dependencies
+const SubmissionSqlService = require('./submissionSqlService')
+const submissionSqlService = new SubmissionSqlService()
 const UserService = require('./userService')
 const userService = new UserService()
 const TagService = require('./tagService')
 const tagService = new TagService()
+const TaskService = require('./taskService')
+const taskService = new TaskService()
+const SubmissionTaskRefService = require('./submissionTaskRefService')
+const submissionTaskRefService = new SubmissionTaskRefService()
+const MethodService = require('./methodService')
+const methodService = new MethodService()
+const SubmissionMethodRefService = require('./submissionMethodRefService')
+const submissionMethodRefService = new SubmissionMethodRefService()
+const PlatformService = require('./platformService')
+const platformService = new PlatformService()
+const SubmissionPlatformRefService = require('./submissionPlatformRefService')
+const submissionPlatformRefService = new SubmissionPlatformRefService()
 const LikeService = require('./likeService')
 const likeService = new LikeService()
 const SubmissionTagRefService = require('./submissionTagRefService')
@@ -25,87 +39,6 @@ const submissionTagRefService = new SubmissionTagRefService()
 class SubmissionService extends ModelService {
   constructor () {
     super(Submission)
-  }
-
-  sqlLike (userId, sortColumn, isDesc, limit, offset) {
-    return 'SELECT submissions.*, users.username as username, CAST("upvotesCount" AS integer) AS "upvotesCount", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
-        '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
-        '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
-        '    WHERE submissions."deletedAt" IS NULL ' +
-        '    GROUP BY submissions.id) as sl ' +
-        'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
-        'LEFT JOIN users on submissions."userId" = users.id ' +
-        'ORDER BY ' + sortColumn + (isDesc ? ' DESC ' : ' ASC ') +
-        'LIMIT ' + limit + ' OFFSET ' + offset
-  }
-
-  sqlTagLike (tagId, userId, sortColumn, isDesc, limit, offset) {
-    return 'SELECT submissions.*, users.username as username, CAST("upvotesCount" AS integer) AS "upvotesCount", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
-        '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
-        '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
-        '    LEFT JOIN "submissionTagRefs" on "submissionTagRefs"."submissionId" = submissions.id AND "submissionTagRefs"."tagId" = ' + tagId + ' ' +
-        '    WHERE submissions."deletedAt" IS NULL AND "submissionTagRefs".id IS NOT NULL ' +
-        '    GROUP BY submissions.id) as sl ' +
-        'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
-        'LEFT JOIN users on submissions."userId" = users.id ' +
-        'ORDER BY ' + sortColumn + (isDesc ? ' DESC ' : ' ASC ') +
-        'LIMIT ' + limit + ' OFFSET ' + offset
-  }
-
-  sqlTrending (userId, sortColumn, isDesc, limit, offset) {
-    return 'SELECT submissions.*, users.username as username, CAST("upvotesCount" AS integer) AS "upvotesCount", ("upvotesCount" * 3600) / EXTRACT(EPOCH FROM (NOW() - submissions."createdAt")) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
-        '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
-        '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
-        '    WHERE submissions."deletedAt" IS NULL ' +
-        '    GROUP BY submissions.id) as sl ' +
-        'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
-        'LEFT JOIN users on submissions."userId" = users.id ' +
-        'ORDER BY ' + sortColumn + (isDesc ? ' DESC ' : ' ASC ') +
-        'LIMIT ' + limit + ' OFFSET ' + offset
-  }
-
-  sqlTagTrending (tagId, userId, sortColumn, isDesc, limit, offset) {
-    return 'SELECT submissions.*, users.username as username, CAST("upvotesCount" AS integer) AS "upvotesCount", ("upvotesCount" * 3600) / EXTRACT(EPOCH FROM (NOW() - submissions."createdAt")) as "upvotesPerHour", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
-        '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
-        '    RIGHT JOIN submissions on likes."submissionId" = submissions.id ' +
-        '    LEFT JOIN "submissionTagRefs" on "submissionTagRefs"."submissionId" = submissions.id AND "submissionTagRefs"."tagId" = ' + tagId + ' ' +
-        '    WHERE submissions."deletedAt" IS NULL AND "submissionTagRefs".id IS NOT NULL ' +
-        '    GROUP BY submissions.id) as sl ' +
-        'LEFT JOIN submissions on submissions.id = sl."submissionId" ' +
-        'LEFT JOIN users on submissions."userId" = users.id ' +
-        'ORDER BY ' + sortColumn + (isDesc ? ' DESC ' : ' ASC ') +
-        'LIMIT ' + limit + ' OFFSET ' + offset
-  }
-
-  sqlByTask (taskId) {
-    return 'WITH RECURSIVE c AS ( ' +
-    '    SELECT ' + taskId + ' as id ' +
-    '    UNION ALL ' +
-    '    SELECT t.id FROM tasks AS t ' +
-    '    JOIN c on c.id = t."taskId" ' +
-    ') ' +
-    'SELECT s.*, CAST(l."upvoteCount" AS integer) AS "upvoteCount" from submissions AS s ' +
-    '    RIGHT JOIN ( ' +
-    '        SELECT DISTINCT "submissionId" FROM public."submissionTaskRefs" ' +
-    '            RIGHT JOIN c on c.id = "taskId" ' +
-    '            WHERE "deletedAt" IS NULL ' +
-    '    ) as i on i."submissionId" = s.id ' +
-    '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
-    '    WHERE s."deletedAt" IS NULL;'
-  }
-
-  sqlByMethod (methodId) {
-    return 'SELECT s.*, CAST(l."upvoteCount" AS integer) AS "upvoteCount" FROM submissions AS s ' +
-        '    RIGHT JOIN public."submissionMethodRefs" AS str ON s.id = str."submissionId" ' +
-        '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
-        '    WHERE s."deletedAt" IS NULL AND str."deletedAt" IS NULL AND str."methodId" = ' + methodId
-  }
-
-  sqlByPlatform (platformId) {
-    return 'SELECT s.*, CAST(l."upvoteCount" AS integer) AS "upvoteCount" FROM submissions AS s ' +
-        '    RIGHT JOIN public."submissionPlatformRefs" AS str ON s.id = str."submissionId" ' +
-        '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
-        '    WHERE s."deletedAt" IS NULL AND str."deletedAt" IS NULL AND str."platformId" = ' + platformId
   }
 
   async getEagerByPk (submissionId) {
@@ -126,17 +59,17 @@ class SubmissionService extends ModelService {
   }
 
   async getByTaskId (taskId) {
-    const result = (await sequelize.query(this.sqlByTask(taskId)))[0]
+    const result = (await sequelize.query(submissionSqlService.sqlByTask(taskId)))[0]
     return { success: true, body: result }
   }
 
   async getByMethodId (methodId) {
-    const result = (await sequelize.query(this.sqlByMethod(methodId)))[0]
+    const result = (await sequelize.query(submissionSqlService.sqlByMethod(methodId)))[0]
     return { success: true, body: result }
   }
 
   async getByPlatformId (platformId) {
-    const result = (await sequelize.query(this.sqlByPlatform(platformId)))[0]
+    const result = (await sequelize.query(submissionSqlService.sqlByPlatform(platformId)))[0]
     return { success: true, body: result }
   }
 
@@ -155,7 +88,7 @@ class SubmissionService extends ModelService {
     if (!submission) {
       return { success: false, error: 'Submission name or ID not found.' }
     }
-    submission = await this.populate(submission, userId)
+    submission = await submissionSqlService.populate(submission, userId)
 
     return { success: true, body: submission }
   }
@@ -186,63 +119,44 @@ class SubmissionService extends ModelService {
     return { success: true, body: submission }
   }
 
-  async populateTags (submission) {
-    submission.tags = []
-    for (let i = 0; i < submission.submissionTagRefs.length; i++) {
-      submission.tags.push(await submission.submissionTagRefs[i].getTag())
-    }
-    delete submission.submissionTagRefs
-  }
-
-  async populate (submission, userId) {
-    const toRet = { ...submission }
-    toRet.isUpvoted = ((userId > 0) && toRet.likes.length) ? (toRet.likes.find(like => like.dataValues.userId === userId) !== undefined) : false
-    toRet.upvotesCount = toRet.likes.length
-    delete toRet.likes
-    toRet.user = await userService.getByPk(toRet.userId)
-
-    await this.populateTags(toRet)
-
-    toRet.methods = []
-    toRet.results = []
-    for (let i = 0; i < toRet.submissionMethodRefs.length; i++) {
-      toRet.methods.push(await toRet.submissionMethodRefs[i].getMethod())
-      const results = await toRet.submissionMethodRefs[i].getResults()
-      for (let j = 0; j < results.length; j++) {
-        results[j] = results[j].dataValues
-        results[j].method = toRet.methods[i]
-        results[j].platform = null
+  async parseRefList (submissionId, userId, csv, service, refService, message, oRefs) {
+    const refSplit = csv.split(',')
+    const nRefs = []
+    for (let i = 0; i < refSplit.length; i++) {
+      const refId = refSplit[i].trim()
+      if (refId) {
+        const ref = await service.getByPk(parseInt(refId))
+        if (!ref) {
+          return { success: false, error: message }
+        }
+        // Reference goes in reference collection
+        nRefs.push((await refService.createOrFetch(submissionId, userId, ref.id)).body)
       }
-      toRet.results.push(...results)
     }
-    delete toRet.submissionMethodRefs
 
-    toRet.tasks = []
-    for (let i = 0; i < toRet.submissionTaskRefs.length; i++) {
-      toRet.tasks.push(await toRet.submissionTaskRefs[i].getTask())
-      for (let j = 0; j < toRet.results.length; j++) {
-        if (toRet.submissionTaskRefs[i].id === toRet.results[j].submissionTaskRefId) {
-          toRet.results[j].task = toRet.tasks[i]
+    console.log(nRefs)
+
+    if (!oRefs || !oRefs.length) {
+      return
+    }
+
+    console.log(oRefs)
+
+    for (let i = 0; i < oRefs.length; i++) {
+      const ref = oRefs[i]
+      let j = 0
+      for (j = 0; j < nRefs.length; j++) {
+        if (nRefs[j].id === ref.id) {
+          break
         }
       }
-    }
-    delete toRet.submissionTaskRefs
-
-    toRet.platforms = []
-    for (let i = 0; i < toRet.submissionPlatformRefs.length; i++) {
-      toRet.platforms.push(await toRet.submissionPlatformRefs[i].getPlatform())
-      for (let j = 0; j < toRet.results.length; j++) {
-        if (toRet.submissionPlatformRefs[i].id === toRet.results[j].submissionPlatformRefId) {
-          toRet.results[j].platform = toRet.platforms[i]
-        }
+      if (j === nRefs.length) {
+        await ref.destroy()
       }
     }
-    delete toRet.submissionPlatformRefs
-
-    return toRet
   }
 
-  async submit (userId, reqBody, sendEmail) {    
+  async submit (userId, reqBody, sendEmail) {
     const validationResult = await this.validateSubmission(reqBody)
     if (!validationResult.success) {
       return validationResult
@@ -253,30 +167,31 @@ class SubmissionService extends ModelService {
       return { success: false, error: 'User not found.' }
     }
 
-    const submission = await this.SequelizeServiceInstance.new()
+    let submission = await this.SequelizeServiceInstance.new()
     submission.userId = userId
     submission.name = reqBody.name.trim()
     submission.nameNormal = reqBody.name.trim().toLowerCase()
     submission.contentUrl = reqBody.contentUrl.trim()
     submission.thumbnailUrl = reqBody.thumbnailUrl ? reqBody.thumbnailUrl.trim() : null
     submission.description = reqBody.description ? reqBody.description.trim() : ''
+    submission.publishedAt = reqBody.isPublished ? new Date() : null
 
-    const validURL = (str) =>  {
-      const pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-        '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-        '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-        '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-      return !!pattern.test(str);
+    const validURL = (str) => {
+      const pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+        '(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
+      return !!pattern.test(str)
     }
 
-    if (!validURL(submission.contentUrl)){
-      return  { success: false, error: 'Invalid content url' } 
+    if (!validURL(submission.contentUrl)) {
+      return { success: false, error: 'Invalid content url' }
     }
 
-    if (submission.thumbnailUrl && !validURL(submission.thumbnailUrl)){
-      return  { success: false, error: 'Invalid thumbnail url' } 
+    if (submission.thumbnailUrl && !validURL(submission.thumbnailUrl)) {
+      return { success: false, error: 'Invalid thumbnail url' }
     }
 
     const result = await this.create(submission)
@@ -296,13 +211,28 @@ class SubmissionService extends ModelService {
       }
     }
 
+    if (reqBody.tasks) {
+      await this.parseRefList(submission.id, userId, reqBody.tasks, taskService, submissionTaskRefService, 'Task in task reference list not found.')
+    }
+
+    if (reqBody.methods) {
+      await this.parseRefList(submission.id, userId, reqBody.methods, methodService, submissionMethodRefService, 'Method in method reference list not found.')
+    }
+
+    if (reqBody.platforms) {
+      await this.parseRefList(submission.id, userId, reqBody.platforms, platformService, submissionPlatformRefService, 'Platform in platform reference list not found.')
+    }
+
+    submission = await this.getEagerByPk(submission.id)
+    submission = await submissionSqlService.populate(submission, userId)
+
     if (!sendEmail) {
-      return result
+      return { success: true, body: submission }
     }
 
     if (!config.supportEmail.service) {
       console.log('Skipping email - account info not set.')
-      return result
+      return { success: true, body: submission }
     }
 
     const transporter = nodemailer.createTransport({
@@ -327,7 +257,7 @@ class SubmissionService extends ModelService {
       return { success: false, message: 'Could not send email.' }
     }
 
-    return result
+    return { success: true, body: submission }
   }
 
   async update (submissionId, reqBody, userId) {
@@ -336,6 +266,22 @@ class SubmissionService extends ModelService {
       return { success: false, error: 'Submission not found.' }
     }
 
+    if (!submission.publishedAt) {
+      if (reqBody.name !== undefined) {
+        submission.name = reqBody.name.trim()
+        submission.nameNormal = reqBody.name.trim().toLowerCase()
+      }
+      if (reqBody.contentUrl !== undefined) {
+        submission.contentUrl = reqBody.contentUrl.trim()
+      }
+      if (reqBody.thumbnailUrl !== undefined) {
+        submission.thumbnailUrl = reqBody.thumbnailUrl ? reqBody.thumbnailUrl.trim() : null
+      }
+      if (reqBody.description !== undefined) {
+        submission.description = reqBody.description ? reqBody.description.trim() : ''
+      }
+      submission.publishedAt = reqBody.isPublished ? new Date() : null
+    }
     if (reqBody.thumbnailUrl !== undefined) {
       submission.thumbnailUrl = (reqBody.thumbnailUrl && reqBody.thumbnailUrl.trim()) ? reqBody.thumbnailUrl.trim() : null
     }
@@ -344,8 +290,35 @@ class SubmissionService extends ModelService {
     }
     await submission.save()
 
+    if (reqBody.tags !== undefined) {
+      await submissionTagRefService.deleteBySubmission(submissionId)
+      const tagSplit = reqBody.tags.split(',')
+      for (let i = 0; i < tagSplit.length; i++) {
+        const tag = tagSplit[i].trim().toLowerCase()
+        if (tag) {
+          const tagModel = (await tagService.createOrFetch(tag, userId)).body
+          await submissionTagRefService.createOrFetch(submission.id, userId, tagModel.id)
+        }
+      }
+    }
+
+    if (reqBody.tasks !== undefined) {
+      const refs = await submissionTaskRefService.getBySubmission(submissionId)
+      await this.parseRefList(submissionId, userId, reqBody.tasks, taskService, submissionTaskRefService, 'Task in task reference list not found.', refs)
+    }
+
+    if (reqBody.methods !== undefined) {
+      const refs = await submissionMethodRefService.getBySubmission(submissionId)
+      await this.parseRefList(submissionId, userId, reqBody.methods, methodService, submissionMethodRefService, 'Method in method reference list not found.', refs)
+    }
+
+    if (reqBody.platforms !== undefined) {
+      const refs = await submissionPlatformRefService.deleteBySubmission(submissionId)
+      await this.parseRefList(submissionId, userId, reqBody.platforms, platformService, submissionPlatformRefService, 'Platform in platform reference list not found.', refs)
+    }
+
     submission = await this.getEagerByPk(submissionId)
-    submission = await this.populate(submission, userId)
+    submission = await submissionSqlService.populate(submission, userId)
     return { success: true, body: submission }
   }
 
@@ -390,17 +363,17 @@ class SubmissionService extends ModelService {
     }
 
     submission = await this.getEagerByPk(submissionId)
-    submission = await this.populate(submission, userId)
+    submission = await submissionSqlService.populate(submission, userId)
     return { success: true, body: submission }
   }
 
   async getpagemetadata (userId, reqBody) {
-    console.log("getpagemetadata ", userId, reqBody)
+    console.log('getpagemetadata ', userId, reqBody)
     const user = await userService.getByPk(userId)
     if (!user) {
       return { success: false, error: 'User not found.' }
     }
-    const result = await parser(reqBody.url);
+    const result = await parser(reqBody.url)
     return { success: true, body: result }
   }
 
@@ -424,35 +397,35 @@ class SubmissionService extends ModelService {
     const result = await this.SequelizeServiceInstance.findAndSort({ userId: submittingUserId, deletedAt: null, approvedAt: { [Op.ne]: null } }, [['createdAt', 'DESC']], startIndex, count)
     for (let i = 0; i < result.length; i++) {
       result[i] = await this.getEagerByPk(result[i].id)
-      result[i] = await this.populate(result[i], userId)
+      result[i] = await submissionSqlService.populate(result[i], userId)
       result[i].username = user.username
     }
     return { success: true, body: result }
   }
 
   async getTrending (startIndex, count, userId) {
-    const result = (await sequelize.query(this.sqlTrending(userId, '"upvotesPerHour"', true, count, startIndex)))[0]
+    const result = (await sequelize.query(submissionSqlService.sqlTrending(userId, '"upvotesPerHour"', true, count, startIndex)))[0]
     for (let i = 0; i < result.length; i++) {
       result[i].submissionTagRefs = (await submissionTagRefService.getBySubmissionId(result[i].id))
-      await this.populateTags(result[i])
+      await submissionSqlService.populateTags(result[i])
     }
     return { success: true, body: result }
   }
 
   async getLatest (startIndex, count, userId) {
-    const result = (await sequelize.query(this.sqlLike(userId, 'submissions."createdAt"', true, count, startIndex)))[0]
+    const result = (await sequelize.query(submissionSqlService.sqlLike(userId, 'submissions."createdAt"', true, count, startIndex)))[0]
     for (let i = 0; i < result.length; i++) {
       result[i].submissionTagRefs = (await submissionTagRefService.getBySubmissionId(result[i].id))
-      await this.populateTags(result[i])
+      await submissionSqlService.populateTags(result[i])
     }
     return { success: true, body: result }
   }
 
   async getPopular (startIndex, count, userId) {
-    const result = (await sequelize.query(this.sqlLike(userId, '"upvotesCount"', true, count, startIndex)))[0]
+    const result = (await sequelize.query(submissionSqlService.sqlLike(userId, '"upvotesCount"', true, count, startIndex)))[0]
     for (let i = 0; i < result.length; i++) {
       result[i].submissionTagRefs = (await submissionTagRefService.getBySubmissionId(result[i].id))
-      await this.populateTags(result[i])
+      await submissionSqlService.populateTags(result[i])
     }
     return { success: true, body: result }
   }
@@ -464,10 +437,10 @@ class SubmissionService extends ModelService {
     }
     const tagId = tag.id
 
-    const result = (await sequelize.query(this.sqlTagTrending(tagId, userId, '"upvotesPerHour"', true, count, startIndex)))[0]
+    const result = (await sequelize.query(submissionSqlService.sqlTagTrending(tagId, userId, '"upvotesPerHour"', true, count, startIndex)))[0]
     for (let i = 0; i < result.length; i++) {
       result[i].submissionTagRefs = (await submissionTagRefService.getBySubmissionId(result[i].id))
-      await this.populateTags(result[i])
+      await submissionSqlService.populateTags(result[i])
     }
     return { success: true, body: result }
   }
@@ -479,10 +452,10 @@ class SubmissionService extends ModelService {
     }
     const tagId = tag.id
 
-    const result = (await sequelize.query(this.sqlTagLike(tagId, userId, 'submissions."createdAt"', true, count, startIndex)))[0]
+    const result = (await sequelize.query(submissionSqlService.sqlTagLike(tagId, userId, 'submissions."createdAt"', true, count, startIndex)))[0]
     for (let i = 0; i < result.length; i++) {
       result[i].submissionTagRefs = (await submissionTagRefService.getBySubmissionId(result[i].id))
-      await this.populateTags(result[i])
+      await submissionSqlService.populateTags(result[i])
     }
     return { success: true, body: result }
   }
@@ -494,10 +467,10 @@ class SubmissionService extends ModelService {
     }
     const tagId = tag.id
 
-    const result = (await sequelize.query(this.sqlTagLike(tagId, userId, '"upvotesCount"', true, count, startIndex)))[0]
+    const result = (await sequelize.query(submissionSqlService.sqlTagLike(tagId, userId, '"upvotesCount"', true, count, startIndex)))[0]
     for (let i = 0; i < result.length; i++) {
       result[i].submissionTagRefs = (await submissionTagRefService.getBySubmissionId(result[i].id))
-      await this.populateTags(result[i])
+      await submissionSqlService.populateTags(result[i])
     }
     return { success: true, body: result }
   }
@@ -523,7 +496,7 @@ class SubmissionService extends ModelService {
     }
 
     submission = await this.getEagerByPk(submissionId)
-    submission = await this.populate(submission, userId)
+    submission = await submissionSqlService.populate(submission, userId)
 
     return { success: true, body: submission }
   }

@@ -9,8 +9,8 @@ const Platform = db.platform
 const sequelize = db.sequelize
 
 // Service dependencies
-const SubmissionService = require('./submissionService')
-const submissionService = new SubmissionService()
+const SubmissionSqlService = require('./submissionSqlService')
+const submissionSqlService = new SubmissionSqlService()
 const SubmissionPlatformRefService = require('./submissionPlatformRefService')
 const submissionPlatformRefService = new SubmissionPlatformRefService()
 const ResultService = require('./resultService')
@@ -170,7 +170,7 @@ class PlatformService extends ModelService {
     for (let i = 0; i < submissionsSplit.length; i++) {
       const submissionId = submissionsSplit[i].trim()
       if (submissionId) {
-        const submission = await submissionService.getByPk(parseInt(submissionId))
+        const submission = await submissionSqlService.getByPk(parseInt(submissionId))
         if (!submission) {
           return { success: false, error: 'Submission reference in Platform collection not found.' }
         }
@@ -179,7 +179,7 @@ class PlatformService extends ModelService {
       }
     }
 
-    return { success: true, body: await this.getSanitized(platform.id) }
+    return await this.getSanitized(platform.id)
   }
 
   async getSanitized (platformId) {
@@ -204,9 +204,7 @@ class PlatformService extends ModelService {
       platform.dataValues.properties = []
     }
 
-    console.log('Hit!')
-
-    platform.dataValues.submissions = (await submissionService.getByPlatformId(platformId)).body
+    platform.dataValues.submissions = (await submissionSqlService.getByPlatformId(platformId)).body
 
     return { success: true, body: platform }
   }
@@ -243,7 +241,7 @@ class PlatformService extends ModelService {
       return { success: false, error: 'Platform not found.' }
     }
 
-    let submission = await submissionService.getByPk(submissionId)
+    let submission = await submissionSqlService.getByPk(submissionId)
     if (!submission) {
       return { success: false, error: 'Submission not found.' }
     }
@@ -261,8 +259,8 @@ class PlatformService extends ModelService {
       }
     }
 
-    submission = await submissionService.getEagerByPk(submissionId)
-    submission = await submissionService.populate(submission, userId)
+    submission = await submissionSqlService.getEagerByPk(submissionId)
+    submission = await submissionSqlService.populate(submission, userId)
 
     return { success: true, body: submission }
   }
