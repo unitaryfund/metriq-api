@@ -290,7 +290,7 @@ class UserService extends ModelService {
     }
 
     await user.save()
-    return { success: true, body: await this.getSanitized(user.id) }
+    return await this.getSanitized(user.id)
   }
 
   async tryPasswordChange (userId, reqBody) {
