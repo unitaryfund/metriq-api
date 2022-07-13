@@ -121,7 +121,7 @@ class SubmissionService extends ModelService {
 
   async parseRefList (submissionId, userId, csv, service, refService, message, oRefs) {
     const refSplit = csv.split(',')
-    const nRefs =[]
+    const nRefs = []
     for (let i = 0; i < refSplit.length; i++) {
       const refId = refSplit[i].trim()
       if (refId) {
@@ -140,7 +140,7 @@ class SubmissionService extends ModelService {
 
     for (let i = 0; i < oRefs.length; i++) {
       const ref = oRefs[i]
-      let j = 0;
+      let j = 0
       for (j = 0; j < nRefs.length; j++) {
         if (nRefs[j].id === ref.id) {
           break
