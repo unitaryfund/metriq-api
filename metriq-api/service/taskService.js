@@ -29,6 +29,8 @@ class TaskService extends ModelService {
   }
 
   async getSanitized (taskId) {
+    console.log('0')
+
     const task = await this.getByPk(taskId)
     if (!task) {
       return { success: false, error: 'Task not found.' }
@@ -44,8 +46,15 @@ class TaskService extends ModelService {
       task.dataValues.childTasks[i].resultCount = await this.getParentResultCount(task.dataValues.childTasks[i].id)
     }
 
-    task.dataValues.submissions = (await this.getSubmissionByTaskId(taskId)).body
+    console.log('1')
+
+    task.dataValues.submissions = (await submissionSqlService.getByTaskId(taskId)).body
+
+    console.log('2')
+
     task.dataValues.results = (await resultService.getByTaskId(taskId)).body
+
+    console.log('3')
 
     return { success: true, body: task }
   }
