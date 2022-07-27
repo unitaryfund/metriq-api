@@ -11,9 +11,12 @@ const jwt = require('express-jwt')
 const jwtDecode = require('jwt-decode')
 // Import cookie-parser middleware
 const cookieParser = require('cookie-parser')
+// Compress API responses for better performance
+const compression = require('compression')
 
 // Initialize the app
 const app = express()
+app.use(compression())
 
 // Import routes.
 const apiRoutes = require('./api-routes')
