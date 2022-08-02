@@ -77,6 +77,12 @@ exports.readSubmissionCounts = async function (req, res) {
     'Retrieved all task names and counts.', req.user ? req.user.id : 0)
 }
 
+exports.readSubmissionCountsSingle = async function (req, res) {
+  routeWrapper(res,
+    async () => await taskService.getNamesAndCounts(req.params.id),
+    'Retrieved task name and counts.', req.user ? req.user.id : 0)
+}
+
 exports.readNames = async function (req, res) {
   routeWrapper(res,
     async () => await taskService.getAllNames(),

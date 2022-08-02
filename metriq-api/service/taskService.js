@@ -67,9 +67,7 @@ class TaskService extends ModelService {
   async getTopLevelNamesAndCounts () {
     const result = await this.getTopLevelNames()
     for (let i = 0; i < result.length; i++) {
-      result[i].submissionCount = await this.getParentSubmissionCount(result[i].id)
-      result[i].upvoteTotal = await this.getParentLikeCount(result[i].id)
-      result[i].resultCount = await this.getParentResultCount(result[i].id)
+      result[i] = (await this.getNamesAndCounts(result[i].id)).body
     }
     const filtered = []
     for (let i = 0; i < result.length; i++) {
@@ -78,6 +76,16 @@ class TaskService extends ModelService {
       }
     }
     return { success: true, body: filtered }
+  }
+
+  async getNamesAndCounts (parentId) {
+    const parentTask = (await sequelize.query(
+      'SELECT id, name, description FROM tasks WHERE tasks.id = ' + parentId + ';'
+    ))[0][0]
+    parentTask.submissionCount = await this.getParentSubmissionCount(parentId)
+    parentTask.upvoteTotal = await this.getParentLikeCount(parentId)
+    parentTask.resultCount = await this.getParentResultCount(parentId)
+    return { success: true, body: parentTask }
   }
 
   async getTopLevelNames () {
