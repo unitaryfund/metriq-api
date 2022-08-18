@@ -54,4 +54,11 @@ config.pgPool = (process.env.METRIQ_MODE === 'TESTING')
 
 config.pgConnectionString = 'postgres://' + config.pgPool.user + ':' + config.pgPool.password + '@' + config.pgPool.host + ':' + config.pgPool.port + '/' + config.pgPool.database
 
+config.twitter = {
+  appKey: process.env.TWITTER_CONSUMER_KEY,
+  appSecret: process.env.TWITTER_CONSUMER_SECRET,
+  accessToken: process.env.TWITTER_ACCESS_TOKEN_KEY,
+  accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+}
+
 module.exports = config

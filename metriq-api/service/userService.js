@@ -273,7 +273,7 @@ class UserService extends ModelService {
     return { success: true, body: await this.getSanitized(user.id) }
   }
 
-  async update(userId, reqBody) {
+  async update (userId, reqBody) {
     const user = await this.getByPk(userId)
     if (!user) {
       return { success: false, error: 'User not found.' }

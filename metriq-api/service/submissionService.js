@@ -11,6 +11,9 @@ const sequelize = db.sequelize
 const Submission = db.submission
 // For email
 const nodemailer = require('nodemailer')
+// For Twitter
+const { TwitterApi } = require('twitter-api-v2')
+const twitter = new TwitterApi(config.twitter)
 
 // Service dependencies
 const SubmissionSqlService = require('./submissionSqlService')
@@ -152,6 +155,23 @@ class SubmissionService extends ModelService {
     }
   }
 
+  async tweet (submission) {
+    let title = 'New submission: ' + submission.name
+    const link = '\nhttps://metriq.info/Submission/' + toString(submission.id)
+    const tweetLength = (title + link).length
+    if (tweetLength > 260) {
+      title = title.substring(0, 257 - link.length) + '...'
+    }
+
+    twitter.v2.tweet(title + link)
+      .then((val) => {
+        console.log(val)
+        console.log('Tweet: Success!')
+      }).catch((err) => {
+        console.log(err)
+      })
+  }
+
   async submit (userId, reqBody, sendEmail) {
     const validationResult = await this.validateSubmission(reqBody)
     if (!validationResult.success) {
@@ -253,6 +273,10 @@ class SubmissionService extends ModelService {
       return { success: false, message: 'Could not send email.' }
     }
 
+    if (reqBody.isPublished && config.twitter.accessSecret) {
+      await this.tweet(submission)
+    }
+
     return { success: true, body: submission }
   }
 
@@ -262,6 +286,7 @@ class SubmissionService extends ModelService {
       return { success: false, error: 'Submission not found.' }
     }
 
+    let doTweet = false
     if (!submission.publishedAt) {
       if (reqBody.name !== undefined) {
         submission.name = reqBody.name.trim()
@@ -276,7 +301,10 @@ class SubmissionService extends ModelService {
       if (reqBody.description !== undefined) {
         submission.description = reqBody.description ? reqBody.description.trim() : ''
       }
-      submission.publishedAt = reqBody.isPublished ? new Date() : null
+      if (reqBody.isPublished) {
+        doTweet = true
+        submission.publishedAt = new Date()
+      }
     }
     if (reqBody.thumbnailUrl !== undefined) {
       submission.thumbnailUrl = (reqBody.thumbnailUrl && reqBody.thumbnailUrl.trim()) ? reqBody.thumbnailUrl.trim() : null
@@ -315,6 +343,11 @@ class SubmissionService extends ModelService {
 
     submission = await this.getEagerByPk(submissionId)
     submission = await submissionSqlService.populate(submission, userId)
+
+    if (doTweet && config.twitter.accessSecret) {
+      await this.tweet(submission)
+    }
+
     return { success: true, body: submission }
   }
 
