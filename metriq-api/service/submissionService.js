@@ -113,7 +113,7 @@ class SubmissionService extends ModelService {
       return { success: false, error: 'Submission not found.' }
     }
 
-    if (toString(submission.userId) !== toString(userId)) {
+    if (submission.userId.toString() !== userId.toString()) {
       return { success: false, error: 'Insufficient privileges to delete submission.' }
     }
 
@@ -157,7 +157,7 @@ class SubmissionService extends ModelService {
 
   async tweet (submission) {
     let title = 'New submission: ' + submission.name
-    const link = '\nhttps://metriq.info/Submission/' + toString(submission.id)
+    const link = '\nhttps://metriq.info/Submission/' + submission.id.toString()
     const tweetLength = (title + link).length
     if (tweetLength > 260) {
       title = title.substring(0, 257 - link.length) + '...'
