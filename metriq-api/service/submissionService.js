@@ -13,7 +13,7 @@ const Submission = db.submission
 const nodemailer = require('nodemailer')
 // For Twitter
 const { TwitterApi } = require('twitter-api-v2')
-const twitter = new TwitterApi(config.twitter)
+const twitter = config.twitter.accessSecret ? new TwitterApi(config.twitter) : null
 
 // Service dependencies
 const SubmissionSqlService = require('./submissionSqlService')
