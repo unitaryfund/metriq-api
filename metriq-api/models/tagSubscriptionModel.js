@@ -5,7 +5,7 @@ module.exports = function (sequelize, DataTypes) {
   const Model = sequelize.define('tagSubscription', {
     notifiedAt: {
       type: DataTypes.DATE,
-      defaultValue: Sequelize.DataTypes.NOW
+      defaultValue: DataTypes.NOW
     }
   }, {})
   Model.associate = function (db) {
