@@ -21,6 +21,10 @@ module.exports = {
             type: Sequelize.INTEGER,
             allowNull: false,
             references: { model: 'submissions', key: 'id' }
+          },
+          notifiedAt: {
+            type: Sequelize.DataTypes.DATE,
+            defaultValue: Sequelize.DataTypes.NOW
           }
         }, { transaction: t }),
         queryInterface.createTable('taskSubscriptions', {
@@ -40,6 +44,10 @@ module.exports = {
             type: Sequelize.INTEGER,
             allowNull: false,
             references: { model: 'tasks', key: 'id' }
+          },
+          notifiedAt: {
+            type: Sequelize.DataTypes.DATE,
+            defaultValue: Sequelize.DataTypes.NOW
           }
         }, { transaction: t }),
         queryInterface.createTable('methodSubscriptions', {
@@ -59,6 +67,10 @@ module.exports = {
             type: Sequelize.INTEGER,
             allowNull: false,
             references: { model: 'methods', key: 'id' }
+          },
+          notifiedAt: {
+            type: Sequelize.DataTypes.DATE,
+            defaultValue: Sequelize.DataTypes.NOW
           }
         }, { transaction: t }),
         queryInterface.createTable('platformSubscriptions', {
@@ -78,6 +90,10 @@ module.exports = {
             type: Sequelize.INTEGER,
             allowNull: false,
             references: { model: 'platforms', key: 'id' }
+          },
+          notifiedAt: {
+            type: Sequelize.DataTypes.DATE,
+            defaultValue: Sequelize.DataTypes.NOW
           }
         }, { transaction: t }),
         queryInterface.createTable('tagSubscriptions', {
@@ -97,6 +113,10 @@ module.exports = {
             type: Sequelize.INTEGER,
             allowNull: false,
             references: { model: 'tags', key: 'id' }
+          },
+          notifiedAt: {
+            type: Sequelize.DataTypes.DATE,
+            defaultValue: Sequelize.DataTypes.NOW
           }
         }, { transaction: t })
       ])
