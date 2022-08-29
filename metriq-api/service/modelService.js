@@ -31,6 +31,10 @@ class ModelService {
 
     return { success: true, body: await result }
   }
+
+  async getAll () {
+    return await this.SequelizeServiceInstance.findAll()
+  }
 }
 
 module.exports = ModelService
