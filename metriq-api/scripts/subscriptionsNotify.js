@@ -77,7 +77,7 @@ function getLastUpateTime (refs, lastUpdate) {
       let didAddHeader = false
       const subscription = tasks[j]
       const task = subscription.getTask()
-      let lastUpdate = submission.updatedAt
+      let lastUpdate = task.updatedAt
 
       const taskSubmissionRefs = task.getSubmissionTaskRefs()
       for (let k = 0; k < taskSubmissionRefs.length; ++k) {
@@ -100,7 +100,7 @@ function getLastUpateTime (refs, lastUpdate) {
       let didAddHeader = false
       const subscription = methods[j]
       const method = subscription.getMethod()
-      let lastUpdate = submission.updatedAt
+      let lastUpdate = method.updatedAt
 
       const methodSubmissionRefs = method.getSubmissionMethodRefs()
       for (let k = 0; k < methodSubmissionRefs.length; ++k) {
@@ -123,7 +123,7 @@ function getLastUpateTime (refs, lastUpdate) {
       let didAddHeader = false
       const subscription = platforms[j]
       const platform = subscription.getPlatform()
-      let lastUpdate = submission.updatedAt
+      let lastUpdate = platform.updatedAt
 
       const platformSubmissionRefs = platform.getSubmissionPlatformRefs()
       for (let k = 0; k < platformSubmissionRefs.length; ++k) {
