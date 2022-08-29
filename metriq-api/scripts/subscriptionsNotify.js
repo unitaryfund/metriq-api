@@ -15,11 +15,32 @@ import UserService from '../service/userService'
     const platforms = await user.getPlatformSubscriptions()
     const tags = await user.getTagSubscriptions()
 
-    const emailBody = 'Your metriq.info subscriptions have updates:'
+    let emailBody = 'Your metriq.info subscriptions have updates:'
     let sendEmail = false
 
-    if (submissions.length) {
-      sendEmail = true
+    for (let j = 0; j < submissions.length; ++j) {
+      let didAddHeader = false
+      const subscription = submissions[i]
+      const submission = subscription.getSubmission()
+      let lastUpdate = submission.updatedAt
+
+      const submissionTasks = submission.getSubmissionTaskRefs()
+      for (let k = 0; k < submissionTasks.length; ++k) {
+        const submissionTask = submissionTasks[i]
+        if (submissionTask.updatedAt > lastUpdate) {
+          lastUpdate = submissionTask.updatedAt
+        }
+      }
+
+      if (lastUpdate > subscription.notifiedAt) {
+        if (!didAddHeader) {
+          didAddHeader = true`\n\nSubmissions:`
+        }
+
+        emailBody += '\nhttps://metriq.info/Submission/' + submission.id + ' - ' + submission.name
+
+        sendEmail = true
+      }
     }
 
     if (tasks.length) {
