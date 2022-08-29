@@ -7,6 +7,7 @@ module.exports = function (sequelize, DataTypes) {
     db.user.hasMany(db.submissionPlatformRef)
     db.submissionPlatformRef.belongsTo(db.platform)
     db.submissionPlatformRef.hasMany(db.result)
+    db.platform.hasMany(db.submissionPlatformRef)
   }
   return Model
 }

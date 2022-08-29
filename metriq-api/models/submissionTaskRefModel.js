@@ -7,6 +7,7 @@ module.exports = function (sequelize, DataTypes) {
     db.user.hasMany(db.submissionTaskRef)
     db.submissionTaskRef.hasMany(db.result)
     db.submissionTaskRef.belongsTo(db.task)
+    db.task.hasMany(db.submissionTaskRef)
   }
   return Model
 }

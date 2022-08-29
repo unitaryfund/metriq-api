@@ -7,6 +7,7 @@ module.exports = function (sequelize, DataTypes) {
     db.user.hasMany(db.submissionMethodRef)
     db.submissionMethodRef.belongsTo(db.method)
     db.submissionMethodRef.hasMany(db.result)
+    db.method.hasMany(db.submissionMethodRef)
   }
   return Model
 }

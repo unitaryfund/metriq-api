@@ -1,6 +1,6 @@
 import UserService from '../service/userService'
 
-function getLastUpateTime (lastUpdate, refs) {
+function getLastUpateTime (refs, lastUpdate) {
   for (let i = 0; i < refs.length; ++i) {
     const ref = refs[i]
     if (ref.updatedAt > lastUpdate) {
@@ -46,6 +46,21 @@ function getLastUpateTime (lastUpdate, refs) {
 
       const submissionTags = submission.getSubmissionTagRefs()
       lastUpdate = getLastUpateTime(submissionTags, lastUpdate)
+
+      for (let k = 0; k < submissionTasks.length; ++k) {
+        const submissionTaskResults = submissionTasks[k].getResults()
+        lastUpdate = getLastUpateTime(submissionTaskResults, lastUpdate)
+      }
+
+      for (let k = 0; k < submissionMethods.length; ++k) {
+        const submissionMethodResults = submissionMethods[k].getResults()
+        lastUpdate = getLastUpateTime(submissionMethodResults, lastUpdate)
+      }
+
+      for (let k = 0; k < submissionPlatforms.length; ++k) {
+        const submissionPlatformResults = submissionPlatforms[k].getResults()
+        lastUpdate = getLastUpateTime(submissionPlatformResults, lastUpdate)
+      }
 
       if (lastUpdate > subscription.notifiedAt) {
         if (!didAddHeader) {
