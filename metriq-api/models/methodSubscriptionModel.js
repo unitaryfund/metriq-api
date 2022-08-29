@@ -10,6 +10,7 @@ module.exports = function (sequelize, DataTypes) {
   }, {})
   Model.associate = function (db) {
     db.user.hasMany(db.methodSubscription)
+    db.methodSubscription.belongsTo(db.user)
   }
   return Model
 }
