@@ -73,16 +73,73 @@ function getLastUpateTime (refs, lastUpdate) {
       }
     }
 
-    if (tasks.length) {
-      sendEmail = true
+    for (let j = 0; j < tasks.length; ++j) {
+      let didAddHeader = false
+      const subscription = tasks[j]
+      const task = subscription.getTask()
+      let lastUpdate = submission.updatedAt
+
+      const taskSubmissionRefs = task.getSubmissionTaskRefs()
+      for (let k = 0; k < taskSubmissionRefs.length; ++k) {
+        const taskSubmissionResults = taskSubmissionRefs[k].getResults()
+        lastUpdate = getLastUpateTime(taskSubmissionResults, lastUpdate)
+      }
+
+      if (lastUpdate > subscription.notifiedAt) {
+        if (!didAddHeader) {
+          didAddHeader = true`\n\nTasks:`
+        }
+
+        emailBody += '\nhttps://metriq.info/Task/' + task.id + ' - ' + task.name
+
+        sendEmail = true
+      }
     }
 
-    if (methods.length) {
-      sendEmail = true
+    for (let j = 0; j < methods.length; ++j) {
+      let didAddHeader = false
+      const subscription = methods[j]
+      const method = subscription.getMethod()
+      let lastUpdate = submission.updatedAt
+
+      const methodSubmissionRefs = method.getSubmissionMethodRefs()
+      for (let k = 0; k < methodSubmissionRefs.length; ++k) {
+        const methodSubmissionResults = methodSubmissionRefs[k].getResults()
+        lastUpdate = getLastUpateTime(methodSubmissionResults, lastUpdate)
+      }
+
+      if (lastUpdate > subscription.notifiedAt) {
+        if (!didAddHeader) {
+          didAddHeader = true`\n\nMethods:`
+        }
+
+        emailBody += '\nhttps://metriq.info/Method/' + method.id + ' - ' + method.name
+
+        sendEmail = true
+      }
     }
 
-    if (platforms.length) {
-      sendEmail = true
+    for (let j = 0; j < platforms.length; ++j) {
+      let didAddHeader = false
+      const subscription = platforms[j]
+      const platform = subscription.getPlatform()
+      let lastUpdate = submission.updatedAt
+
+      const platformSubmissionRefs = platform.getSubmissionPlatformRefs()
+      for (let k = 0; k < platformSubmissionRefs.length; ++k) {
+        const platformSubmissionResults = platformSubmissionRefs[k].getResults()
+        lastUpdate = getLastUpateTime(platformSubmissionResults, lastUpdate)
+      }
+
+      if (lastUpdate > subscription.notifiedAt) {
+        if (!didAddHeader) {
+          didAddHeader = true`\n\nPlatforms:`
+        }
+
+        emailBody += '\nhttps://metriq.info/Platform/' + platform.id + ' - ' + platform.name
+
+        sendEmail = true
+      }
     }
 
     if (tags.length) {
