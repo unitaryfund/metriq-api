@@ -139,6 +139,12 @@ exports.upvote = async function (req, res) {
     'Up-voted submission!', req.user ? req.user.id : 0)
 }
 
+exports.subscribe = async function (req, res) {
+  routeWrapper(res,
+    async () => await submissionService.subscribe(req.params.id, req.user.id),
+    'Up-voted submission!', req.user ? req.user.id : 0)
+}
+
 exports.getpagemetadata = async function (req, res) {
   routeWrapper(res,
     async () => await submissionService.getpagemetadata(req.user.id, req.body),
