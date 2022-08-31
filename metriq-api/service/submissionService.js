@@ -413,7 +413,7 @@ class SubmissionService extends ModelService {
     if (subscription) {
       await submissionSubscriptionService.deleteByPk(subscription.id)
     } else {
-      subscription = await submissionSubscriptionService.createOrFetch(submission.id, user.id, user.id)
+      subscription = await submissionSubscriptionService.createOrFetch(user.id, submission.id)
     }
 
     submission = await this.getEagerByPk(submissionId)
