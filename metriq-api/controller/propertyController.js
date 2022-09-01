@@ -72,6 +72,6 @@ exports.readNames = async function (req, res) {
 
 exports.delete = async function (req, res) {
   routeWrapper(res,
-    async () => await propertyService.delete(req.params.id),
+    async () => await propertyService.delete(req.params.id, req.user ? req.user.id : 0),
     'Successfully deleted platform property.', req.user ? req.user.id : 0)
 }
