@@ -61,14 +61,20 @@ exports.new = async function (req, res) {
 
 exports.read = async function (req, res) {
   routeWrapper(res,
-    async () => await taskService.getSanitized(req.params.id),
+    async () => await taskService.getSanitized(req.params.id, req.user ? req.user.id : 0),
     'Retrieved task by Id.', req.user ? req.user.id : 0)
 }
 
 exports.update = async function (req, res) {
   routeWrapper(res,
-    async () => await taskService.update(req.params.id, req.body),
+    async () => await taskService.update(req.params.id, req.body, req.user ? req.user.id : 0),
     'Updated task.', req.user ? req.user.id : 0)
+}
+
+exports.subscribe = async function (req, res) {
+  routeWrapper(res,
+    async () => await taskService.subscribe(req.params.id, req.user.id),
+    'Subscribed to task!', req.user ? req.user.id : 0)
 }
 
 exports.readSubmissionCounts = async function (req, res) {
