@@ -1,3 +1,4 @@
+import e from 'express'
 import UserService from '../service/userService'
 
 function getLastUpateTime (refs, lastUpdate) {
@@ -63,7 +64,7 @@ function getLastUpateTime (refs, lastUpdate) {
 
       if (lastUpdate > subscription.notifiedAt) {
         if (!didAddHeader) {
-          didAddHeader = true`\n\nSubmissions:`
+          didAddHeader = true
         }
 
         emailBody += '\nhttps://metriq.info/Submission/' + submission.id + ' - ' + submission.name
@@ -86,7 +87,7 @@ function getLastUpateTime (refs, lastUpdate) {
 
       if (lastUpdate > subscription.notifiedAt) {
         if (!didAddHeader) {
-          didAddHeader = true`\n\nTasks:`
+          didAddHeader = true
         }
 
         emailBody += '\nhttps://metriq.info/Task/' + task.id + ' - ' + task.name
@@ -109,7 +110,7 @@ function getLastUpateTime (refs, lastUpdate) {
 
       if (lastUpdate > subscription.notifiedAt) {
         if (!didAddHeader) {
-          didAddHeader = true`\n\nMethods:`
+          didAddHeader = true
         }
 
         emailBody += '\nhttps://metriq.info/Method/' + method.id + ' - ' + method.name
@@ -132,7 +133,7 @@ function getLastUpateTime (refs, lastUpdate) {
 
       if (lastUpdate > subscription.notifiedAt) {
         if (!didAddHeader) {
-          didAddHeader = true`\n\nPlatforms:`
+          didAddHeader = true
         }
 
         emailBody += '\nhttps://metriq.info/Platform/' + platform.id + ' - ' + platform.name
@@ -143,6 +144,9 @@ function getLastUpateTime (refs, lastUpdate) {
 
     if (!sendEmail) {
       console.log('No subscription updates for ' + user.email)
+    } else {
+      emailBody += "\n\nThank you being a part of the Metriq.info quantum benchmark community! To unsubscribe from updates, cancel your per-item subscriptions at the links above, or log into your Metriq.info account and cancel all subscriptions at https://metriq.info/Profile."
+      console.log(user.email + ": " + emailBody)
     }
   }
 
