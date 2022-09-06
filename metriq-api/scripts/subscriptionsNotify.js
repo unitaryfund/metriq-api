@@ -24,7 +24,6 @@ function getLastUpateTime (refs, lastUpdate) {
     const tasks = await user.getTaskSubscriptions()
     const methods = await user.getMethodSubscriptions()
     const platforms = await user.getPlatformSubscriptions()
-    const tags = await user.getTagSubscriptions()
 
     let emailBody = 'Your metriq.info subscriptions have updates:'
     let sendEmail = false
@@ -32,33 +31,33 @@ function getLastUpateTime (refs, lastUpdate) {
     for (let j = 0; j < submissions.length; ++j) {
       let didAddHeader = false
       const subscription = submissions[j]
-      const submission = subscription.getSubmission()
+      const submission = await subscription.getSubmission()
       let lastUpdate = submission.updatedAt
 
-      const submissionTasks = submission.getSubmissionTaskRefs()
+      const submissionTasks = await submission.getSubmissionTaskRefs()
       lastUpdate = getLastUpateTime(submissionTasks, lastUpdate)
 
-      const submissionMethods = submission.getSubmissionMethodRefs()
+      const submissionMethods = await submission.getSubmissionMethodRefs()
       lastUpdate = getLastUpateTime(submissionMethods, lastUpdate)
 
-      const submissionPlatforms = submission.getSubmissionPlatformRefs()
+      const submissionPlatforms = await submission.getSubmissionPlatformRefs()
       lastUpdate = getLastUpateTime(submissionPlatforms, lastUpdate)
 
-      const submissionTags = submission.getSubmissionTagRefs()
+      const submissionTags = await submission.getSubmissionTagRefs()
       lastUpdate = getLastUpateTime(submissionTags, lastUpdate)
 
       for (let k = 0; k < submissionTasks.length; ++k) {
-        const submissionTaskResults = submissionTasks[k].getResults()
+        const submissionTaskResults = await submissionTasks[k].getResults()
         lastUpdate = getLastUpateTime(submissionTaskResults, lastUpdate)
       }
 
       for (let k = 0; k < submissionMethods.length; ++k) {
-        const submissionMethodResults = submissionMethods[k].getResults()
+        const submissionMethodResults = await submissionMethods[k].getResults()
         lastUpdate = getLastUpateTime(submissionMethodResults, lastUpdate)
       }
 
       for (let k = 0; k < submissionPlatforms.length; ++k) {
-        const submissionPlatformResults = submissionPlatforms[k].getResults()
+        const submissionPlatformResults = await submissionPlatforms[k].getResults()
         lastUpdate = getLastUpateTime(submissionPlatformResults, lastUpdate)
       }
 
@@ -76,12 +75,12 @@ function getLastUpateTime (refs, lastUpdate) {
     for (let j = 0; j < tasks.length; ++j) {
       let didAddHeader = false
       const subscription = tasks[j]
-      const task = subscription.getTask()
+      const task = await subscription.getTask()
       let lastUpdate = task.updatedAt
 
-      const taskSubmissionRefs = task.getSubmissionTaskRefs()
+      const taskSubmissionRefs = await task.getSubmissionTaskRefs()
       for (let k = 0; k < taskSubmissionRefs.length; ++k) {
-        const taskSubmissionResults = taskSubmissionRefs[k].getResults()
+        const taskSubmissionResults = await taskSubmissionRefs[k].getResults()
         lastUpdate = getLastUpateTime(taskSubmissionResults, lastUpdate)
       }
 
@@ -99,12 +98,12 @@ function getLastUpateTime (refs, lastUpdate) {
     for (let j = 0; j < methods.length; ++j) {
       let didAddHeader = false
       const subscription = methods[j]
-      const method = subscription.getMethod()
+      const method = await subscription.getMethod()
       let lastUpdate = method.updatedAt
 
-      const methodSubmissionRefs = method.getSubmissionMethodRefs()
+      const methodSubmissionRefs = await method.getSubmissionMethodRefs()
       for (let k = 0; k < methodSubmissionRefs.length; ++k) {
-        const methodSubmissionResults = methodSubmissionRefs[k].getResults()
+        const methodSubmissionResults = await methodSubmissionRefs[k].getResults()
         lastUpdate = getLastUpateTime(methodSubmissionResults, lastUpdate)
       }
 
@@ -122,12 +121,12 @@ function getLastUpateTime (refs, lastUpdate) {
     for (let j = 0; j < platforms.length; ++j) {
       let didAddHeader = false
       const subscription = platforms[j]
-      const platform = subscription.getPlatform()
+      const platform = await subscription.getPlatform()
       let lastUpdate = platform.updatedAt
 
-      const platformSubmissionRefs = platform.getSubmissionPlatformRefs()
+      const platformSubmissionRefs = await platform.getSubmissionPlatformRefs()
       for (let k = 0; k < platformSubmissionRefs.length; ++k) {
-        const platformSubmissionResults = platformSubmissionRefs[k].getResults()
+        const platformSubmissionResults = await platformSubmissionRefs[k].getResults()
         lastUpdate = getLastUpateTime(platformSubmissionResults, lastUpdate)
       }
 
@@ -140,10 +139,6 @@ function getLastUpateTime (refs, lastUpdate) {
 
         sendEmail = true
       }
-    }
-
-    if (tags.length) {
-      sendEmail = true
     }
 
     if (!sendEmail) {

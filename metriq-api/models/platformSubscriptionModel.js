@@ -11,6 +11,7 @@ module.exports = function (sequelize, DataTypes) {
   Model.associate = function (db) {
     db.user.hasMany(db.platformSubscription)
     db.platformSubscription.belongsTo(db.user)
+    db.platformSubscription.belongsTo(db.platform)
   }
   return Model
 }
