@@ -71,6 +71,12 @@ exports.delete = async function (req, res) {
     'Successfully deleted user profile.', false)
 }
 
+exports.unsubscribe = async function (req, res) {
+  routeWrapper(res,
+    async () => await userService.unsubscribe(req.user.id),
+    'Successfully unsubscribed from all updates.', false)
+}
+
 const itemsPerPage = 10
 
 // Validate the delete request and delete the user.

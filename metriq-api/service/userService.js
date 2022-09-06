@@ -332,6 +332,32 @@ class UserService extends ModelService {
 
     return { success: true, body: user }
   }
+
+  async unsubscribe (userId) {
+    const user = await this.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    const submissions = await user.getSubmissionSubscriptions()
+    for (let i = 0; i < submissions.length; ++i) {
+      await submissions[i].destroy()
+    }
+    const tasks = await user.getTaskSubscriptions()
+    for (let i = 0; i < tasks.length; ++i) {
+      await tasks[i].destroy()
+    }
+    const methods = await user.getMethodSubscriptions()
+    for (let i = 0; i < methods.length; ++i) {
+      await methods[i].destroy()
+    }
+    const platforms = await user.getPlatformSubscriptions()
+    for (let i = 0; i < platforms.length; ++i) {
+      await platforms[i].destroy()
+    }
+
+    return { success: true, body: user }
+  }
 }
 
 module.exports = UserService
