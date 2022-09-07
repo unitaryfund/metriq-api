@@ -1,5 +1,6 @@
-import e from 'express'
+import nodemailer from 'nodemailer'
 import UserService from '../service/userService'
+import config from '../config'
 
 function getLastUpateTime (refs, lastUpdate) {
   for (let i = 0; i < refs.length; ++i) {
@@ -177,20 +178,20 @@ function getLastUpateTime (refs, lastUpdate) {
     }
 
     for (let j = 0; j < submissions.length; ++j) {
-      submissions[i].notifiedAt = new Date()
-      await submissions[i].save()
+      submissions[j].notifiedAt = new Date()
+      await submissions[j].save()
     }
     for (let j = 0; j < tasks.length; ++j) {
-      tasks[i].notifiedAt = new Date()
-      await tasks[i].save()
+      tasks[j].notifiedAt = new Date()
+      await tasks[j].save()
     }
     for (let j = 0; j < methods.length; ++j) {
-      methods[i].notifiedAt = new Date()
-      await methods[i].save()
+      methods[j].notifiedAt = new Date()
+      await methods[j].save()
     }
     for (let j = 0; j < platforms.length; ++j) {
-      platforms[i].notifiedAt = new Date()
-      await platforms[i].save()
+      platforms[j].notifiedAt = new Date()
+      await platforms[j].save()
     }
 
     console.log('Updated user notification date and time.')
