@@ -27,7 +27,7 @@ function getLastUpateTime (refs, lastUpdate) {
     const methods = await user.getMethodSubscriptions()
     const platforms = await user.getPlatformSubscriptions()
 
-    let emailBody = 'Your metriq.info subscriptions have updates:'
+    let emailBody = 'Your metriq.info subscriptions have updates:\n'
     let sendEmail = false
 
     for (let j = 0; j < submissions.length; ++j) {
