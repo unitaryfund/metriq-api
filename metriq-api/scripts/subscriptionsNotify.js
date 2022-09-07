@@ -144,10 +144,56 @@ function getLastUpateTime (refs, lastUpdate) {
 
     if (!sendEmail) {
       console.log('No subscription updates for ' + user.email)
-    } else {
-      emailBody += "\n\nThank you being a part of the Metriq.info quantum benchmark community! To unsubscribe from updates, cancel your per-item subscriptions at the links above, or log into your Metriq.info account and cancel all subscriptions at https://metriq.info/Profile."
-      console.log(user.email + ": " + emailBody)
+      continue
     }
+
+    emailBody += "\n\nThank you being a part of the Metriq.info quantum benchmark community! To unsubscribe from updates, cancel your per-item subscriptions at the links above, or log into your Metriq.info account and cancel all subscriptions at https://metriq.info/Profile."
+    console.log(user.email + ": " + emailBody)
+
+    if (!config.supportEmail.service) {
+      console.log('Skipping email - account info not set.')
+      continue
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: config.supportEmail.service,
+      auth: {
+        user: config.supportEmail.account,
+        pass: config.supportEmail.password
+      }
+    })
+
+    const mailOptions = {
+      from: config.supportEmail.address,
+      to: user.email,
+      subject: 'Metriq subscription updates',
+      text: emailBody
+    }
+
+    const emailResult = await transporter.sendMail(mailOptions)
+    if (!emailResult.accepted || (emailResult.accepted[0] !== user.email)) {
+      console.log('Could not send email.')
+      continue
+    }
+
+    for (let j = 0; j < submissions.length; ++j) {
+      submissions[i].notifiedAt = new Date()
+      await submissions[i].save()
+    }
+    for (let j = 0; j < tasks.length; ++j) {
+      tasks[i].notifiedAt = new Date()
+      await tasks[i].save()
+    }
+    for (let j = 0; j < methods.length; ++j) {
+      methods[i].notifiedAt = new Date()
+      await methods[i].save()
+    }
+    for (let j = 0; j < platforms.length; ++j) {
+      platforms[i].notifiedAt = new Date()
+      await platforms[i].save()
+    }
+
+    console.log('Updated user notification date and time.')
   }
 
   console.log('Done notifying subscribers.')
