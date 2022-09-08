@@ -38,6 +38,8 @@ const LikeService = require('./likeService')
 const likeService = new LikeService()
 const SubmissionTagRefService = require('./submissionTagRefService')
 const submissionTagRefService = new SubmissionTagRefService()
+const SubmissionSubscriptionService = require('./submissionSubscriptionService')
+const submissionSubscriptionService = new SubmissionSubscriptionService()
 
 class SubmissionService extends ModelService {
   constructor () {
@@ -384,11 +386,34 @@ class SubmissionService extends ModelService {
       return { success: false, error: 'User not found.' }
     }
 
-    let like = await likeService.getByFks(submission.id, user.id, user.id)
+    let like = await likeService.getByFks(submission.id, user.id)
     if (like) {
       await likeService.deleteByPk(like.id)
     } else {
       like = await likeService.createOrFetch(submission.id, user.id, user.id)
+    }
+
+    submission = await this.getEagerByPk(submissionId)
+    submission = await submissionSqlService.populate(submission, userId)
+    return { success: true, body: submission }
+  }
+
+  async subscribe (submissionId, userId) {
+    let submission = await this.getByPk(submissionId)
+    if (!submission) {
+      return { success: false, error: 'Submission not found.' }
+    }
+
+    const user = await userService.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    let subscription = await submissionSubscriptionService.getByFks(user.id, submission.id)
+    if (subscription) {
+      await submissionSubscriptionService.deleteByPk(subscription.id)
+    } else {
+      subscription = await submissionSubscriptionService.createOrFetch(user.id, submission.id)
     }
 
     submission = await this.getEagerByPk(submissionId)

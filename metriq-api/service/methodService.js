@@ -14,18 +14,23 @@ const SubmissionMethodRefService = require('./submissionMethodRefService')
 const submissionMethodRefService = new SubmissionMethodRefService()
 const ResultService = require('./resultService')
 const resultService = new ResultService()
+const MethodSubscriptionService = require('./methodSubscriptionService')
+const methodSubscriptionService = new MethodSubscriptionService()
+const UserService = require('./userService')
+const userService = new UserService()
 
 class MethodService extends ModelService {
   constructor () {
     super(Method)
   }
 
-  async getSanitized (methodId) {
+  async getSanitized (methodId, userId) {
     const method = await this.getByPk(methodId)
     if (!method) {
       return { success: false, error: 'Method not found.' }
     }
 
+    method.dataValues.isSubscribed = ((userId > 0) && await methodSubscriptionService.getByFks(userId, methodId))
     method.dataValues.parentMethod = await this.getByPk(method.dataValues.methodId)
     delete method.dataValues.methodId
 
@@ -165,7 +170,7 @@ class MethodService extends ModelService {
     return { success: true, body: method }
   }
 
-  async update (methodId, reqBody) {
+  async update (methodId, reqBody, userId) {
     const method = await this.getByPk(methodId)
     if (!method) {
       return { success: false, error: 'Method not found.' }
@@ -196,7 +201,29 @@ class MethodService extends ModelService {
 
     await method.save()
 
-    return await this.getSanitized(method.id)
+    return await this.getSanitized(method.id, userId)
+  }
+
+  async subscribe (methodId, userId) {
+    let method = await this.getByPk(methodId)
+    if (!method) {
+      return { success: false, error: 'Method not found.' }
+    }
+
+    const user = await userService.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    let subscription = await methodSubscriptionService.getByFks(user.id, method.id)
+    if (subscription) {
+      await methodSubscriptionService.deleteByPk(subscription.id)
+    } else {
+      subscription = await methodSubscriptionService.createOrFetch(user.id, method.id)
+    }
+
+    method = (await this.getSanitized(methodId, userId)).body
+    return { success: true, body: method }
   }
 
   async addOrRemoveSubmission (isAdd, methodId, submissionId, userId) {

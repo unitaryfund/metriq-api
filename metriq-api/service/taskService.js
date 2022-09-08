@@ -14,6 +14,10 @@ const SubmissionSqlService = require('./submissionSqlService')
 const submissionSqlService = new SubmissionSqlService()
 const SubmissionTaskRefService = require('./submissionTaskRefService')
 const submissionTaskRefService = new SubmissionTaskRefService()
+const TaskSubscriptionService = require('./taskSubscriptionService')
+const taskSubscriptionService = new TaskSubscriptionService()
+const UserService = require('./userService')
+const userService = new UserService()
 
 class TaskService extends ModelService {
   constructor () {
@@ -28,14 +32,13 @@ class TaskService extends ModelService {
     return await this.SequelizeServiceInstance.findOne({ name: name })
   }
 
-  async getSanitized (taskId) {
-    console.log('0')
-
+  async getSanitized (taskId, userId) {
     const task = await this.getByPk(taskId)
     if (!task) {
       return { success: false, error: 'Task not found.' }
     }
 
+    task.dataValues.isSubscribed = ((userId > 0) && await taskSubscriptionService.getByFks(userId, taskId))
     task.dataValues.parentTask = await this.getByPk(task.dataValues.taskId)
     delete task.dataValues.taskId
 
@@ -46,16 +49,31 @@ class TaskService extends ModelService {
       task.dataValues.childTasks[i].resultCount = await this.getParentResultCount(task.dataValues.childTasks[i].id)
     }
 
-    console.log('1')
-
     task.dataValues.submissions = (await submissionSqlService.getByTaskId(taskId)).body
-
-    console.log('2')
-
     task.dataValues.results = (await resultService.getByTaskId(taskId)).body
 
-    console.log('3')
+    return { success: true, body: task }
+  }
 
+  async subscribe (taskId, userId) {
+    let task = await this.getByPk(taskId)
+    if (!task) {
+      return { success: false, error: 'Task not found.' }
+    }
+
+    const user = await userService.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    let subscription = await taskSubscriptionService.getByFks(user.id, task.id)
+    if (subscription) {
+      await taskSubscriptionService.deleteByPk(subscription.id)
+    } else {
+      subscription = await taskSubscriptionService.createOrFetch(user.id, task.id)
+    }
+
+    task = (await this.getSanitized(taskId, userId)).body
     return { success: true, body: task }
   }
 
@@ -245,7 +263,7 @@ class TaskService extends ModelService {
     return { success: true, body: task }
   }
 
-  async update (taskId, reqBody) {
+  async update (taskId, reqBody, userId) {
     const task = await this.getByPk(taskId)
     if (!task) {
       return { success: false, error: 'Task not found.' }
@@ -274,7 +292,7 @@ class TaskService extends ModelService {
 
     await task.save()
 
-    return await this.getSanitized(task.id)
+    return await this.getSanitized(task.id, userId)
   }
 
   async addOrRemoveSubmission (isAdd, taskId, submissionId, userId) {

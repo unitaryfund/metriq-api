@@ -98,14 +98,14 @@ class PropertyService {
     return await platformDataTypeService.getAll()
   }
 
-  async delete (propertyId) {
+  async delete (propertyId, userId) {
     const property = await platformDataTypeValueService.getByPk(propertyId)
     if (!property) {
       return { success: false, error: 'Platform property not found.' }
     }
     const platformId = property.platformId
     await property.destroy()
-    const platform = await platformService.getSanitized(platformId)
+    const platform = await platformService.getSanitized(platformId, userId)
 
     return { success: true, body: platform }
   }

@@ -7,6 +7,8 @@ const Submission = db.submission
 
 const UserService = require('./userService')
 const userService = new UserService()
+const SubmissionSubscriptionService = require('./submissionSubscriptionService')
+const submissionSubscriptionService = new SubmissionSubscriptionService()
 
 class SubmissionSqlService {
   constructor () {
@@ -131,6 +133,7 @@ class SubmissionSqlService {
     toRet.upvotesCount = toRet.likes.length
     delete toRet.likes
     toRet.user = await userService.getByPk(toRet.userId)
+    toRet.isSubscribed = ((userId > 0) && await submissionSubscriptionService.getByFks(userId, toRet.id))
 
     await this.populateTags(toRet)
 

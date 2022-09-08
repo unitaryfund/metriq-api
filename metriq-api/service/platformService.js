@@ -15,6 +15,10 @@ const SubmissionPlatformRefService = require('./submissionPlatformRefService')
 const submissionPlatformRefService = new SubmissionPlatformRefService()
 const ResultService = require('./resultService')
 const resultService = new ResultService()
+const PlatformSubscriptionService = require('./platformSubscriptionService')
+const platformSubscriptionService = new PlatformSubscriptionService()
+const UserService = require('./userService')
+const userService = new UserService()
 
 class PlatformService extends ModelService {
   constructor () {
@@ -179,17 +183,19 @@ class PlatformService extends ModelService {
       }
     }
 
-    return await this.getSanitized(platform.id)
+    return await this.getSanitized(platform.id, userId)
   }
 
-  async getSanitized (platformId) {
+  async getSanitized (platformId, userId) {
     const platform = await this.getByPk(platformId)
     if (!platform) {
       return { success: false, error: 'Platform not found.' }
     }
 
+    platform.dataValues.isSubscribed = ((userId > 0) && await platformSubscriptionService.getByFks(userId, platformId))
+
     if (platform.dataValues.platformId) {
-      platform.dataValues.parentPlatform = (await this.getSanitized(platform.dataValues.platformId)).body
+      platform.dataValues.parentPlatform = (await this.getSanitized(platform.dataValues.platformId, userId)).body
     } else {
       platform.dataValues.parentPlatform = null
     }
@@ -209,13 +215,33 @@ class PlatformService extends ModelService {
     return { success: true, body: platform }
   }
 
-  async update (platformId, reqBody) {
-    const platform = await this.getByPk(platformId)
+  async subscribe (platformId, userId) {
+    let platform = await this.getByPk(platformId)
     if (!platform) {
       return { success: false, error: 'Platform not found.' }
     }
 
-    console.log(reqBody)
+    const user = await userService.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    let subscription = await platformSubscriptionService.getByFks(user.id, platform.id)
+    if (subscription) {
+      await platformSubscriptionService.deleteByPk(subscription.id)
+    } else {
+      subscription = await platformSubscriptionService.createOrFetch(user.id, platform.id)
+    }
+
+    platform = (await this.getSanitized(platformId, userId)).body
+    return { success: true, body: platform }
+  }
+
+  async update (platformId, reqBody, userId) {
+    const platform = await this.getByPk(platformId)
+    if (!platform) {
+      return { success: false, error: 'Platform not found.' }
+    }
 
     if (reqBody.name !== undefined) {
       platform.name = reqBody.name.trim()
@@ -232,7 +258,7 @@ class PlatformService extends ModelService {
 
     await platform.save()
 
-    return await this.getSanitized(platform.id)
+    return await this.getSanitized(platform.id, userId)
   }
 
   async addOrRemoveSubmission (isAdd, platformId, submissionId, userId) {

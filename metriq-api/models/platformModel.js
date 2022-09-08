@@ -21,6 +21,7 @@ module.exports = function (sequelize, DataTypes) {
     db.platform.belongsTo(db.platform)
     db.platform.hasMany(db.platform)
     db.platform.hasMany(db.platformDataTypeValue)
+    db.platform.hasMany(db.platformSubscription)
   }
   return Model
 }

@@ -61,14 +61,20 @@ exports.new = async function (req, res) {
 
 exports.read = async function (req, res) {
   routeWrapper(res,
-    async () => await methodService.getSanitized(req.params.id),
+    async () => await methodService.getSanitized(req.params.id, req.user ? req.user.id : 0),
     'Retrieved method by Id.', req.user ? req.user.id : 0)
 }
 
 exports.update = async function (req, res) {
   routeWrapper(res,
-    async () => await methodService.update(req.params.id, req.body),
+    async () => await methodService.update(req.params.id, req.body, req.user ? req.user.id : 0),
     'Updated method.', req.user ? req.user.id : 0)
+}
+
+exports.subscribe = async function (req, res) {
+  routeWrapper(res,
+    async () => await methodService.subscribe(req.params.id, req.user.id),
+    'Subscribed to method!', req.user ? req.user.id : 0)
 }
 
 exports.readSubmissionCounts = async function (req, res) {

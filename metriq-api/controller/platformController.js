@@ -71,6 +71,12 @@ exports.update = async function (req, res) {
     'Updated platform.', req.user ? req.user.id : 0)
 }
 
+exports.subscribe = async function (req, res) {
+  routeWrapper(res,
+    async () => await platformService.subscribe(req.params.id, req.user.id),
+    'Subscribed to platform!', req.user ? req.user.id : 0)
+}
+
 exports.readNames = async function (req, res) {
   routeWrapper(res,
     async () => await platformService.getAllNames(),
