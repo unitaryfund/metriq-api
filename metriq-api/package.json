@@ -10,7 +10,8 @@
     "db:migrate:undo": "npx sequelize-cli db:migrate:undo",
     "db:seed": "npx sequelize-cli db:seed",
     "db:seed:all": "npx sequelize-cli db:seed:all",
-    "subscriptions:notify": "babel-node ./scripts/subscriptionsNotify"
+    "subscriptions:notify": "babel-node ./scripts/subscriptionsNotify",
+    "admin:approve:all": "babel-node ./scripts/approveNewSubmissions"
   },
   "keywords": [
     "api",
