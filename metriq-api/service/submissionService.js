@@ -272,7 +272,7 @@ class SubmissionService extends ModelService {
 
     if (reqBody.isPublished && config.twitter.accessSecret) {
       await this.tweet(submission)
-      
+
       const emailResult = await transporter.sendMail(mailOptions)
       if (!emailResult.accepted || (emailResult.accepted[0] !== user.email)) {
         return { success: false, message: 'Could not send email.' }

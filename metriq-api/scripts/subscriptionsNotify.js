@@ -148,8 +148,8 @@ function getLastUpateTime (refs, lastUpdate) {
       continue
     }
 
-    emailBody += "\n\nThank you being a part of the Metriq.info quantum benchmark community! To unsubscribe from updates, cancel your per-item subscriptions at the links above, or log into your Metriq.info account and cancel all subscriptions at https://metriq.info/Profile."
-    console.log(user.email + ": " + emailBody)
+    emailBody += '\n\nThank you being a part of the Metriq.info quantum benchmark community! To unsubscribe from updates, cancel your per-item subscriptions at the links above, or log into your Metriq.info account and cancel all subscriptions at https://metriq.info/Profile.'
+    console.log(user.email + ': ' + emailBody)
 
     if (!config.supportEmail.service) {
       console.log('Skipping email - account info not set.')
