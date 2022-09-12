@@ -96,6 +96,12 @@ class SubmissionSqlService {
             '    WHERE s."deletedAt" IS NULL AND s."publishedAt" IS NOT NULL AND str."deletedAt" IS NULL AND str."platformId" = ' + platformId
   }
 
+  sqlSubmittedToday () {
+    const d = new Date()
+    d.setDate(d.getDate() - 1)
+    return 'SELECT * FROM submissions WHERE s."deletedAt" IS NULL AND s."publishedAt" > \'' + d.toISOString() + '\''
+  }
+
   async getByTaskId (taskId) {
     const result = (await sequelize.query(this.sqlByTask(taskId)))[0]
     return { success: true, body: result }
@@ -108,6 +114,11 @@ class SubmissionSqlService {
 
   async getByPlatformId (platformId) {
     const result = (await sequelize.query(this.sqlByPlatform(platformId)))[0]
+    return { success: true, body: result }
+  }
+
+  async getFromPastDay () {
+    const result = (await sequelize.query(this.sqlSubmittedToday()))[0]
     return { success: true, body: result }
   }
 

@@ -45,6 +45,11 @@ module.exports = function (sequelize, DataTypes) {
     },
     recoveryTokenExpiration: {
       type: DataTypes.DATE
+    },
+    isSubscribedToNewSubmissions: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
     }
   }, {})
   Model.associate = function (db) {
