@@ -362,6 +362,18 @@ class UserService extends ModelService {
 
     return { success: true, body: user }
   }
+
+  async setNewSubmissionSubscription (userId, isSubscribed) {
+    const user = await this.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    user.isSubscribedToNewSubmissions = isSubscribed
+    await user.save()
+
+    return { success: true, body: user }
+  }
 }
 
 module.exports = UserService

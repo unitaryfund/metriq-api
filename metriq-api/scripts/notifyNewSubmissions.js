@@ -27,9 +27,15 @@ import config from '../config'
   console.log('Email content: ' + emailBody)
 
   const userService = new UserService()
-  const allUsers = await userService.getSubscribedToNewSubmissions()
-  for (let i = 0; i < allUsers.length; ++i) {
-    const user = allUsers[i]
+  const users = await userService.getSubscribedToNewSubmissions()
+
+  if (!users.length) {
+    console.log('No subscribed users! (Done.)')
+    return
+  }
+
+  for (let i = 0; i < users.length; ++i) {
+    const user = users[i]
     console.log('Emailing ' + user.email + '...')
 
     const transporter = nodemailer.createTransport({
