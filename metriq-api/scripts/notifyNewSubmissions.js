@@ -19,7 +19,7 @@ import config from '../config'
     return
   }
 
-  let emailBody = 'There are new submissions to Metriq, in the past 24 hours: \n\n'
+  let emailBody = 'There are new submissions to Metriq, in the past 24 hours: \n'
   for (let i = 0; i < submissions.length; ++i) {
     emailBody += '\nhttps://metriq.info/Submission/' + submissions[i].id + ' - ' + submissions[i].name
   }
