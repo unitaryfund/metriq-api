@@ -47,7 +47,7 @@ import config from '../config'
     const mailOptions = {
       from: config.supportEmail.address,
       to: user.email,
-      subject: 'Metriq subscription updates',
+      subject: 'Your Metriq submission has been approved!',
       text: emailBody
     }
 
