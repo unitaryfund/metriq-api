@@ -69,6 +69,10 @@ class UserService extends ModelService {
     return await this.SequelizeServiceInstance.findOne({ [Op.or]: [{ usernameNormal: usernameOrEmailNormal }, { email: usernameOrEmailNormal }] })
   }
 
+  async getSubscribedToNewSubmissions () {
+    return await this.SequelizeServiceInstance.findAll({ isSubscribedToNewSubmissions: true })
+  }
+
   async get (userId) {
     const user = await this.getByPk(userId)
     if (!user) {

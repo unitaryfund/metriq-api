@@ -99,7 +99,7 @@ class SubmissionSqlService {
   sqlSubmittedToday () {
     const d = new Date()
     d.setDate(d.getDate() - 1)
-    return 'SELECT * FROM submissions WHERE s."deletedAt" IS NULL AND s."publishedAt" > \'' + d.toISOString() + '\''
+    return 'SELECT * FROM submissions WHERE "deletedAt" IS NULL AND "publishedAt" > \'' + d.toISOString() + '\''
   }
 
   async getByTaskId (taskId) {
