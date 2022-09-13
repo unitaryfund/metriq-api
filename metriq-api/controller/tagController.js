@@ -63,3 +63,9 @@ exports.readNames = async function (req, res) {
     async () => await tagService.getAllNames(),
     'Retrieved all task names.', req.user ? req.user.id : 0)
 }
+
+exports.subscribe = async function (req, res) {
+  routeWrapper(res,
+    async () => await tagService.subscribe(req.params.name, req.user.id),
+    'Subscribed to tag!', req.user ? req.user.id : 0)
+}
