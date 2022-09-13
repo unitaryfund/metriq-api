@@ -77,6 +77,18 @@ exports.unsubscribe = async function (req, res) {
     'Successfully unsubscribed from all updates.', false)
 }
 
+exports.subscribeNewSubmissions = async function (req, res) {
+  routeWrapper(res,
+    async () => await userService.setNewSubmissionSubscription(req.user.id, true),
+    'Successfully subscribed to daily new submission updates.', false)
+}
+
+exports.unsubscribeNewSubmissions = async function (req, res) {
+  routeWrapper(res,
+    async () => await userService.setNewSubmissionSubscription(req.user.id, false),
+    'Successfully unsubscribed from daily new submission updates.', false)
+}
+
 const itemsPerPage = 10
 
 // Validate the delete request and delete the user.

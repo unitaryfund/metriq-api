@@ -69,6 +69,10 @@ class UserService extends ModelService {
     return await this.SequelizeServiceInstance.findOne({ [Op.or]: [{ usernameNormal: usernameOrEmailNormal }, { email: usernameOrEmailNormal }] })
   }
 
+  async getSubscribedToNewSubmissions () {
+    return await this.SequelizeServiceInstance.findAll({ isSubscribedToNewSubmissions: true })
+  }
+
   async get (userId) {
     const user = await this.getByPk(userId)
     if (!user) {
@@ -355,6 +359,18 @@ class UserService extends ModelService {
     for (let i = 0; i < platforms.length; ++i) {
       await platforms[i].destroy()
     }
+
+    return { success: true, body: user }
+  }
+
+  async setNewSubmissionSubscription (userId, isSubscribed) {
+    const user = await this.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    user.isSubscribedToNewSubmissions = isSubscribed
+    await user.save()
 
     return { success: true, body: user }
   }
