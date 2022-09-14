@@ -6,6 +6,11 @@ const ModelService = require('./modelService')
 const db = require('../models/index')
 const sequelize = db.sequelize
 const Tag = db.tag
+// Other services
+const TagSubscriptionService = require('./tagSubscriptionService')
+const tagSubscriptionService = new TagSubscriptionService()
+const UserService = require('./userService')
+const userService = new UserService()
 
 class TagService extends ModelService {
   constructor () {
@@ -46,7 +51,31 @@ class TagService extends ModelService {
       await tag.save()
     }
 
+    tag.isSubscribed = ((userId > 0) && await tagSubscriptionService.getByFks(userId, tag.id))
+
     return { success: true, body: tag }
+  }
+
+  async subscribe (tagName, userId) {
+    const tag = await this.getByName(tagName)
+    if (!tag) {
+      return { success: false, error: 'Task not found.' }
+    }
+
+    const user = await userService.getByPk(userId)
+    if (!user) {
+      return { success: false, error: 'User not found.' }
+    }
+
+    let subscription = await tagSubscriptionService.getByFks(user.id, tag.id)
+    const willBeSubscribed = !subscription
+    if (subscription) {
+      await tagSubscriptionService.deleteByPk(subscription.id)
+    } else {
+      subscription = await tagSubscriptionService.createOrFetch(user.id, tag.id)
+    }
+
+    return { success: true, body: willBeSubscribed }
   }
 }
 

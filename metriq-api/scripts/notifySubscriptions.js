@@ -26,6 +26,7 @@ function getLastUpateTime (refs, lastUpdate) {
     const tasks = await user.getTaskSubscriptions()
     const methods = await user.getMethodSubscriptions()
     const platforms = await user.getPlatformSubscriptions()
+    const tags = await user.getTagSubscriptions()
 
     let emailBody = 'Your metriq.info subscriptions have updates:\n'
     let sendEmail = false
@@ -143,6 +144,35 @@ function getLastUpateTime (refs, lastUpdate) {
       }
     }
 
+    for (let j = 0; j < tags.length; ++j) {
+      let didAddHeader = false
+      const subscription = tags[j]
+      const tag = await subscription.getTag()
+      let lastUpdate = tag.updatedAt
+
+      const tagSubmissionRefs = await tag.getSubmissionTagRefs()
+      let emailSubmissions = ''
+      for (let k = 0; k < tagSubmissionRefs.length; ++k) {
+        const tagSubmission = await tagSubmissionRefs[k].getSubmission()
+        if (tagSubmission && (tagSubmission.publishedAt > subscription.notifiedAt)) {
+          lastUpdate = tagSubmission.publishedAt
+          emailSubmissions += '\nhttps://metriq.info/Submission/' + tagSubmission.id + ' - ' + tagSubmission.name
+        }
+      }
+
+      if (lastUpdate > subscription.notifiedAt) {
+        if (!didAddHeader) {
+          didAddHeader = true
+        }
+
+        emailBody += '\nhttps://metriq.info/Tag/' + encodeURIComponent(tag.name) + ' - ' + tag.name
+        emailBody += '\nNew submissions for tag:'
+        emailBody += emailSubmissions
+
+        sendEmail = true
+      }
+    }
+
     if (!sendEmail) {
       console.log('No subscription updates for ' + user.email)
       continue
@@ -192,6 +222,10 @@ function getLastUpateTime (refs, lastUpdate) {
     for (let j = 0; j < platforms.length; ++j) {
       platforms[j].notifiedAt = new Date()
       await platforms[j].save()
+    }
+    for (let j = 0; j < tags.length; ++j) {
+      tags[j].notifiedAt = new Date()
+      await tags[j].save()
     }
 
     console.log('Updated user notification date and time.')
