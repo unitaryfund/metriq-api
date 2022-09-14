@@ -219,6 +219,10 @@ function getLastUpateTime (refs, lastUpdate) {
       platforms[j].notifiedAt = new Date()
       await platforms[j].save()
     }
+    for (let j = 0; j < tags.length; ++j) {
+      tags[j].notifiedAt = new Date()
+      await tags[j].save()
+    }
 
     console.log('Updated user notification date and time.')
   }
