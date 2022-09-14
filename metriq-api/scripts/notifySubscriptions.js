@@ -153,7 +153,9 @@ function getLastUpateTime (refs, lastUpdate) {
       const tagSubmissionRefs = await tag.getSubmissionTagRefs()
       for (let k = 0; k < tagSubmissionRefs.length; ++k) {
         const tagSubmission = await tagSubmissionRefs[k].getSubmission()
-        lastUpdate = getLastUpateTime(tagSubmission, lastUpdate)
+        if (tagSubmission.publishedAt > lastUpdate) {
+          lastUpdate = tagSubmission.publishedAt
+        }
       }
 
       if (lastUpdate > subscription.notifiedAt) {
