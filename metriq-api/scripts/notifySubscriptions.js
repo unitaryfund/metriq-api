@@ -151,10 +151,12 @@ function getLastUpateTime (refs, lastUpdate) {
       let lastUpdate = tag.updatedAt
 
       const tagSubmissionRefs = await tag.getSubmissionTagRefs()
+      let emailSubmissions = ''
       for (let k = 0; k < tagSubmissionRefs.length; ++k) {
         const tagSubmission = await tagSubmissionRefs[k].getSubmission()
-        if (tagSubmission.publishedAt > lastUpdate) {
+        if (tagSubmission.publishedAt > subscription.notifiedAt) {
           lastUpdate = tagSubmission.publishedAt
+          emailSubmissions += '\nhttps://metriq.info/Submission/' + tagSubmission.id + ' - ' + tagSubmission.name
         }
       }
 
@@ -164,6 +166,8 @@ function getLastUpateTime (refs, lastUpdate) {
         }
 
         emailBody += '\nhttps://metriq.info/Tag/' + encodeURIComponent(tag.name) + ' - ' + tag.name
+        emailBody += '\nNew submissions for tag:'
+        emailBody += emailSubmissions
 
         sendEmail = true
       }
