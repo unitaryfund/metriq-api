@@ -68,7 +68,7 @@ class TagService extends ModelService {
     }
 
     let subscription = await tagSubscriptionService.getByFks(user.id, tag.id)
-    const willBeSubscribed = !!subscription
+    const willBeSubscribed = !subscription
     if (subscription) {
       await tagSubscriptionService.deleteByPk(subscription.id)
     } else {
