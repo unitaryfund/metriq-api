@@ -26,6 +26,7 @@ function getLastUpateTime (refs, lastUpdate) {
     const tasks = await user.getTaskSubscriptions()
     const methods = await user.getMethodSubscriptions()
     const platforms = await user.getPlatformSubscriptions()
+    const tags = await user.getTagSubscriptions()
 
     let emailBody = 'Your metriq.info subscriptions have updates:\n'
     let sendEmail = false
@@ -138,6 +139,29 @@ function getLastUpateTime (refs, lastUpdate) {
         }
 
         emailBody += '\nhttps://metriq.info/Platform/' + platform.id + ' - ' + platform.name
+
+        sendEmail = true
+      }
+    }
+
+    for (let j = 0; j < tags.length; ++j) {
+      let didAddHeader = false
+      const subscription = tags[j]
+      const tag = await subscription.getTag()
+      let lastUpdate = tag.updatedAt
+
+      const tagSubmissionRefs = await tag.getSubmissionTagRefs()
+      for (let k = 0; k < tagSubmissionRefs.length; ++k) {
+        const tagSubmission = await tagSubmissionRefs[k].getSubmission()
+        lastUpdate = getLastUpateTime(tagSubmission, lastUpdate)
+      }
+
+      if (lastUpdate > subscription.notifiedAt) {
+        if (!didAddHeader) {
+          didAddHeader = true
+        }
+
+        emailBody += '\nhttps://metriq.info/Tag/' + encodeURIComponent(tag.name) + ' - ' + tag.name
 
         sendEmail = true
       }
