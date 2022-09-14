@@ -51,6 +51,8 @@ class TagService extends ModelService {
       await tag.save()
     }
 
+    tag.dataValues.isSubscribed = ((userId > 0) && await tagSubscriptionService.getByFks(userId, tag.id))
+
     return { success: true, body: tag }
   }
 
