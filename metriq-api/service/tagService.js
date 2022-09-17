@@ -26,9 +26,9 @@ class TagService extends ModelService {
     return { success: true, body: result }
   }
 
-  async getAllNamesAndCounts () {
+  async getAllNamesAndCounts (userId) {
     const result = (await sequelize.query(
-      'SELECT tags.name as name, COUNT("submissionTagRefs".*) as "submissionCount", COUNT(likes.*) as "upvoteTotal", COUNT(results.*) as "resultCount" from "submissionTagRefs" ' +
+      'SELECT tags.id as id, tags.name as name, COUNT("submissionTagRefs".*) as "submissionCount", COUNT(likes.*) as "upvoteTotal", COUNT(results.*) as "resultCount" from "submissionTagRefs" ' +
       '  RIGHT JOIN tags on tags.id = "submissionTagRefs"."tagId" ' +
       '  LEFT JOIN likes on likes."submissionId" = "submissionTagRefs"."submissionId" ' +
       '  LEFT JOIN "submissionTaskRefs" on "submissionTaskRefs"."submissionId" = "submissionTagRefs"."submissionId" AND "submissionTaskRefs"."deletedAt" IS NULL ' +
@@ -37,6 +37,16 @@ class TagService extends ModelService {
       '  WHERE (submissions."deletedAt" IS NULL) ' +
       '  GROUP BY tags.id'
     ))[0]
+
+    if (!userId) {
+      return { success: true, body: result }
+    }
+
+    for (let i = 0; i < result.length; ++i) {
+      const tag = result[i]
+      tag.isSubscribed = ((userId > 0) && await tagSubscriptionService.getByFks(userId, tag.id))
+    }
+
     return { success: true, body: result }
   }
 

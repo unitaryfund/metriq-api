@@ -56,7 +56,7 @@ function setJwtCookie (res, token) {
 
 exports.read = async function (req, res) {
   routeWrapper(res,
-    async () => await tagService.getAllNamesAndCounts(),
+    async () => await tagService.getAllNamesAndCounts(req.user ? req.user.id : 0),
     'Retrieved all tag names and counts.', req.user ? req.user.id : 0)
 }
 
