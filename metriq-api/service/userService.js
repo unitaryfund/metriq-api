@@ -37,7 +37,8 @@ class UserService extends ModelService {
       affiliation: user.affiliation,
       name: user.name,
       createdAt: user.createdAt,
-      isSubscribedToNewSubmissions: user.isSubscribedToNewSubmissions
+      isSubscribedToNewSubmissions: user.isSubscribedToNewSubmissions,
+      twitterHandle: user.twitterHandle
     }
   }
 
@@ -284,14 +285,17 @@ class UserService extends ModelService {
       return { success: false, error: 'User not found.' }
     }
 
-    if (reqBody.name) {
+    if (reqBody.name !== undefined) {
       user.name = reqBody.name
     }
-    if (reqBody.email) {
+    if (reqBody.email !== undefined) {
       user.email = reqBody.email
     }
-    if (reqBody.affiliation) {
+    if (reqBody.affiliation !== undefined) {
       user.affiliation = reqBody.affiliation
+    }
+    if (reqBody.twitterHandle !== undefined) {
+      user.twitterHandle = reqBody.twitterHandle
     }
 
     await user.save()

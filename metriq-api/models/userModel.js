@@ -50,6 +50,11 @@ module.exports = function (sequelize, DataTypes) {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
+    },
+    twitterHandle: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      defaultValue: ''
     }
   }, {})
   Model.associate = function (db) {
