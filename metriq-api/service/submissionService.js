@@ -157,8 +157,8 @@ class SubmissionService extends ModelService {
     }
   }
 
-  async tweet (submission) {
-    let title = 'New submission: ' + submission.name
+  async tweet (submission, twitterHandle) {
+    let title = 'New submission' + (twitterHandle ? ' by ' + twitterHandle + ': ' :  ': ') + submission.name
     const link = '\nhttps://metriq.info/Submission/' + submission.id.toString()
     const tweetLength = (title + link).length
     if (tweetLength > 260) {
@@ -271,7 +271,7 @@ class SubmissionService extends ModelService {
     }
 
     if (reqBody.isPublished && config.twitter.accessSecret) {
-      await this.tweet(submission)
+      await this.tweet(submission, user.twitterHandle)
 
       const emailResult = await transporter.sendMail(mailOptions)
       if (!emailResult.accepted || (emailResult.accepted[0] !== user.email)) {
@@ -347,7 +347,8 @@ class SubmissionService extends ModelService {
     submission = await submissionSqlService.populate(submission, userId)
 
     if (doTweet && config.twitter.accessSecret) {
-      await this.tweet(submission)
+      const user = await userService.getByPk(userId)
+      await this.tweet(submission, user ? user.twitterHandle : '')
     }
 
     return { success: true, body: submission }

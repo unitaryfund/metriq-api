@@ -102,6 +102,7 @@ class UserService extends ModelService {
     user.username = reqBody.username.trim()
     user.usernameNormal = reqBody.username.trim().toLowerCase()
     user.affiliation = reqBody.affiliation ? reqBody.affiliation : ''
+    user.twitterHandle = reqBody.twitterHandle ? reqBody.twitterHandle : ''
     user.name = reqBody.name ? reqBody.name : ''
     user.email = reqBody.email.trim().toLowerCase()
     user.passwordHash = await bcrypt.hash(reqBody.password, saltRounds)
@@ -138,6 +139,12 @@ class UserService extends ModelService {
 
   validatePassword (password) {
     return password && (password.length >= 12)
+  }
+
+  validateTwitterHandle (handle) {
+    // https://codepen.io/SitePoint/pen/yLbqeg
+    const re = /^@[A-Za-z0-9_]{1,15}$/
+    return re.test(handle)
   }
 
   async validateRegistration (reqBody) {
@@ -180,6 +187,10 @@ class UserService extends ModelService {
     const emailMatch = await this.getByEmail(tlEmail)
     if (emailMatch) {
       return { success: false, error: 'Email already in use.' }
+    }
+
+    if (reqBody.twitterHandle && !this.validateTwitterHandle(reqBody.twitterHandle)) {
+      return { success: false, error: 'Invalid Twitter handle format.' }
     }
 
     return { success: true }
