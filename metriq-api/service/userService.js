@@ -106,6 +106,7 @@ class UserService extends ModelService {
     user.name = reqBody.name ? reqBody.name : ''
     user.email = reqBody.email.trim().toLowerCase()
     user.passwordHash = await bcrypt.hash(reqBody.password, saltRounds)
+    user.isSubscribedToNewSubmissions = false;
 
     const result = await this.create(user)
     if (!result.success) {
