@@ -158,7 +158,10 @@ class SubmissionService extends ModelService {
   }
 
   async tweet (submission, twitterHandle) {
-    let title = 'New submission' + (twitterHandle ? ' by ' + twitterHandle + ': ' :  ': ') + submission.name
+    if (twitterHandle.charAt(0) != '@') {
+      twitterHandle = '@' + twitterHandle
+    }
+    let title = 'New submission' + (twitterHandle ? ' from ' + twitterHandle + ': ' :  ': ') + submission.name
     const link = '\nhttps://metriq.info/Submission/' + submission.id.toString()
     const tweetLength = (title + link).length
     if (tweetLength > 260) {
