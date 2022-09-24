@@ -158,7 +158,7 @@ class SubmissionService extends ModelService {
   }
 
   async tweet (submission, twitterHandle) {
-    if (twitterHandle.charAt(0) != '@') {
+    if (twitterHandle && (twitterHandle.charAt(0) != '@')) {
       twitterHandle = '@' + twitterHandle
     }
     let title = 'New submission' + (twitterHandle ? ' from ' + twitterHandle + ': ' :  ': ') + submission.name
