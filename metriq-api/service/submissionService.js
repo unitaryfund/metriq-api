@@ -440,7 +440,7 @@ class SubmissionService extends ModelService {
     if (!user) {
       return { success: false, error: 'User not found.' }
     }
-    const result = await this.SequelizeServiceInstance.findAndSort({ userId: userId, deletedAt: null }, [['createdAt', 'DESC']], startIndex, count)
+    const result = await this.SequelizeServiceInstance.findAndSort({ userId: userId, deletedAt: null, publishedAt: { [Op.ne]: null } }, [['createdAt', 'DESC']], startIndex, count)
     for (let i = 0; i < result.length; i++) {
       result[i].dataValues.username = user.username
     }
