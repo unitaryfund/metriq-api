@@ -15,7 +15,7 @@ import config from '../config'
     let sendEmail = false
     const submissions = await user.getSubmissions()
     for (let j = 0; j < submissions.length; ++j) {
-      if (!submissions[j].approvedAt) {
+      if (!submissions[j].approvedAt && !submissions[j].deletedAt && !!submissions[j].publishedAt) {
         sendEmail = true
         emailBody += '\nhttps://metriq.info/Submission/' + submissions[j].id + ' - ' + submissions[j].name
         submissions[j].approvedAt = new Date()
