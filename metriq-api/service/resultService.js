@@ -158,8 +158,8 @@ class ResultService extends ModelService {
     result.submissionMethodRefId = (await submissionMethodRefService.getByFks(submissionId, parseInt(reqBody.method))).id
     result.isHigherBetter = reqBody.isHigherBetter
     result.metricName = reqBody.metricName
-    result.metricValue = reqBody.metricValue
-    result.evaluatedAt = reqBody.evaluatedAt
+    result.metricValue = parseFloat(reqBody.metricValue)
+    result.evaluatedAt = new Date(reqBody.evaluatedAt)
     result.notes = reqBody.notes ? reqBody.notes : ''
     result.standardError = reqBody.standardError
     result.sampleSize = reqBody.sampleSize
@@ -192,6 +192,11 @@ class ResultService extends ModelService {
       return { success: false, error: 'Result not found.' }
     }
 
+    // Task must be not null and valid (present in database) for a valid result object.
+    if (reqBody.task === null) {
+      return { success: false, error: 'Result requires task to be defined.' }
+    }
+
     // Method must be not null and valid (present in database) for a valid result object.
     if (reqBody.method === null) {
       return { success: false, error: 'Result requires method to be defined.' }
@@ -208,8 +213,8 @@ class ResultService extends ModelService {
     result.submissionMethodRefId = (await submissionMethodRefService.getByFks(reqBody.submissionId, parseInt(reqBody.method))).id
     result.isHigherBetter = reqBody.isHigherBetter
     result.metricName = reqBody.metricName
-    result.metricValue = reqBody.metricValue
-    result.evaluatedAt = reqBody.evaluatedAt
+    result.metricValue = parseFloat(reqBody.metricValue)
+    result.evaluatedAt = new Date(reqBody.evaluatedAt)
     result.notes = reqBody.notes ? reqBody.notes : ''
     result.standardError = reqBody.standardError
     result.sampleSize = reqBody.sampleSize
