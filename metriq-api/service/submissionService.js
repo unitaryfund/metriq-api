@@ -534,6 +534,10 @@ class SubmissionService extends ModelService {
   }
 
   async addOrRemoveTag (isAdd, submissionId, tagName, userId) {
+    if (!tagName) {
+      return { success: false, error: 'Cannot add an empty string as a tag.' }
+    }
+
     let submission = await this.getByPk(submissionId)
     if (!submission) {
       return { success: false, error: 'Submission not found.' }
