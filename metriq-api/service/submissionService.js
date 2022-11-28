@@ -78,9 +78,12 @@ class SubmissionService extends ModelService {
     return { success: true, body: result }
   }
 
-  async getByArxivId (arxivId) {
-    const url = 'https://arxiv.org/abs/' + arxivId
+  async getByUrl (url) {
     return await this.SequelizeServiceInstance.findOne({ contentUrl: url })
+  }
+
+  async getByArxivId (arxivId) {
+    return await this.getByUrl('https://arxiv.org/abs/' + arxivId)
   }
 
   async get (submissionNameOrId) {
@@ -432,6 +435,8 @@ class SubmissionService extends ModelService {
       return { success: false, error: 'User not found.' }
     }
     const result = await parser(reqBody.url)
+    const existing = await this.getByUrl(reqBody.url)
+    result.isAlreadyInDatabase = !!existing
     return { success: true, body: result }
   }
 
