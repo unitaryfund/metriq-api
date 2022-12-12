@@ -437,6 +437,7 @@ class SubmissionService extends ModelService {
     const result = await parser(reqBody.url)
     const existing = await this.getByUrl(reqBody.url)
     result.isAlreadyInDatabase = !!existing
+    result.ExistingDraftId = ((existing.userId === userId) && (!existing.publishedAt) && (!existing.deletedAt)) ? existing.id : 0
     return { success: true, body: result }
   }
 
