@@ -103,3 +103,9 @@ exports.readSubmissionsPublic = async function (req, res) {
     async () => await submissionService.getByUserIdPublic(req.params.userId, (req.user && req.user.id) ? req.user.id : 0, parseInt(req.params.page) * itemsPerPage, itemsPerPage),
     'Successfully retrieved user submissions.', req.user ? req.user.id : 0)
 }
+
+exports.topSubmitters = async function (req, res) {
+  routeWrapper(res,
+    async () => await userService.getTopSubmitters(2),
+    'Successfully retrieved top submitters.', req.user ? req.user.id : 0)
+}

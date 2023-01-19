@@ -7,6 +7,7 @@ const ModelService = require('./modelService')
 // Database Model
 const config = require('../config')
 const db = require('../models/index')
+const sequelize = db.sequelize
 const User = db.user
 
 // Password hasher
@@ -315,8 +316,6 @@ class UserService extends ModelService {
   }
 
   async tryPasswordChange (userId, reqBody) {
-    console.log('In method')
-
     if (!this.validatePassword(reqBody.password)) {
       return { success: false, error: 'Password is too short.' }
     }
@@ -390,6 +389,40 @@ class UserService extends ModelService {
     await user.save()
 
     return { success: true, body: user }
+  }
+
+  async getTopSubmitters (count) {
+    const month = new Date()
+    month.setDate(month.getDate() - 30)
+
+    const week = new Date()
+    week.setDate(week.getDate() - 7)
+
+    const pad = function (num) { return ('00' + num).slice(-2) }
+
+    return {
+      success: true,
+      body: {
+        allTime: (await sequelize.query(
+          'SELECT users.username, COUNT(submissions."userId") AS "submissionsCount" FROM users' +
+          ' LEFT JOIN submissions ON users.id = submissions."userId" AND submissions."publishedAt" IS NOT NULL' +
+          ' GROUP BY users.id' +
+          ' ORDER BY "submissionsCount" DESC' +
+          ' LIMIT ' + count))[0],
+        monthly: (await sequelize.query(
+          'SELECT users.username, COUNT(submissions."userId") AS "submissionsCount" FROM users' +
+          ' LEFT JOIN submissions ON users.id = submissions."userId" AND submissions."publishedAt" > \'' + month.getUTCFullYear() + '-' + pad(month.getUTCMonth() + 1) + '-' + pad(month.getUTCDate()) + '\'' +
+          ' GROUP BY users.id' +
+          ' ORDER BY "submissionsCount" DESC' +
+          ' LIMIT ' + count))[0],
+        weekly: (await sequelize.query(
+          'SELECT users.username, COUNT(submissions."userId") AS "submissionsCount" FROM users' +
+          ' LEFT JOIN submissions ON users.id = submissions."userId" AND submissions."publishedAt" > \'' + week.getUTCFullYear() + '-' + pad(week.getUTCMonth() + 1) + '-' + pad(week.getUTCDate()) + '\'' +
+          ' GROUP BY users.id' +
+          ' ORDER BY "submissionsCount" DESC' +
+          ' LIMIT ' + count))[0]
+      }
+    }
   }
 }
 
