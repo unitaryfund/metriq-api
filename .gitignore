@@ -1,5 +1,11 @@
+# Mac
+.DS_Store
+
 # REST API testing
 route.http
+
+# QED-C benchmark repo
+benchmark/benchmark/QC-App-Oriented-Benchmarks/*
 
 # VSCode
 #*.vscode
