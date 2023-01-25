@@ -30,6 +30,14 @@ module.exports = function (sequelize, DataTypes) {
     sampleSize: {
       type: DataTypes.INTEGER,
       allowNull: true
+    },
+    qubitCount: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    circuitDepth: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     }
   }, {})
   Model.associate = function (db) {

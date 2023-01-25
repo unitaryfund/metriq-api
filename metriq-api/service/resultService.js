@@ -163,6 +163,8 @@ class ResultService extends ModelService {
     result.notes = reqBody.notes ? reqBody.notes : ''
     result.standardError = reqBody.standardError
     result.sampleSize = reqBody.sampleSize
+    result.qubitCount = reqBody.qubitCount
+    result.circuitDepth = reqBody.circuitDepth
 
     const nResult = await this.create(result)
     if (!nResult.success) {
@@ -218,6 +220,8 @@ class ResultService extends ModelService {
     result.notes = reqBody.notes ? reqBody.notes : ''
     result.standardError = reqBody.standardError
     result.sampleSize = reqBody.sampleSize
+    result.qubitCount = reqBody.qubitCount
+    result.circuitDepth = reqBody.circuitDepth
 
     result.save()
 
