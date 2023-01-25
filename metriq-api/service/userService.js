@@ -404,19 +404,19 @@ class UserService extends ModelService {
       success: true,
       body: {
         allTime: (await sequelize.query(
-          'SELECT users.username, COUNT(submissions."userId") AS "submissionsCount" FROM users' +
+          'SELECT users.id, users.username, COUNT(submissions."userId") AS "submissionsCount" FROM users' +
           ' LEFT JOIN submissions ON users.id = submissions."userId" AND submissions."publishedAt" IS NOT NULL' +
           ' GROUP BY users.id' +
           ' ORDER BY "submissionsCount" DESC' +
           ' LIMIT ' + count))[0],
         monthly: (await sequelize.query(
-          'SELECT users.username, COUNT(submissions."userId") AS "submissionsCount" FROM users' +
+          'SELECT users.id, users.username, COUNT(submissions."userId") AS "submissionsCount" FROM users' +
           ' LEFT JOIN submissions ON users.id = submissions."userId" AND submissions."publishedAt" > \'' + month.getUTCFullYear() + '-' + pad(month.getUTCMonth() + 1) + '-' + pad(month.getUTCDate()) + '\'' +
           ' GROUP BY users.id' +
           ' ORDER BY "submissionsCount" DESC' +
           ' LIMIT ' + count))[0],
         weekly: (await sequelize.query(
-          'SELECT users.username, COUNT(submissions."userId") AS "submissionsCount" FROM users' +
+          'SELECT users.id, users.username, COUNT(submissions."userId") AS "submissionsCount" FROM users' +
           ' LEFT JOIN submissions ON users.id = submissions."userId" AND submissions."publishedAt" > \'' + week.getUTCFullYear() + '-' + pad(week.getUTCMonth() + 1) + '-' + pad(week.getUTCDate()) + '\'' +
           ' GROUP BY users.id' +
           ' ORDER BY "submissionsCount" DESC' +

@@ -106,6 +106,6 @@ exports.readSubmissionsPublic = async function (req, res) {
 
 exports.topSubmitters = async function (req, res) {
   routeWrapper(res,
-    async () => await userService.getTopSubmitters(2),
+    async () => await userService.getTopSubmitters(3),
     'Successfully retrieved top submitters.', req.user ? req.user.id : 0)
 }
