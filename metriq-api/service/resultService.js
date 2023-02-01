@@ -29,7 +29,7 @@ class ResultService extends ModelService {
     '    SELECT t.id FROM tasks AS t ' +
     '    JOIN c on c.id = t."taskId" ' +
     ') ' +
-    'SELECT r.*, s.name AS "submissionName", CASE WHEN t.id = ' + taskId + ' THEN m.name ELSE m.name || \' | \' || t.name END AS "methodName", COALESCE(p.name, \'\') as "platformName"  FROM "submissionTaskRefs" AS str ' +
+    'SELECT r.*, s.name AS "submissionName", s."contentUrl" AS "submissionUrl", CASE WHEN t.id = ' + taskId + ' THEN m.name ELSE m.name || \' | \' || t.name END AS "methodName", COALESCE(p.name, \'\') as "platformName"  FROM "submissionTaskRefs" AS str ' +
     '    RIGHT JOIN c on c.id = str."taskId" ' +
     '    JOIN results AS r on r."submissionTaskRefId" = str.id AND r."deletedAt" IS NULL ' +
     '    LEFT JOIN submissions AS s on str."submissionId" = s.id AND s."deletedAt" IS NULL ' +
