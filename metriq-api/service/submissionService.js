@@ -196,7 +196,9 @@ class SubmissionService extends ModelService {
     submission.name = reqBody.name.trim()
     submission.nameNormal = reqBody.name.trim().toLowerCase()
     submission.contentUrl = reqBody.contentUrl.trim()
-    submission.thumbnailUrl = reqBody.thumbnailUrl ? reqBody.thumbnailUrl.trim() : null
+    submission.thumbnailUrl = reqBody.thumbnailUrl ? reqBody.thumbnailUrl.trim() : ''
+    submission.codeUrl = reqBody.codeUrl ? reqBody.codeUrl.trim() : ''
+    submission.supplementUrl = reqBody.supplementUrl ? reqBody.supplementUrl.trim() : ''
     submission.description = reqBody.description ? reqBody.description.trim() : ''
     submission.publishedAt = reqBody.isPublished ? new Date() : null
 
@@ -303,19 +305,19 @@ class SubmissionService extends ModelService {
       if (reqBody.contentUrl !== undefined) {
         submission.contentUrl = reqBody.contentUrl.trim()
       }
-      if (reqBody.thumbnailUrl !== undefined) {
-        submission.thumbnailUrl = reqBody.thumbnailUrl ? reqBody.thumbnailUrl.trim() : null
-      }
-      if (reqBody.description !== undefined) {
-        submission.description = reqBody.description ? reqBody.description.trim() : ''
-      }
       if (reqBody.isPublished) {
         doTweet = true
         submission.publishedAt = new Date()
       }
     }
     if (reqBody.thumbnailUrl !== undefined) {
-      submission.thumbnailUrl = (reqBody.thumbnailUrl && reqBody.thumbnailUrl.trim()) ? reqBody.thumbnailUrl.trim() : null
+      submission.thumbnailUrl = reqBody.thumbnailUrl.trim() ? reqBody.thumbnailUrl.trim() : null
+    }
+    if (reqBody.codeUrl !== undefined) {
+      submission.codeUrl = reqBody.codeUrl.trim() ? reqBody.codeUrl.trim() : null
+    }
+    if (reqBody.supplementUrl !== undefined) {
+      submission.supplementUrl = reqBody.codeUrl.trim() ? reqBody.supplementUrl.trim() : null
     }
     if (reqBody.description !== undefined) {
       submission.description = reqBody.description.trim() ? reqBody.description.trim() : ''

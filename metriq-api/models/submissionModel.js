@@ -22,6 +22,14 @@ module.exports = function (sequelize, DataTypes) {
     thumbnailUrl: {
       type: DataTypes.TEXT
     },
+    codeUrl: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    supplementUrl: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
     approvedAt: {
       type: DataTypes.DATE
     },
