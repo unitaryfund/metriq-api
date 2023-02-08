@@ -145,7 +145,7 @@ class UserService extends ModelService {
 
   validateTwitterHandle (handle) {
     // https://codepen.io/SitePoint/pen/yLbqeg
-    const re = /^@[A-Za-z0-9_]{1,15}$/
+    const re = /^@?[A-Za-z0-9_]{1,15}$/
     return re.test(handle)
   }
 
