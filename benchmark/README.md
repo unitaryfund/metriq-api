@@ -23,8 +23,10 @@ poetry shell
 Once the `poetry` shell has been invoked, one may run the `run.py` script as
 
 ```
-python run.py
+python run.py -token <TOKEN>
 ```
+
+where `<TOKEN>` is the Metriq API token obtained from your Metriq account.
 
 In order to select which benchmarks to run, we can specify this in the `benchmarks` dictionary:
 
