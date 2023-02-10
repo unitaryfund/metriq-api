@@ -311,16 +311,16 @@ class SubmissionService extends ModelService {
       }
     }
     if (reqBody.thumbnailUrl !== undefined) {
-      submission.thumbnailUrl = reqBody.thumbnailUrl.trim() ? reqBody.thumbnailUrl.trim() : null
+      submission.thumbnailUrl = (reqBody.thumbnailUrl && reqBody.thumbnailUrl.trim()) ? reqBody.thumbnailUrl.trim() : null
     }
     if (reqBody.codeUrl !== undefined) {
-      submission.codeUrl = reqBody.codeUrl.trim() ? reqBody.codeUrl.trim() : null
+      submission.codeUrl = (reqBody.codeUrl && reqBody.codeUrl.trim()) ? reqBody.codeUrl.trim() : null
     }
     if (reqBody.supplementUrl !== undefined) {
-      submission.supplementUrl = reqBody.codeUrl.trim() ? reqBody.supplementUrl.trim() : null
+      submission.supplementUrl = (reqBody.supplementUrl && reqBody.codeUrl.trim()) ? reqBody.supplementUrl.trim() : null
     }
     if (reqBody.description !== undefined) {
-      submission.description = reqBody.description.trim() ? reqBody.description.trim() : ''
+      submission.description = (reqBody.description && reqBody.description.trim()) ? reqBody.description.trim() : ''
     }
     await submission.save()
 
