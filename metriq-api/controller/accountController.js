@@ -99,28 +99,28 @@ exports.logout = async function (req, res) {
 
 // Generate a new client token for the user ID claim.
 exports.newToken = async function (req, res) {
-  if (req.user.role !== 'web') {
+  if (req.auth.role !== 'web') {
     sendResponse(res, 403, 'Authorization role lacks privileges.')
     return
   }
 
   routeWrapper(res,
-    async () => await userService.saveClientTokenForUserId(req.user.id),
+    async () => await userService.saveClientTokenForUserId(req.auth.id),
     'Client token was generated successfully.',
-    req.user.id)
+    req.auth.id)
 }
 
 // Delete any client token for the user ID claim
 exports.deleteToken = async function (req, res) {
-  if (req.user.role !== 'web') {
+  if (req.auth.role !== 'web') {
     sendResponse(res, 403, 'Authorization role lacks privileges.')
     return
   }
 
   routeWrapper(res,
-    async () => await userService.deleteClientTokenForUserId(req.user.id),
+    async () => await userService.deleteClientTokenForUserId(req.auth.id),
     'Client token was deleted successfully.',
-    req.user.id)
+    req.auth.id)
 }
 
 // Generate a new recovery UUID and email.
@@ -144,13 +144,13 @@ exports.password = async function (req, res) {
 
 // Change password if cookie and old password are valid.
 exports.update_password = async function (req, res) {
-  if (req.user.role !== 'web') {
+  if (req.auth.role !== 'web') {
     sendResponse(res, 403, 'Authorization role lacks privileges.')
     return
   }
 
   routeWrapper(res,
-    async () => await userService.tryPasswordChange(req.user.id, req.body),
+    async () => await userService.tryPasswordChange(req.auth.id, req.body),
     'Successfully changed password.',
-    req.user.id)
+    req.auth.id)
 }

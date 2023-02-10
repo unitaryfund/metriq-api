@@ -55,48 +55,48 @@ function setJwtCookie (res, token) {
 // Validate the submission request and create the submission model.
 exports.new = async function (req, res) {
   routeWrapper(res,
-    async () => await taskService.submit(req.user.id, req.body),
-    'New task added to submission!', req.user ? req.user.id : 0)
+    async () => await taskService.submit(req.auth.id, req.body),
+    'New task added to submission!', req.auth ? req.auth.id : 0)
 }
 
 exports.read = async function (req, res) {
   routeWrapper(res,
-    async () => await taskService.getSanitized(req.params.id, req.user ? req.user.id : 0),
-    'Retrieved task by Id.', req.user ? req.user.id : 0)
+    async () => await taskService.getSanitized(req.params.id, req.auth ? req.auth.id : 0),
+    'Retrieved task by Id.', req.auth ? req.auth.id : 0)
 }
 
 exports.update = async function (req, res) {
   routeWrapper(res,
-    async () => await taskService.update(req.params.id, req.body, req.user ? req.user.id : 0),
-    'Updated task.', req.user ? req.user.id : 0)
+    async () => await taskService.update(req.params.id, req.body, req.auth ? req.auth.id : 0),
+    'Updated task.', req.auth ? req.auth.id : 0)
 }
 
 exports.subscribe = async function (req, res) {
   routeWrapper(res,
-    async () => await taskService.subscribe(req.params.id, req.user.id),
-    'Subscribed to task!', req.user ? req.user.id : 0)
+    async () => await taskService.subscribe(req.params.id, req.auth.id),
+    'Subscribed to task!', req.auth ? req.auth.id : 0)
 }
 
 exports.readSubmissionCounts = async function (req, res) {
   routeWrapper(res,
     async () => await taskService.getTopLevelNamesAndCounts(),
-    'Retrieved all task names and counts.', req.user ? req.user.id : 0)
+    'Retrieved all task names and counts.', req.auth ? req.auth.id : 0)
 }
 
 exports.readSubmissionCountsSingle = async function (req, res) {
   routeWrapper(res,
     async () => await taskService.getNamesAndCounts(req.params.id),
-    'Retrieved task name and counts.', req.user ? req.user.id : 0)
+    'Retrieved task name and counts.', req.auth ? req.auth.id : 0)
 }
 
 exports.readNames = async function (req, res) {
   routeWrapper(res,
     async () => await taskService.getAllNames(),
-    'Retrieved all task names.', req.user ? req.user.id : 0)
+    'Retrieved all task names.', req.auth ? req.auth.id : 0)
 }
 
 exports.readNetworkGraph = async function (req, res) {
   routeWrapper(res,
     async () => await taskService.getNetworkGraph(),
-    'Retrieved task network graph.', req.user ? req.user.id : 0)
+    'Retrieved task network graph.', req.auth ? req.auth.id : 0)
 }

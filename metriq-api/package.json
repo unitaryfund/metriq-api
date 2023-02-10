@@ -5,14 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --runInBand ./coverage",
-    "db:schema": "babel-node ./scripts/db/schema",
-    "db:migrate": "babel-node ./scripts/db/migrate",
+    "db:schema": "node ./scripts/db/schema.mjs",
+    "db:migrate": "node ./scripts/db/migrate.mjs",
     "db:migrate:undo": "npx sequelize-cli db:migrate:undo",
     "db:seed": "npx sequelize-cli db:seed",
     "db:seed:all": "npx sequelize-cli db:seed:all",
-    "notify:subscriptions": "babel-node ./scripts/notifySubscriptions",
-    "notify:submissions": "babel-node ./scripts/notifyNewSubmissions",
-    "admin:approve:all": "babel-node ./scripts/approveNewSubmissions"
+    "notify:subscriptions": "node ./scripts/notifySubscriptions.mjs",
+    "notify:submissions": "node ./scripts/notifyNewSubmissions.mjs",
+    "admin:approve:all": "node ./scripts/approveNewSubmissions.mjs"
   },
   "keywords": [
     "api",
@@ -29,10 +29,10 @@
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
-    "express-jwt": "^6.0.0",
+    "express-jwt": "^8.4.1",
     "html-metadata-parser": "2.0.4",
     "jest": "^27.0.4",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "jwt-decode": "^3.1.2",
     "nodemailer": "^6.6.2",
     "nodemon": "^2.0.15",
@@ -47,10 +47,6 @@
     "testEnvironment": "node"
   },
   "devDependencies": {
-    "@babel/cli": "^7.17.0",
-    "@babel/core": "^7.17.2",
-    "@babel/node": "^7.16.8",
-    "@babel/preset-env": "^7.16.11",
     "sequelize-cli": "^6.4.1"
   }
 }

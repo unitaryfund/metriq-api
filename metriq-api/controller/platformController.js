@@ -55,36 +55,36 @@ function setJwtCookie (res, token) {
 // Validate the platform request and create the platform model.
 exports.new = async function (req, res) {
   routeWrapper(res,
-    async () => await platformService.submit(req.user.id, req.body),
-    'New platform added!', req.user ? req.user.id : 0)
+    async () => await platformService.submit(req.auth.id, req.body),
+    'New platform added!', req.auth ? req.auth.id : 0)
 }
 
 exports.read = async function (req, res) {
   routeWrapper(res,
     async () => await platformService.getSanitized(req.params.id),
-    'Retrieved platform by Id.', req.user ? req.user.id : 0)
+    'Retrieved platform by Id.', req.auth ? req.auth.id : 0)
 }
 
 exports.update = async function (req, res) {
   routeWrapper(res,
     async () => await platformService.update(req.params.id, req.body),
-    'Updated platform.', req.user ? req.user.id : 0)
+    'Updated platform.', req.auth ? req.auth.id : 0)
 }
 
 exports.subscribe = async function (req, res) {
   routeWrapper(res,
-    async () => await platformService.subscribe(req.params.id, req.user.id),
-    'Subscribed to platform!', req.user ? req.user.id : 0)
+    async () => await platformService.subscribe(req.params.id, req.auth.id),
+    'Subscribed to platform!', req.auth ? req.auth.id : 0)
 }
 
 exports.readNames = async function (req, res) {
   routeWrapper(res,
     async () => await platformService.getAllNames(),
-    'Retrieved all platform names.', req.user ? req.user.id : 0)
+    'Retrieved all platform names.', req.auth ? req.auth.id : 0)
 }
 
 exports.readSubmissionCounts = async function (req, res) {
   routeWrapper(res,
     async () => await platformService.getTopLevelNamesAndCounts(),
-    'Retrieved all platform names and counts.', req.user ? req.user.id : 0)
+    'Retrieved all platform names and counts.', req.auth ? req.auth.id : 0)
 }
