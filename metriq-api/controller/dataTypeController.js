@@ -55,5 +55,5 @@ function setJwtCookie (res, token) {
 exports.readNames = async function (req, res) {
   routeWrapper(res,
     async () => await dataTypeService.getAllNames(),
-    'Retrieved all data type names.', req.user ? req.user.id : 0)
+    'Retrieved all data type names.', req.auth ? req.auth.id : 0)
 }

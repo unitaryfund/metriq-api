@@ -54,24 +54,24 @@ function setJwtCookie (res, token) {
 
 exports.new = async function (req, res) {
   routeWrapper(res,
-    async () => await propertyService.submit(req.user.id, req.params.id, req.body),
-    'New platform property created!', req.user ? req.user.id : 0)
+    async () => await propertyService.submit(req.auth.id, req.params.id, req.body),
+    'New platform property created!', req.auth ? req.auth.id : 0)
 }
 
 exports.update = async function (req, res) {
   routeWrapper(res,
-    async () => await propertyService.update(req.params.id, req.body, req.user.id),
-    'Platform property updated!', req.user ? req.user.id : 0)
+    async () => await propertyService.update(req.params.id, req.body, req.auth.id),
+    'Platform property updated!', req.auth ? req.auth.id : 0)
 }
 
 exports.readNames = async function (req, res) {
   routeWrapper(res,
     async () => await propertyService.getAllNames(),
-    'Retrieved all property names.', req.user ? req.user.id : 0)
+    'Retrieved all property names.', req.auth ? req.auth.id : 0)
 }
 
 exports.delete = async function (req, res) {
   routeWrapper(res,
-    async () => await propertyService.delete(req.params.id, req.user ? req.user.id : 0),
-    'Successfully deleted platform property.', req.user ? req.user.id : 0)
+    async () => await propertyService.delete(req.params.id, req.auth ? req.auth.id : 0),
+    'Successfully deleted platform property.', req.auth ? req.auth.id : 0)
 }

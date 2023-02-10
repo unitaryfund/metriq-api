@@ -6,7 +6,7 @@ const express = require('express')
 // Import Sequelize
 const { Sequelize } = require('sequelize')
 // Import express JWT auth
-const jwt = require('express-jwt')
+const { expressjwt: expressJwt } = require('express-jwt');
 // Import JWT decoder
 const jwtDecode = require('jwt-decode')
 // Import cookie-parser middleware
@@ -36,7 +36,7 @@ const unless = function (paths, middleware) {
         try {
           const decoded = jwtDecode(req.cookies.token)
           if (decoded && decoded.id) {
-            req.user = { id: decoded.id }
+            req.auth = { id: decoded.id }
           }
         } catch {}
       }
@@ -48,7 +48,7 @@ const unless = function (paths, middleware) {
           try {
             const decoded = jwtDecode(req.cookies.token)
             if (decoded && decoded.id) {
-              req.user = { id: decoded.id }
+              req.auth = { id: decoded.id }
             }
           } catch {}
         }
@@ -68,7 +68,7 @@ app.use(cookieParser())
 
 // Set up cookie/header authorization checks.
 app.use(unless(publicApiRoutes,
-  jwt({
+  expressJwt({
     secret: config.api.token.secretKey,
     algorithms: [config.api.token.algorithm],
     getToken: req => {
@@ -113,14 +113,14 @@ function sendResponse (res, code, m) {
 
 // Check that cookie/header actually corresponds to a valid token
 app.use(unless(publicApiRoutes, async function (req, res, next) {
-  const userResponse = await userService.get(req.user.id)
+  const userResponse = await userService.get(req.auth.id)
   if (!userResponse.success) {
     sendResponse(res, 403, 'Invalid user token.')
     return
   }
   const user = userResponse.body
 
-  if (req.user.role !== 'web') {
+  if (req.auth.role !== 'web') {
     const authHeader = req.get('Authorization')
     const token = authHeader.substring(authHeader.indexOf(' ') + 1, authHeader.length)
     if (token !== user.clientToken) {

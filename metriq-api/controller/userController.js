@@ -54,38 +54,38 @@ function setJwtCookie (res, token) {
 
 exports.read = async function (req, res) {
   routeWrapper(res,
-    async () => await userService.getSanitized(req.user.id),
-    'Successfully retrieved user profile.', req.user ? req.user.id : 0)
+    async () => await userService.getSanitized(req.auth.id),
+    'Successfully retrieved user profile.', req.auth ? req.auth.id : 0)
 }
 
 exports.update = async function (req, res) {
   routeWrapper(res,
-    async () => await userService.update(req.user.id, req.body),
-    'Successfully updated user profile.', req.user ? req.user.id : 0)
+    async () => await userService.update(req.auth.id, req.body),
+    'Successfully updated user profile.', req.auth ? req.auth.id : 0)
 }
 
 // Validate the delete request and delete the user.
 exports.delete = async function (req, res) {
   routeWrapper(res,
-    async () => await userService.delete(req.user.id),
+    async () => await userService.delete(req.auth.id),
     'Successfully deleted user profile.', false)
 }
 
 exports.unsubscribe = async function (req, res) {
   routeWrapper(res,
-    async () => await userService.unsubscribe(req.user.id),
+    async () => await userService.unsubscribe(req.auth.id),
     'Successfully unsubscribed from all updates.', false)
 }
 
 exports.subscribeNewSubmissions = async function (req, res) {
   routeWrapper(res,
-    async () => await userService.setNewSubmissionSubscription(req.user.id, true),
+    async () => await userService.setNewSubmissionSubscription(req.auth.id, true),
     'Successfully subscribed to daily new submission updates.', false)
 }
 
 exports.unsubscribeNewSubmissions = async function (req, res) {
   routeWrapper(res,
-    async () => await userService.setNewSubmissionSubscription(req.user.id, false),
+    async () => await userService.setNewSubmissionSubscription(req.auth.id, false),
     'Successfully unsubscribed from daily new submission updates.', false)
 }
 
@@ -94,18 +94,18 @@ const itemsPerPage = 10
 // Validate the delete request and delete the user.
 exports.readSubmissions = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.getByUserId(req.user.id, parseInt(req.params.page) * itemsPerPage, itemsPerPage),
-    'Successfully retrieved user submissions.', req.user ? req.user.id : 0)
+    async () => await submissionService.getByUserId(req.auth.id, parseInt(req.params.page) * itemsPerPage, itemsPerPage),
+    'Successfully retrieved user submissions.', req.auth ? req.auth.id : 0)
 }
 
 exports.readSubmissionsPublic = async function (req, res) {
   routeWrapper(res,
-    async () => await submissionService.getByUserIdPublic(req.params.userId, (req.user && req.user.id) ? req.user.id : 0, parseInt(req.params.page) * itemsPerPage, itemsPerPage),
-    'Successfully retrieved user submissions.', req.user ? req.user.id : 0)
+    async () => await submissionService.getByUserIdPublic(req.params.userId, (req.auth && req.auth.id) ? req.auth.id : 0, parseInt(req.params.page) * itemsPerPage, itemsPerPage),
+    'Successfully retrieved user submissions.', req.auth ? req.auth.id : 0)
 }
 
 exports.topSubmitters = async function (req, res) {
   routeWrapper(res,
     async () => await userService.getTopSubmitters(3),
-    'Successfully retrieved top submitters.', req.user ? req.user.id : 0)
+    'Successfully retrieved top submitters.', req.auth ? req.auth.id : 0)
 }
