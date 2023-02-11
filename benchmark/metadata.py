@@ -1,3 +1,6 @@
+# Metriq submission ID for QED-C benchmark results:
+qedc_submission_id = "14"
+
 # Map of QED-C algorithm names to Metriq task names and ids:
 metriq_task_name_map = {
     "amplitude-estimate": {
@@ -47,14 +50,38 @@ metriq_task_name_map = {
 }
 
 # Map of QED-C device names to Metriq platform names and ids:
+metriq_method_name_map = {
+    "ibmq_belem": {
+        "name": "ibmq-belem",
+        "method_id": "78",
+    },
+    "ibmq_casablanca": {
+        "name": "ibmq-casablanca",
+        "method_id": "71",
+    },
+    "ibmq_guadalupe": {
+        "name": "ibmq-guadalupe",
+        "method_id": "84",
+    },
+    "ibmq_perth": {
+        "name": "ibmq-perth",
+        "method_id": "82",
+    },
+    "ibmq_lima": {
+        "name": "ibmq-lima",
+        "method_id": "74",
+    },
+    "qasm_simulator": {
+        "name": "qasm simulator",
+        "method_id": "308",
+    },
+}
+
+# Map of QED-C device names to Metriq platform names and ids:
 metriq_platform_name_map = {
     "ibmq_belem": {
         "name": "ibmq-belem",
         "platform_id": "26",
-    },
-    "ibmq_bogota": {
-        "name": "ibmq-bogota",
-        "platform_id": "2",
     },
     "ibmq_casablanca": {
         "name": "ibmq-casablanca",
@@ -68,9 +95,13 @@ metriq_platform_name_map = {
         "name": "ibmq-perth",
         "platform_id": "22",
     },
+    "ibmq_lima": {
+        "name": "ibmq-lima",
+        "platform_id": "27",
+    },
     "qasm_simulator": {
-        "name": "qasm-simulator",
-        "platform_id": "",
+        "name": "qasm simulator",
+        "platform_id": "153",
     },
 }
 
@@ -82,10 +113,9 @@ benchmarks = {
         "max_qubits": 8,
         "num_shots": 100,
         "providers": [
-            {"qiskit": "qasm_simulator"},
             #{"qiskit": "ibmq_belem"},
-            #{"cirq": "qasm_simulator"},
-            #{"braket": "qasm_simulator"},
+            #{"qiskit": "ibmq_lima"},
+            #{"qiskit": "qasm_simulator"},
         ]
     }
 }

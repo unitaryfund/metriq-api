@@ -4,6 +4,7 @@ import argparse
 import ast
 import os
 import subprocess
+from datetime import datetime
 
 # Third-party imports:
 from git import Repo
@@ -12,11 +13,14 @@ from git import Repo
 from metadata import (
     benchmarks, 
     metriq_task_name_map, 
+    metriq_method_name_map, 
     metriq_platform_name_map,
+    qedc_submission_id,
 )
 
 # Client for Metriq webapp:
 from metriq import MetriqClient
+from metriq.models.result import ResultCreateRequest
 
 
 def run_benchmarks(client: MetriqClient):
@@ -58,27 +62,30 @@ def run_benchmarks(client: MetriqClient):
 
 def process_data_for_metriq(data: dict, client: MetriqClient):
     """Process data obtained from QED-C benchmark script."""
-    task_name = metriq_task_name_map.get(data["algorithm"])["name"]
-    device_name = metriq_platform_name_map.get(data["device"])["name"]
+    task_id = metriq_task_name_map.get(data["algorithm"])["task_id"]
+    platform_id = metriq_platform_name_map.get(data["device"])["platform_id"]
+    method_id = metriq_method_name_map.get(data["device"])["method_id"]
 
     for i, qubit in enumerate(data["groups"]):
-        metriq_payload = {
-            "task": task_name,
-            "method": device_name,
-            "platform": device_name,
-            "metric": "Fidelity",
-            "value": data["avg_fidelities"][i],
-            "qubits": qubit,
-        }
+        result = ResultCreateRequest()
+        result.task = task_id
+        result.method = method_id
+        result.platform = platform_id
+        result.metricName = "Fidelity"
+        result.metricValue = data["avg_fidelities"][i]
+        result.evaluatedAt = datetime.today().strftime("%Y-%m-%d")
+        result.isHigherBetter = "true"
+        result.qubitCount = qubit
+        result.circuitDepth = int(data["avg_depths"][i])
+        result.notes = "Obtained automatically via QED-C benchmark script."
+
         try:
             # Upload benchmark result to Metriq:
-            print(f"Uploading: {metriq_payload}")
-            # Leaving this deliberately commented out as do not want to modify Metriq post at this time.
-            #client.submission_
+            print(f"Uploading: {result}")
+            client.result_add(result=result, submission_id=qedc_submission_id)
         except:
             # Unable to upload benchmark data to Metriq:
-            print(f"Unable to upload {metriq_payload}")
-
+            print("Unable to upload...")
 
 
 if __name__ == "__main__":
@@ -106,5 +113,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     token = args.token
     client = MetriqClient(url="https://metriq.info", token=token)
+
     run_benchmarks(client)
 
