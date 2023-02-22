@@ -77,32 +77,45 @@ class TaskService extends ModelService {
     return { success: true, body: task }
   }
 
-  async getAllNames () {
+  async getAllNames (userId) {
     const result = await this.SequelizeServiceInstance.projectAll(['id', 'name', [sequelize.literal('CASE WHEN "taskId" IS NULL THEN 1 ELSE 0 END'), 'top']])
+    if (userId) {
+      for (let i = 0; i < result.length; ++i) {
+        result[i].dataValues.isSubscribed = !!(await taskSubscriptionService.getByFks(userId, result[i].dataValues.id))
+      }
+    }
     return { success: true, body: result }
   }
 
-  async getTopLevelNamesAndCounts () {
+  async getTopLevelNamesAndCounts (userId) {
     const result = await this.getTopLevelNames()
-    for (let i = 0; i < result.length; i++) {
+    for (let i = 0; i < result.length; ++i) {
       result[i] = (await this.getNamesAndCounts(result[i].id)).body
     }
     const filtered = []
-    for (let i = 0; i < result.length; i++) {
+    for (let i = 0; i < result.length; ++i) {
       if (result[i].submissionCount > 0) {
         filtered.push(result[i])
+      }
+    }
+    if (userId) {
+      for (let i = 0; i < filtered.length; ++i) {
+        filtered[i].isSubscribed = !!(await taskSubscriptionService.getByFks(userId, filtered[i].id))
       }
     }
     return { success: true, body: filtered }
   }
 
-  async getNamesAndCounts (parentId) {
+  async getNamesAndCounts (parentId, userId) {
     const parentTask = (await sequelize.query(
       'SELECT id, name, description FROM tasks WHERE tasks.id = ' + parentId + ';'
     ))[0][0]
     parentTask.submissionCount = await this.getParentSubmissionCount(parentId)
     parentTask.upvoteTotal = await this.getParentLikeCount(parentId)
     parentTask.resultCount = await this.getParentResultCount(parentId)
+    if (userId) {
+      parentTask.isSubscribed = !!(await taskSubscriptionService.getByFks(userId, parentTask.id))
+    }
     return { success: true, body: parentTask }
   }
 

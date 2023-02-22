@@ -46,12 +46,17 @@ class MethodService extends ModelService {
     return { success: true, body: method }
   }
 
-  async getAllNames () {
+  async getAllNames (userId) {
     const result = await this.SequelizeServiceInstance.projectAll(['id', 'name'])
+    if (userId) {
+      for (let i = 0; i < result.length; i++) {
+        result[i].dataValues.isSubscribed = !!(await methodSubscriptionService.getByFks(userId, result[i].dataValues.id))
+      }
+    }
     return { success: true, body: result }
   }
 
-  async getTopLevelNamesAndCounts () {
+  async getTopLevelNamesAndCounts (userId) {
     const result = await this.getTopLevelNames()
     for (let i = 0; i < result.length; i++) {
       result[i].submissionCount = await this.getParentSubmissionCount(result[i].id)
@@ -62,6 +67,11 @@ class MethodService extends ModelService {
     for (let i = 0; i < result.length; i++) {
       if (result[i].submissionCount > 0) {
         filtered.push(result[i])
+      }
+    }
+    if (userId) {
+      for (let i = 0; i < filtered.length; i++) {
+        filtered[i].isSubscribed = !!(await methodSubscriptionService.getByFks(userId, filtered[i].id))
       }
     }
     return { success: true, body: filtered }

@@ -6,7 +6,7 @@ const express = require('express')
 // Import Sequelize
 const { Sequelize } = require('sequelize')
 // Import express JWT auth
-const { expressjwt: expressJwt } = require('express-jwt');
+const { expressjwt: expressJwt } = require('express-jwt')
 // Import JWT decoder
 const jwtDecode = require('jwt-decode')
 // Import cookie-parser middleware
