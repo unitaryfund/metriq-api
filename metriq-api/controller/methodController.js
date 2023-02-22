@@ -79,12 +79,12 @@ exports.subscribe = async function (req, res) {
 
 exports.readSubmissionCounts = async function (req, res) {
   routeWrapper(res,
-    async () => await methodService.getTopLevelNamesAndCounts(),
+    async () => await methodService.getTopLevelNamesAndCounts(req.auth ? req.auth.id : 0),
     'Retrieved all method names and counts.', req.auth ? req.auth.id : 0)
 }
 
 exports.readNames = async function (req, res) {
   routeWrapper(res,
-    async () => await methodService.getAllNames(),
+    async () => await methodService.getAllNames(req.auth ? req.auth.id : 0),
     'Retrieved all method names.', req.auth ? req.auth.id : 0)
 }

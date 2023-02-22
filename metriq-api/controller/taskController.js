@@ -73,25 +73,25 @@ exports.update = async function (req, res) {
 
 exports.subscribe = async function (req, res) {
   routeWrapper(res,
-    async () => await taskService.subscribe(req.params.id, req.auth.id),
+    async () => await taskService.subscribe(req.params.id, req.auth ? req.auth.id : 0),
     'Subscribed to task!', req.auth ? req.auth.id : 0)
 }
 
 exports.readSubmissionCounts = async function (req, res) {
   routeWrapper(res,
-    async () => await taskService.getTopLevelNamesAndCounts(),
+    async () => await taskService.getTopLevelNamesAndCounts(req.auth ? req.auth.id : 0),
     'Retrieved all task names and counts.', req.auth ? req.auth.id : 0)
 }
 
 exports.readSubmissionCountsSingle = async function (req, res) {
   routeWrapper(res,
-    async () => await taskService.getNamesAndCounts(req.params.id),
+    async () => await taskService.getNamesAndCounts(req.params.id, req.auth ? req.auth.id : 0),
     'Retrieved task name and counts.', req.auth ? req.auth.id : 0)
 }
 
 exports.readNames = async function (req, res) {
   routeWrapper(res,
-    async () => await taskService.getAllNames(),
+    async () => await taskService.getAllNames(req.auth ? req.auth.id : 0),
     'Retrieved all task names.', req.auth ? req.auth.id : 0)
 }
 

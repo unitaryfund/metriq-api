@@ -66,7 +66,7 @@ class PlatformService extends ModelService {
     ))[0]
   }
 
-  async getTopLevelNamesAndCounts () {
+  async getTopLevelNamesAndCounts (userId) {
     const result = await this.getTopLevelNames()
     for (let i = 0; i < result.length; i++) {
       result[i].submissionCount = await this.getParentSubmissionCount(result[i].id)
@@ -77,6 +77,11 @@ class PlatformService extends ModelService {
     for (let i = 0; i < result.length; i++) {
       if (result[i].submissionCount > 0) {
         filtered.push(result[i])
+      }
+    }
+    if (userId) {
+      for (let i = 0; i < filtered.length; i++) {
+        filtered[i].isSubscribed = !!(await platformSubscriptionService.getByFks(userId, filtered[i].id))
       }
     }
     return { success: true, body: filtered }
@@ -140,8 +145,13 @@ class PlatformService extends ModelService {
     return await this.SequelizeServiceInstance.findOne({ name: name })
   }
 
-  async getAllNames () {
+  async getAllNames (userId) {
     const result = await this.SequelizeServiceInstance.projectAll(['id', 'name'])
+    if (userId) {
+      for (let i = 0; i < result.length; i++) {
+        result[i].dataValues.isSubscribed = !!(await platformSubscriptionService.getByFks(userId, result[i].dataValues.id))
+      }
+    }
     return { success: true, body: result }
   }
 

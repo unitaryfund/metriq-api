@@ -61,7 +61,7 @@ exports.new = async function (req, res) {
 
 exports.read = async function (req, res) {
   routeWrapper(res,
-    async () => await platformService.getSanitized(req.params.id),
+    async () => await platformService.getSanitized(req.params.id, req.auth ? req.auth.id : 0),
     'Retrieved platform by Id.', req.auth ? req.auth.id : 0)
 }
 
@@ -79,12 +79,12 @@ exports.subscribe = async function (req, res) {
 
 exports.readNames = async function (req, res) {
   routeWrapper(res,
-    async () => await platformService.getAllNames(),
+    async () => await platformService.getAllNames(req.auth ? req.auth.id : 0),
     'Retrieved all platform names.', req.auth ? req.auth.id : 0)
 }
 
 exports.readSubmissionCounts = async function (req, res) {
   routeWrapper(res,
-    async () => await platformService.getTopLevelNamesAndCounts(),
+    async () => await platformService.getTopLevelNamesAndCounts(req.auth ? req.auth.id : 0),
     'Retrieved all platform names and counts.', req.auth ? req.auth.id : 0)
 }
