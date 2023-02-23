@@ -79,6 +79,8 @@ def process_data_for_metriq(data: dict, client: MetriqClient):
         result.circuitDepth = int(data["avg_depths"][i])
         result.notes = "Obtained automatically via QED-C benchmark script."
 
+        print(result)
+
         try:
             # Upload benchmark result to Metriq:
             print(f"Uploading: {result}")
