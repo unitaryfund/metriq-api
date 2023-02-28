@@ -15,6 +15,10 @@ class SubmissionSqlService {
     this.SubmissionSequelizeServiceInstance = new SequelizeService(Submission)
   }
 
+  sqlNames () {
+    return 'SELECT id, name FROM submissions WHERE "deletedAt" IS NULL AND "publishedAt" IS NOT NULL'
+  }
+
   sqlLike (userId, sortColumn, isDesc, limit, offset) {
     return 'SELECT submissions.*, users.username as username, CAST("upvotesCount" AS integer) AS "upvotesCount", (sl."isUpvoted" > 0) as "isUpvoted" from ' +
             '    (SELECT submissions.id as "submissionId", COUNT(likes.*) as "upvotesCount", SUM(CASE likes."userId" WHEN ' + userId + ' THEN 1 ELSE 0 END) as "isUpvoted" from likes ' +
