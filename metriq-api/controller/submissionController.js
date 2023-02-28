@@ -194,3 +194,9 @@ exports.newReport = async function (req, res) {
     async () => await moderationReportService.submit(req.auth.id, req.params.id, req.body, true),
     'Submitted moderation report.', req.auth ? req.auth.id : 0)
 }
+
+exports.readNames = async function (req, res) {
+  routeWrapper(res,
+    async () => await submissionService.getAllNames(),
+    'Retrieved all submission names.', req.auth ? req.auth.id : 0)
+}

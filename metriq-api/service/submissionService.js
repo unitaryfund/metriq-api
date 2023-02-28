@@ -570,6 +570,11 @@ class SubmissionService extends ModelService {
 
     return { success: true, body: submission }
   }
+
+  async getAllNames () {
+    const result = (await sequelize.query(submissionSqlService.sqlNames()))[0]
+    return { success: true, body: result }
+  }
 }
 
 module.exports = SubmissionService
