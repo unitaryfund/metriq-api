@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer'
-import SubmissionSqlService from '../service/submissionSqlService'
-import UserService from '../service/userService'
-import config from '../config'
+import SubmissionSqlService from '../service/submissionSqlService.js'
+import UserService from '../service/userService.js'
+import config from '../config.js'
 
 (async () => {
   console.log('Notifying users of daily new submissions...')

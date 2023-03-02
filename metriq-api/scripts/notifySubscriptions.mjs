@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer'
-import UserService from '../service/userService'
-import config from '../config'
+import UserService from '../service/userService,js'
+import config from '../config.js'
 
 function getLastUpateTime (refs, lastUpdate) {
   for (let i = 0; i < refs.length; ++i) {

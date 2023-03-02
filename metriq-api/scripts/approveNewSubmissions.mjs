@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer'
-import UserService from '../service/userService'
-import config from '../config'
+import UserService from '../service/userService.js'
+import config from '../config.js'
 
 (async () => {
   console.log('Approving all new submissions...')
