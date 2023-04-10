@@ -317,7 +317,7 @@ class SubmissionService extends ModelService {
       submission.codeUrl = (reqBody.codeUrl && reqBody.codeUrl.trim()) ? reqBody.codeUrl.trim() : null
     }
     if (reqBody.supplementUrl !== undefined) {
-      submission.supplementUrl = (reqBody.supplementUrl && reqBody.codeUrl.trim()) ? reqBody.supplementUrl.trim() : null
+      submission.supplementUrl = (reqBody.supplementUrl && reqBody.supplementUrl.trim()) ? reqBody.supplementUrl.trim() : null
     }
     if (reqBody.description !== undefined) {
       submission.description = (reqBody.description && reqBody.description.trim()) ? reqBody.description.trim() : ''
