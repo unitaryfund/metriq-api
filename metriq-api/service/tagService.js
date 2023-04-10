@@ -18,7 +18,7 @@ class TagService extends ModelService {
   }
 
   async getByName (tagName) {
-    return await this.SequelizeServiceInstance.findOne({ name: tagName.trim().toLowerCase() })
+    return await this.SequelizeServiceInstance.findOne({ name: tagName.trim() })
   }
 
   async getAllNames () {
