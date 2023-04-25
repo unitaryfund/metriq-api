@@ -104,7 +104,7 @@ if __name__ == "__main__":
     if os.path.exists(repo_dir):
         print(f"QED-C benchmarks repository present in {repo_dir}")
     else:
-        print(f"Cloining {git_url} into {repo_dir}...")
+        print(f"Cloning {git_url} into {repo_dir}...")
         Repo.clone_from(git_url, repo_dir)
         print("Clone complete")
 

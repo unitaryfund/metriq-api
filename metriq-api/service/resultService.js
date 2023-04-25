@@ -165,6 +165,7 @@ class ResultService extends ModelService {
     result.sampleSize = reqBody.sampleSize
     result.qubitCount = reqBody.qubitCount
     result.circuitDepth = reqBody.circuitDepth
+    result.shots = reqBody.shots
 
     const nResult = await this.create(result)
     if (!nResult.success) {
@@ -222,6 +223,7 @@ class ResultService extends ModelService {
     result.sampleSize = reqBody.sampleSize
     result.qubitCount = reqBody.qubitCount
     result.circuitDepth = reqBody.circuitDepth
+    result.shots = reqBody.shots
 
     result.save()
 
