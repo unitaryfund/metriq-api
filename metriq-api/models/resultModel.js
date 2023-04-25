@@ -38,6 +38,10 @@ module.exports = function (sequelize, DataTypes) {
     circuitDepth: {
       type: DataTypes.INTEGER,
       allowNull: true
+    },
+    shots: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     }
   }, {})
   Model.associate = function (db) {
