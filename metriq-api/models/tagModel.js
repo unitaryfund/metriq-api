@@ -6,6 +6,10 @@ module.exports = function (sequelize, DataTypes) {
     name: {
       type: DataTypes.TEXT,
       allowNull: false
+    },
+    nameNormal: {
+      type: DataTypes.TEXT,
+      allowNull: false
     }
   }, {})
   Model.associate = function (db) {

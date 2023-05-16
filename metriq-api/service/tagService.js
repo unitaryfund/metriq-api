@@ -18,7 +18,7 @@ class TagService extends ModelService {
   }
 
   async getByName (tagName) {
-    return await this.SequelizeServiceInstance.findOne({ name: tagName.trim() })
+    return await this.SequelizeServiceInstance.findOne({ nameNormal: tagName.trim().toLowerCase() })
   }
 
   async getAllNames () {
@@ -56,6 +56,7 @@ class TagService extends ModelService {
     if (!tag) {
       tag = await this.SequelizeServiceInstance.new()
       tag.name = tagName
+      tag.nameNormal = tagName.toLowerCase()
       tag.userId = userId
       tag = (await this.create(tag)).body
       await tag.save()
