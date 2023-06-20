@@ -186,7 +186,12 @@ class MethodService extends ModelService {
       return { success: false, error: 'Method not found.' }
     }
 
-    if (reqBody.name !== undefined) {
+    if (reqBody.name && (method.name !== reqBody.name.trim())) {
+      reqBody.name = reqBody.name.trim()
+      const nameMatch = await this.getByName(reqBody.name)
+      if (nameMatch) {
+        return { success: false, error: 'Method name already in use.' }
+      }
       method.name = reqBody.name.trim()
     }
     if (reqBody.fullName !== undefined) {

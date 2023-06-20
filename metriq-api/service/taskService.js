@@ -282,17 +282,22 @@ class TaskService extends ModelService {
       return { success: false, error: 'Task not found.' }
     }
 
-    if (reqBody.name !== undefined) {
-      task.name = reqBody.name.trim()
+    if (task.parentId && reqBody.name && (task.name !== reqBody.name.trim())) {
+      reqBody.name = reqBody.name.trim()
+      const nameMatch = await this.getByName(reqBody.name)
+      if (nameMatch) {
+        return { success: false, error: 'Submission name already in use.' }
+      }
+      task.name = reqBody.name
     }
-    if (reqBody.fullName !== undefined) {
+    if (task.parentId && (reqBody.fullName !== undefined)) {
       task.fullName = reqBody.fullName.trim()
     }
     if (reqBody.description !== undefined) {
       task.description = reqBody.description.trim()
     }
 
-    if (reqBody.parentTask !== undefined) {
+    if (task.parentId && (reqBody.parentTask !== undefined)) {
       reqBody.parentTask = parseInt(reqBody.parentTask)
       if (reqBody.parentTask) {
         task.taskId = reqBody.parentTask
