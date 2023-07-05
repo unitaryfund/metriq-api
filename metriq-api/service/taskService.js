@@ -108,7 +108,7 @@ class TaskService extends ModelService {
 
   async getNamesAndCounts (parentId, userId) {
     const parentTask = (await sequelize.query(
-      'SELECT id, name, description FROM tasks WHERE tasks.id = ' + parentId + ';'
+      'SELECT id, name, description, "taskId" FROM tasks WHERE tasks.id = ' + parentId + ';'
     ))[0][0]
     parentTask.submissionCount = await this.getParentSubmissionCount(parentId)
     parentTask.upvoteTotal = await this.getParentLikeCount(parentId)
@@ -116,6 +116,8 @@ class TaskService extends ModelService {
     if (userId) {
       parentTask.isSubscribed = !!(await taskSubscriptionService.getByFks(userId, parentTask.id))
     }
+    parentTask.parentTask = await this.getByPk(parentTask.taskId)
+    parentTask.taskId = undefined
     return { success: true, body: parentTask }
   }
 
