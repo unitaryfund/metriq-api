@@ -97,6 +97,7 @@ class SubmissionService extends ModelService {
       return { success: false, error: 'Submission name or ID not found.' }
     }
     submission = await submissionSqlService.populate(submission, userId)
+    submission.isSubscribed = ((userId > 0) && await submissionSubscriptionService.getByFks(userId, submission.id))
 
     return { success: true, body: submission }
   }
