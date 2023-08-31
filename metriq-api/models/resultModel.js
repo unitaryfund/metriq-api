@@ -32,15 +32,35 @@ module.exports = function (sequelize, DataTypes) {
       allowNull: true
     },
     qubitCount: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
       allowNull: true
     },
     circuitDepth: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
       allowNull: true
     },
     shots: {
       type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    quartile0: {
+      type: DataTypes.FLOAT,
+      allowNull: true
+    },
+    quartile1: {
+      type: DataTypes.FLOAT,
+      allowNull: true
+    },
+    quartile2: {
+      type: DataTypes.FLOAT,
+      allowNull: true
+    },
+    quartile3: {
+      type: DataTypes.FLOAT,
+      allowNull: true
+    },
+    quartile4: {
+      type: DataTypes.FLOAT,
       allowNull: true
     }
   }, {})
