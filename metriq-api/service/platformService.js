@@ -19,6 +19,10 @@ const PlatformSubscriptionService = require('./platformSubscriptionService')
 const platformSubscriptionService = new PlatformSubscriptionService()
 const UserService = require('./userService')
 const userService = new UserService()
+const ArchitectureService = require('./architectureService')
+const architectureService = new ArchitectureService()
+const ProviderService = require('./providerService')
+const providerService = new ProviderService()
 
 class PlatformService extends ModelService {
   constructor () {
@@ -203,6 +207,20 @@ class PlatformService extends ModelService {
     }
 
     platform.dataValues.isSubscribed = ((userId > 0) && await platformSubscriptionService.getByFks(userId, platformId))
+
+    if (platform.dataValues.architectureId) {
+      platform.dataValues.architecture = (await architectureService.getSanitized(platform.dataValues.architectureId, userId)).body
+    } else {
+      platform.dataValues.architecture = null
+    }
+    delete platform.dataValues.architectureId
+
+    if (platform.dataValues.providerId) {
+      platform.dataValues.provider = (await providerService.getSanitized(platform.dataValues.providerId, userId)).body
+    } else {
+      platform.dataValues.provider = null
+    }
+    delete platform.dataValues.providerId
 
     if (platform.dataValues.platformId) {
       platform.dataValues.parentPlatform = (await this.getSanitized(platform.dataValues.platformId, userId)).body
