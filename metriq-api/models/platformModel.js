@@ -14,6 +14,14 @@ module.exports = function (sequelize, DataTypes) {
     description: {
       type: DataTypes.TEXT,
       allowNull: false
+    },
+    providerId: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    architectureId: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     }
   }, {})
   Model.associate = function (db) {
