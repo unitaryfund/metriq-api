@@ -25,8 +25,8 @@ class ProviderService extends ModelService {
     return { success: true, body: propertyType }
   }
 
-  async getAll () {
-    const result = await this.SequelizeServiceInstance.projectAll(['id', 'name', 'fullName', 'description'])
+  async getAllNames () {
+    const result = await this.SequelizeServiceInstance.projectAll(['id', 'name'])
     return { success: true, body: result }
   }
 }
