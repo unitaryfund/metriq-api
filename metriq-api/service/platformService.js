@@ -222,6 +222,13 @@ class PlatformService extends ModelService {
     }
     delete platform.dataValues.providerId
 
+    if (platform.dataValues.deviceId) {
+      platform.dataValues.device = (await this.getSanitized(platform.dataValues.deviceId, userId)).body
+    } else {
+      platform.dataValues.device = null
+    }
+    delete platform.dataValues.deviceId
+
     if (platform.dataValues.platformId) {
       platform.dataValues.parentPlatform = (await this.getSanitized(platform.dataValues.platformId, userId)).body
     } else {
