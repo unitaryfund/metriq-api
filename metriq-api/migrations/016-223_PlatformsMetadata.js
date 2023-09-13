@@ -13,12 +13,6 @@ module.exports = {
             type: Sequelize.INTEGER,
             allowNull: true,
             references: { model: 'architectures', key: 'id' }
-          }, { transaction: t }),
-        queryInterface.addColumn('platforms', 'deviceId',
-          {
-            type: Sequelize.INTEGER,
-            allowNull: true,
-            references: { model: 'platforms', key: 'id' }
           }, { transaction: t })
       ])
     })
@@ -27,7 +21,6 @@ module.exports = {
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(t => {
       return Promise.all([
-        queryInterface.removeColumn('platforms', 'deviceId', { transaction: t }),
         queryInterface.removeColumn('platforms', 'architectureId', { transaction: t }),
         queryInterface.removeColumn('platforms', 'providerId', { transaction: t })
       ])
