@@ -8,7 +8,8 @@ module.exports = {
       { name: 'Photonics', fullName: 'Photonics', description: '', userId: 1 },
       { name: 'Spins', fullName: 'Spins', description: '', userId: 1 },
       { name: 'Superconducting Circuits', fullName: 'Superconducting Circuits', description: '', userId: 1 },
-      { name: 'Classical', fullName: 'Classical', description: '', userId: 1 }
+      { name: 'Classical', fullName: 'Classical', description: '', userId: 1 },
+      { name: 'Other', fullName: 'Other', description: '', userId: 1 }
     ])
   },
 

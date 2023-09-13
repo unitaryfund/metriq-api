@@ -7,7 +7,8 @@ module.exports = {
       { name: 'Rigetti', fullName: 'Rigetti', description: '', userId: 1 },
       { name: 'IonQ', fullName: 'IonQ', description: '', userId: 1 },
       { name: 'ETH', fullName: 'ETH', description: '', userId: 1 },
-      { name: 'NVIDIA', fullName: 'NVIDIA', description: '', userId: 1 }
+      { name: 'NVIDIA', fullName: 'NVIDIA', description: '', userId: 1 },
+      { name: 'Other', fullName: 'Other', description: '', userId: 1 }
     ])
   },
 
