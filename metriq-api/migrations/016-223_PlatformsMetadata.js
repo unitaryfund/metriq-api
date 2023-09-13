@@ -5,13 +5,15 @@ module.exports = {
         queryInterface.addColumn('platforms', 'providerId',
           {
             type: Sequelize.INTEGER,
-            allowNull: true,
+            allowNull: false,
+            defaultValue: 17,
             references: { model: 'providers', key: 'id' }
           }, { transaction: t }),
         queryInterface.addColumn('platforms', 'architectureId',
           {
             type: Sequelize.INTEGER,
-            allowNull: true,
+            allowNull: false,
+            defaultValue: 7,
             references: { model: 'architectures', key: 'id' }
           }, { transaction: t })
       ])

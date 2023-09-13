@@ -17,11 +17,11 @@ module.exports = function (sequelize, DataTypes) {
     },
     providerId: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: false
     },
     architectureId: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: false
     }
   }, {})
   Model.associate = function (db) {
