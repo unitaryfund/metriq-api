@@ -19,6 +19,10 @@ const PlatformSubscriptionService = require('./platformSubscriptionService')
 const platformSubscriptionService = new PlatformSubscriptionService()
 const UserService = require('./userService')
 const userService = new UserService()
+const ArchitectureService = require('./architectureService')
+const architectureService = new ArchitectureService()
+const ProviderService = require('./providerService')
+const providerService = new ProviderService()
 
 class PlatformService extends ModelService {
   constructor () {
@@ -204,6 +208,20 @@ class PlatformService extends ModelService {
 
     platform.dataValues.isSubscribed = ((userId > 0) && await platformSubscriptionService.getByFks(userId, platformId))
 
+    if (platform.dataValues.architectureId) {
+      platform.dataValues.architecture = await architectureService.getByPk(platform.dataValues.architectureId)
+    } else {
+      platform.dataValues.architecture = null
+    }
+    delete platform.dataValues.architectureId
+
+    if (platform.dataValues.providerId) {
+      platform.dataValues.provider = await providerService.getByPk(platform.dataValues.providerId, userId)
+    } else {
+      platform.dataValues.provider = null
+    }
+    delete platform.dataValues.providerId
+
     if (platform.dataValues.platformId) {
       platform.dataValues.parentPlatform = (await this.getSanitized(platform.dataValues.platformId, userId)).body
     } else {
@@ -264,6 +282,15 @@ class PlatformService extends ModelService {
     }
     if (reqBody.parentPlatform !== undefined) {
       platform.platformId = reqBody.parentPlatform ? parseInt(reqBody.parentPlatform) : null
+    }
+    if (reqBody.provider !== undefined) {
+      platform.providerId = reqBody.provider ? parseInt(reqBody.provider) : null
+    }
+    if (reqBody.architecture !== undefined) {
+      platform.architectureId = reqBody.architecture ? parseInt(reqBody.architecture) : null
+    }
+    if (reqBody.device !== undefined) {
+      platform.deviceId = reqBody.deviceId ? parseInt(reqBody.device) : null
     }
 
     await platform.save()

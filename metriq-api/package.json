@@ -8,7 +8,7 @@
     "db:schema": "node ./scripts/db/schema.mjs",
     "db:migrate": "node ./scripts/db/migrate.mjs",
     "db:migrate:undo": "npx sequelize-cli db:migrate:undo",
-    "db:seed": "npx sequelize-cli db:seed",
+    "db:seed": "npx sequelize-cli db:seed --seed",
     "db:seed:all": "npx sequelize-cli db:seed:all",
     "notify:subscriptions": "node ./scripts/notifySubscriptions.mjs",
     "notify:submissions": "node ./scripts/notifyNewSubmissions.mjs",

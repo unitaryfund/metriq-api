@@ -20,7 +20,7 @@ app.use(compression())
 
 // Import routes.
 const apiRoutes = require('./api-routes')
-const publicApiRoutes = ['/api/login', '/api/register', '/api/recover', '/api/password', '/api/tag', '/api/platform', '/api/property', '/api/dataType', '/api/v1/arxiv_id', '/api/user/topSubmitters']
+const publicApiRoutes = ['/api/login', '/api/register', '/api/recover', '/api/password', '/api/tag', '/api/platform', '/api/property', '/api/dataType', '/api/provider', '/api/architecture', '/api/v1/arxiv_id', '/api/user/topSubmitters']
 const unless = function (paths, middleware) {
   return function (req, res, next) {
     if ((req.method === 'GET') &&
@@ -31,6 +31,8 @@ const unless = function (paths, middleware) {
         req.path.startsWith('/api/platform') ||
         req.path.startsWith('/api/property') ||
         req.path.startsWith('/api/dataType') ||
+        req.path.startsWith('/api/provider') ||
+        req.path.startsWith('/api/architecture') ||
         /\/api\/user\/\d+\/submission\/?/.test(req.path))) {
       if (req.cookies && req.cookies.token) {
         try {
