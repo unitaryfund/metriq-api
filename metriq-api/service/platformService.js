@@ -284,10 +284,10 @@ class PlatformService extends ModelService {
       platform.platformId = reqBody.parentPlatform ? parseInt(reqBody.parentPlatform) : null
     }
     if (reqBody.provider !== undefined) {
-      platform.providerId = reqBody.providerId ? parseInt(reqBody.provider) : null
+      platform.providerId = reqBody.provider ? parseInt(reqBody.provider) : null
     }
     if (reqBody.architecture !== undefined) {
-      platform.architectureId = reqBody.architectureId ? parseInt(reqBody.architecture) : null
+      platform.architectureId = reqBody.architecture ? parseInt(reqBody.architecture) : null
     }
     if (reqBody.device !== undefined) {
       platform.deviceId = reqBody.deviceId ? parseInt(reqBody.device) : null
