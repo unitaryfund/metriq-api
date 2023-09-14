@@ -209,14 +209,14 @@ class PlatformService extends ModelService {
     platform.dataValues.isSubscribed = ((userId > 0) && await platformSubscriptionService.getByFks(userId, platformId))
 
     if (platform.dataValues.architectureId) {
-      platform.dataValues.architecture = (await architectureService.getSanitized(platform.dataValues.architectureId, userId)).body
+      platform.dataValues.architecture = await architectureService.getByPk(platform.dataValues.architectureId)
     } else {
       platform.dataValues.architecture = null
     }
     delete platform.dataValues.architectureId
 
     if (platform.dataValues.providerId) {
-      platform.dataValues.provider = (await providerService.getSanitized(platform.dataValues.providerId, userId)).body
+      platform.dataValues.provider = await providerService.getByPk(platform.dataValues.providerId, userId)
     } else {
       platform.dataValues.provider = null
     }
