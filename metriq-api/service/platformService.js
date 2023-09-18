@@ -223,7 +223,7 @@ class PlatformService extends ModelService {
     delete platform.dataValues.providerId
 
     if (platform.dataValues.platformId) {
-      platform.dataValues.parentPlatform = (await this.getSanitized(platform.dataValues.platformId, userId)).body
+      platform.dataValues.parentPlatform = (await this.getByPk(platform.dataValues.platformId, userId)).body
     } else {
       platform.dataValues.parentPlatform = null
     }
@@ -281,16 +281,13 @@ class PlatformService extends ModelService {
       platform.description = reqBody.description.trim()
     }
     if (reqBody.parentPlatform !== undefined) {
-      platform.platformId = reqBody.parentPlatform ? parseInt(reqBody.parentPlatform) : null
+      platform.platformId = (reqBody.parentPlatform && parseInt(reqBody.parentPlatform) !== platform.id) ? parseInt(reqBody.parentPlatform) : null
     }
     if (reqBody.provider !== undefined) {
       platform.providerId = reqBody.provider ? parseInt(reqBody.provider) : null
     }
     if (reqBody.architecture !== undefined) {
       platform.architectureId = reqBody.architecture ? parseInt(reqBody.architecture) : null
-    }
-    if (reqBody.device !== undefined) {
-      platform.deviceId = reqBody.deviceId ? parseInt(reqBody.device) : null
     }
 
     await platform.save()
