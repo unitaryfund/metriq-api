@@ -70,8 +70,7 @@ class PlatformService extends ModelService {
     ))[0]
   }
 
-  async getTopLevelNamesAndCounts (userId) {
-    const result = await this.getTopLevelNames()
+  async populate (result, userId) {
     for (let i = 0; i < result.length; i++) {
       result[i].submissionCount = await this.getParentSubmissionCount(result[i].id)
       result[i].upvoteTotal = await this.getParentLikeCount(result[i].id)
@@ -91,9 +90,36 @@ class PlatformService extends ModelService {
     return { success: true, body: filtered }
   }
 
+  async getTopLevelNamesAndCounts (userId) {
+    const result = await this.getTopLevelNames()
+    return await this.populate(result, userId)
+  }
+
+  async getTopLevelNamesAndCountsByArchitecture (architectureId, userId) {
+    const result = await this.getTopLevelNamesByArchitecture(architectureId)
+    return await this.populate(result, userId)
+  }
+
+  async getTopLevelNamesAndCountsByProvider (architectureId, userId) {
+    const result = await this.getTopLevelNamesByProvider(architectureId)
+    return await this.populate(result, userId)
+  }
+
   async getTopLevelNames () {
     return (await sequelize.query(
       'SELECT id, name, description FROM platforms WHERE platforms."platformId" is NULL '
+    ))[0]
+  }
+
+  async getTopLevelNamesByArchitecture (architectureId) {
+    return (await sequelize.query(
+      'SELECT id, name, description FROM platforms WHERE platforms."platformId" is NULL AND platforms."architectureId" = ' + architectureId
+    ))[0]
+  }
+
+  async getTopLevelNamesByProvider (providerId) {
+    return (await sequelize.query(
+      'SELECT id, name, description FROM platforms WHERE platforms."platformId" is NULL AND platforms."providerId" = ' + providerId
     ))[0]
   }
 

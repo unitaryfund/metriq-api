@@ -88,3 +88,15 @@ exports.readSubmissionCounts = async function (req, res) {
     async () => await platformService.getTopLevelNamesAndCounts(req.auth ? req.auth.id : 0),
     'Retrieved all platform names and counts.', req.auth ? req.auth.id : 0)
 }
+
+exports.readSubmissionCountsArchitecture = async function (req, res) {
+  routeWrapper(res,
+    async () => await platformService.getTopLevelNamesAndCountsByArchitecture(req.params.id, req.auth ? req.auth.id : 0),
+    'Retrieved all platform names and counts.', req.auth ? req.auth.id : 0)
+}
+
+exports.readSubmissionCountsProvider = async function (req, res) {
+  routeWrapper(res,
+    async () => await platformService.getTopLevelNamesAndCountsByProvider(req.params.id, req.auth ? req.auth.id : 0),
+    'Retrieved all platform names and counts.', req.auth ? req.auth.id : 0)
+}
