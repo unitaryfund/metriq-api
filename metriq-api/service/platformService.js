@@ -100,8 +100,8 @@ class PlatformService extends ModelService {
     return await this.populate(result, userId)
   }
 
-  async getTopLevelNamesAndCountsByProvider (architectureId, userId) {
-    const result = await this.getTopLevelNamesByProvider(architectureId)
+  async getTopLevelNamesAndCountsByProvider (providerId, userId) {
+    const result = await this.getTopLevelNamesByProvider(providerId)
     return await this.populate(result, userId)
   }
 
@@ -113,13 +113,13 @@ class PlatformService extends ModelService {
 
   async getTopLevelNamesByArchitecture (architectureId) {
     return (await sequelize.query(
-      'SELECT id, name, description FROM platforms WHERE platforms."platformId" is NULL AND platforms."architectureId" = ' + architectureId
+      'SELECT id, name, description FROM platforms WHERE platforms."architectureId" = ' + architectureId
     ))[0]
   }
 
   async getTopLevelNamesByProvider (providerId) {
     return (await sequelize.query(
-      'SELECT id, name, description FROM platforms WHERE platforms."platformId" is NULL AND platforms."providerId" = ' + providerId
+      'SELECT id, name, description FROM platforms WHERE platforms."providerId" = ' + providerId
     ))[0]
   }
 
