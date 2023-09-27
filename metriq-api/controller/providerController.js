@@ -57,3 +57,9 @@ exports.readNames = async function (req, res) {
     async () => await providerService.getAllNames(),
     'Retrieved all provider names.', req.auth ? req.auth.id : 0)
 }
+
+exports.readSubmissionCounts = async function (req, res) {
+  routeWrapper(res,
+    async () => await providerService.getTopLevelNamesAndCounts(),
+    'Retrieved all provider names and counts.', req.auth ? req.auth.id : 0)
+}
