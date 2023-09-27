@@ -57,3 +57,9 @@ exports.readNames = async function (req, res) {
     async () => await architectureService.getAllNames(),
     'Retrieved all architecture names.', req.auth ? req.auth.id : 0)
 }
+
+exports.readSubmissionCounts = async function (req, res) {
+  routeWrapper(res,
+    async () => await architectureService.getTopLevelNamesAndCounts(),
+    'Retrieved all architecture names and counts.', req.auth ? req.auth.id : 0)
+}
