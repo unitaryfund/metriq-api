@@ -31,6 +31,11 @@ class ProviderService extends ModelService {
     return { success: true, body: result }
   }
 
+  async getAllNamesByArchitecture (architectureId) {
+    const result = (await sequelize.query('SELECT DISTINCT providers.id, providers.name FROM providers RIGHT JOIN platforms on providers.id = platforms."providerId" WHERE platforms.id IS NOT NULL AND platforms."architectureId" = ' + architectureId))[0]
+    return { success: true, body: result }
+  }
+
   async getTopLevelNamesAndCounts () {
     const result = (await this.getAllNames()).body
     for (let i = 0; i < result.length; ++i) {
@@ -45,11 +50,33 @@ class ProviderService extends ModelService {
     return { success: true, body: filtered }
   }
 
+  async getTopLevelNamesAndCountsByArchitecture (architectureId) {
+    const result = (await this.getAllNamesByArchitecture(architectureId)).body
+    for (let i = 0; i < result.length; ++i) {
+      result[i] = (await this.getNamesAndCountsArch(result[i])).body
+    }
+    const filtered = []
+    for (let i = 0; i < result.length; ++i) {
+      if (result[i].submissionCount > 0) {
+        filtered.push(result[i])
+      }
+    }
+    return { success: true, body: filtered }
+  }
+
   async getNamesAndCounts (provider) {
     const id = provider.dataValues.id
     provider.dataValues.submissionCount = await this.getSubmissionCount(id)
     provider.dataValues.upvoteTotal = await this.getLikeCount(id)
     provider.dataValues.resultCount = await this.getResultCount(id)
+    return { success: true, body: provider }
+  }
+
+  async getNamesAndCountsArch (provider) {
+    const id = provider.id
+    provider.submissionCount = await this.getSubmissionCount(id)
+    provider.upvoteTotal = await this.getLikeCount(id)
+    provider.resultCount = await this.getResultCount(id)
     return { success: true, body: provider }
   }
 

@@ -63,3 +63,9 @@ exports.readSubmissionCounts = async function (req, res) {
     async () => await providerService.getTopLevelNamesAndCounts(),
     'Retrieved all provider names and counts.', req.auth ? req.auth.id : 0)
 }
+
+exports.readSubmissionCountsByArchitecture = async function (req, res) {
+  routeWrapper(res,
+    async () => await providerService.getTopLevelNamesAndCountsByArchitecture(req.params.id),
+    'Retrieved all provider names and counts.', req.auth ? req.auth.id : 0)
+}
