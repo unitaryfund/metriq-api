@@ -12,6 +12,14 @@ class ProviderService extends ModelService {
     super(Provider)
   }
 
+  async getSanitized (id) {
+    const provider = await this.getByPk(id)
+    if (!provider) {
+      return { success: false, error: 'Provider ID not found.' }
+    }
+    return { success: true, body: provider }
+  }
+
   async validate (propertyType) {
     if (!propertyType.name) {
       return { success: false, error: 'Property name cannot be blank.' }

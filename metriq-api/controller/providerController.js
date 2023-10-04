@@ -52,6 +52,12 @@ function setJwtCookie (res, token) {
   }
 }
 
+exports.read = async function (req, res) {
+  routeWrapper(res,
+    async () => await providerService.getSanitized(req.params.id),
+    'Retrieved provider.', req.auth ? req.auth.id : 0)
+}
+
 exports.readNames = async function (req, res) {
   routeWrapper(res,
     async () => await providerService.getAllNames(),
@@ -67,5 +73,5 @@ exports.readSubmissionCounts = async function (req, res) {
 exports.readSubmissionCountsByArchitecture = async function (req, res) {
   routeWrapper(res,
     async () => await providerService.getTopLevelNamesAndCountsByArchitecture(req.params.id),
-    'Retrieved all provider names and counts.', req.auth ? req.auth.id : 0)
+    'Retrieved all provider names and counts, by architecture.', req.auth ? req.auth.id : 0)
 }

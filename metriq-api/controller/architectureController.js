@@ -52,6 +52,12 @@ function setJwtCookie (res, token) {
   }
 }
 
+exports.read = async function (req, res) {
+  routeWrapper(res,
+    async () => await architectureService.getSanitized(req.params.id),
+    'Retrieved architecture.', req.auth ? req.auth.id : 0)
+}
+
 exports.readNames = async function (req, res) {
   routeWrapper(res,
     async () => await architectureService.getAllNames(),

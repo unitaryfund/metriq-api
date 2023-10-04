@@ -12,6 +12,14 @@ class ArchitectureService extends ModelService {
     super(Architecture)
   }
 
+  async getSanitized (id) {
+    const architecture = await this.getByPk(id)
+    if (!architecture) {
+      return { success: false, error: 'Architecture ID not found.' }
+    }
+    return { success: true, body: architecture }
+  }
+
   async validate (propertyType) {
     if (!propertyType.name) {
       return { success: false, error: 'Property name cannot be blank.' }
