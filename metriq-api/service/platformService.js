@@ -197,8 +197,8 @@ class PlatformService extends ModelService {
     platform.fullName = reqBody.fullName
     platform.description = reqBody.description
     platform.platformId = reqBody.parentPlatform ? reqBody.parentPlatform : null
-    platform.architectureId = 7
-    platform.providerId = 17
+    platform.architectureId = reqBody.architecture
+    platform.providerId = reqBody.provider
 
     if (reqBody.parentPlatform) {
       const parentPlatform = await this.getByPk(platform.platformId)
