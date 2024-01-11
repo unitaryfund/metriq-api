@@ -4,6 +4,8 @@
 // It doesn't exactly fit the model-service-controller abstraction paradigm that we use, but maybe we can build a "domain" interface at this level.
 
 // Data Access Layer
+const DataTypeService = require('./dataTypeService')
+const dataTypeService = new DataTypeService()
 const PlatformDataTypeService = require('./platformDataTypeService')
 const platformDataTypeService = new PlatformDataTypeService()
 const PlatformDataTypeValueService = require('./platformDataTypeValueService')
@@ -57,6 +59,7 @@ class PropertyService {
     }
 
     property.id = platformDataTypeValue.id
+    property.typeFriendlyName = (await dataTypeService.getByPk(property.dataTypeId)).friendlyName
 
     return { success: true, body: property }
   }
@@ -105,9 +108,8 @@ class PropertyService {
     }
     const platformId = property.platformId
     await property.destroy()
-    const platform = await platformService.getSanitized(platformId, userId)
 
-    return { success: true, body: platform }
+    return await platformService.getSanitized(platformId, userId)
   }
 }
 
