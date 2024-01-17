@@ -34,14 +34,26 @@ exports.subscribe = async function (req, res) {
 
 exports.readNames = async function (req, res) {
   routeWrapper(res,
-    async () => await platformService.getAllNames(req.auth ? req.auth.id : 0),
+    async () => await platformService.getAllNames(req.auth ? req.auth.id : 0, false),
     'Retrieved all platform names.', req.auth ? req.auth.id : 0)
+}
+
+exports.readDataSetNames = async function (req, res) {
+  routeWrapper(res,
+    async () => await platformService.getAllNames(req.auth ? req.auth.id : 0, true),
+    'Retrieved all data set names.', req.auth ? req.auth.id : 0)
 }
 
 exports.readSubmissionCounts = async function (req, res) {
   routeWrapper(res,
-    async () => await platformService.getTopLevelNamesAndCounts(req.auth ? req.auth.id : 0),
+    async () => await platformService.getTopLevelNamesAndCounts(req.auth ? req.auth.id : 0, false),
     'Retrieved all platform names and counts.', req.auth ? req.auth.id : 0)
+}
+
+exports.readDataSetSubmissionCounts = async function (req, res) {
+  routeWrapper(res,
+    async () => await platformService.getTopLevelNamesAndCounts(req.auth ? req.auth.id : 0, true),
+    'Retrieved all data set names and counts.', req.auth ? req.auth.id : 0)
 }
 
 exports.readSubmissionCountsArchitecture = async function (req, res) {

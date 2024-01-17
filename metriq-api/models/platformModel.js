@@ -22,6 +22,10 @@ module.exports = function (sequelize, DataTypes) {
     architectureId: {
       type: DataTypes.INTEGER,
       allowNull: false
+    },
+    isDataSet: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false
     }
   }, {})
   Model.associate = function (db) {
