@@ -13,6 +13,8 @@ const SubmissionSqlService = require('./submissionSqlService')
 const submissionSqlService = new SubmissionSqlService()
 const SubmissionPlatformRefService = require('./submissionPlatformRefService')
 const submissionPlatformRefService = new SubmissionPlatformRefService()
+const SubmissionDataSetRefService = require('./submissionDataSetRefService')
+const submissionDataSetRefService = new SubmissionDataSetRefService()
 const ResultService = require('./resultService')
 const resultService = new ResultService()
 const PlatformSubscriptionService = require('./platformSubscriptionService')
@@ -324,7 +326,7 @@ class PlatformService extends ModelService {
     return await this.getSanitized(platform.id, userId)
   }
 
-  async addOrRemoveSubmission (isAdd, platformId, submissionId, userId) {
+  async addOrRemovePlatformSubmission (isAdd, platformId, submissionId, userId) {
     const platform = await this.getByPk(platformId)
     if (!platform) {
       return { success: false, error: 'Platform not found.' }
@@ -345,6 +347,36 @@ class PlatformService extends ModelService {
           return { success: false, error: 'Cannot delete submission platform reference with result. Change or delete results in the submission that use this platform, first.' }
         }
         await submissionPlatformRefService.deleteByPk(ref.id)
+      }
+    }
+
+    submission = await submissionSqlService.getEagerByPk(submissionId)
+    submission = await submissionSqlService.populate(submission, userId)
+
+    return { success: true, body: submission }
+  }
+
+  async addOrRemoveDataSetSubmission (isAdd, dataSetId, submissionId, userId) {
+    const dataSet = await this.getByPk(dataSetId)
+    if (!dataSet) {
+      return { success: false, error: 'Data set not found.' }
+    }
+
+    let submission = await submissionSqlService.getByPk(submissionId)
+    if (!submission) {
+      return { success: false, error: 'Submission not found.' }
+    }
+
+    if (isAdd) {
+      await submissionDataSetRefService.createOrFetch(submission.id, userId, dataSet.id)
+    } else {
+      const ref = await submissionDataSetRefService.getByFks(submission.id, dataSet.id)
+      if (ref) {
+        const results = (await resultService.getByDataSetIdSubmissionId(dataSet.id, submission.id)).body
+        if (results && results.length) {
+          return { success: false, error: 'Cannot delete submission data set reference with result. Change or delete results in the submission that use this platform, first.' }
+        }
+        await submissionDataSetRefService.deleteByPk(ref.id)
       }
     }
 

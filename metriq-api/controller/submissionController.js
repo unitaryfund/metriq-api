@@ -78,14 +78,26 @@ exports.deleteTask = async function (req, res) {
 
 exports.newPlatform = async function (req, res) {
   routeWrapper(res,
-    async () => await platformService.addOrRemoveSubmission(true, req.params.platformId, req.params.submissionId, req.auth.id),
+    async () => await platformService.addOrRemovePlatformSubmission(true, req.params.platformId, req.params.submissionId, req.auth.id),
     'Successfully added platform to submission.', req.auth ? req.auth.id : 0)
 }
 
 exports.deletePlatform = async function (req, res) {
   routeWrapper(res,
-    async () => await platformService.addOrRemoveSubmission(false, req.params.platformId, req.params.submissionId, req.auth.id),
+    async () => await platformService.addOrRemovePlatformSubmission(false, req.params.platformId, req.params.submissionId, req.auth.id),
     'Successfully removed platform from submission.', req.auth ? req.auth.id : 0)
+}
+
+exports.newDataSet = async function (req, res) {
+  routeWrapper(res,
+    async () => await platformService.addOrRemoveDataSetSubmission(true, req.params.dataSetId, req.params.submissionId, req.auth.id),
+    'Successfully added data set to submission.', req.auth ? req.auth.id : 0)
+}
+
+exports.deleteDataSet = async function (req, res) {
+  routeWrapper(res,
+    async () => await platformService.addOrRemoveDataSetSubmission(false, req.params.dataSetId, req.params.submissionId, req.auth.id),
+    'Successfully removed data set from submission.', req.auth ? req.auth.id : 0)
 }
 
 exports.upvote = async function (req, res) {
