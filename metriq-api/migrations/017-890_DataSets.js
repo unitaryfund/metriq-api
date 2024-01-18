@@ -7,6 +7,12 @@ module.exports = {
             type: Sequelize.BOOLEAN,
             allowNull: false,
             defaultValue: false
+          }, { transaction: t }),
+        queryInterface.addColumn('results', 'submissionDataSetRefId',
+          {
+            type: Sequelize.INTEGER,
+            allowNull: true,
+            references: { model: 'submissionPlatformRefs', key: 'id' }
           }, { transaction: t })
       ])
     })

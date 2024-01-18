@@ -29,13 +29,14 @@ class ResultService extends ModelService {
     '    SELECT t.id FROM tasks AS t ' +
     '    JOIN c on c.id = t."taskId" ' +
     ') ' +
-    'SELECT r.*, s.name AS "submissionName", s."contentUrl" AS "submissionUrl", s.id AS "submissionId", CASE WHEN t.id = ' + taskId + ' THEN m.name ELSE m.name || \' | \' || t.name END AS "methodName", COALESCE(p.name, \'\') as "platformName"  FROM "submissionTaskRefs" AS str ' +
+    'SELECT r.*, s.name AS "submissionName", s."contentUrl" AS "submissionUrl", s.id AS "submissionId", CASE WHEN t.id = ' + taskId + ' THEN m.name ELSE m.name || \' | \' || t.name END AS "methodName", COALESCE(d.name, \'\') as "dataSetName", COALESCE(p.name, \'\') as "platformName"  FROM "submissionTaskRefs" AS str ' +
     '    RIGHT JOIN c on c.id = str."taskId" ' +
     '    JOIN results AS r on r."submissionTaskRefId" = str.id AND r."deletedAt" IS NULL ' +
     '    LEFT JOIN submissions AS s on str."submissionId" = s.id AND s."deletedAt" IS NULL ' +
     '    LEFT JOIN "submissionMethodRefs" AS smr on r."submissionMethodRefId" = smr.id AND smr."deletedAt" IS NULL ' +
     '    LEFT JOIN methods AS m on smr."methodId" = m.id ' +
     '    LEFT JOIN "submissionPlatformRefs" AS spr on r."submissionPlatformRefId" = spr.id AND spr."deletedAt" IS NULL ' +
+    '    LEFT JOIN platforms AS d on spr."dataSetId" = p.id ' +
     '    LEFT JOIN platforms AS p on spr."platformId" = p.id ' +
     '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
     '    WHERE str."deletedAt" IS NULL;'
@@ -48,13 +49,14 @@ class ResultService extends ModelService {
     '    SELECT t.id FROM tasks AS t ' +
     '    JOIN c on c.id = t."taskId" ' +
     ') ' +
-    'SELECT r.*, s.name AS "submissionName", s.id as "submissionId", CASE WHEN t.id = ' + taskId + ' THEN m.name ELSE m.name || \' | \' || t.name END AS "methodName", COALESCE(p.name, \'\') as "platformName"  FROM "submissionTaskRefs" AS str ' +
+    'SELECT r.*, s.name AS "submissionName", s.id as "submissionId", CASE WHEN t.id = ' + taskId + ' THEN m.name ELSE m.name || \' | \' || t.name END AS "methodName", COALESCE(d.name, \'\') as "dataSetName", COALESCE(p.name, \'\') as "platformName" FROM "submissionTaskRefs" AS str ' +
     '    RIGHT JOIN c on c.id = str."taskId" ' +
     '    JOIN results AS r on r."submissionTaskRefId" = str.id AND r."deletedAt" IS NULL ' +
     '    LEFT JOIN submissions AS s on str."submissionId" = s.id AND s."deletedAt" IS NULL ' +
     '    LEFT JOIN "submissionMethodRefs" AS smr on r."submissionMethodRefId" = smr.id AND smr."deletedAt" IS NULL ' +
     '    LEFT JOIN methods AS m on smr."methodId" = m.id ' +
     '    LEFT JOIN "submissionPlatformRefs" AS spr on r."submissionPlatformRefId" = spr.id AND spr."deletedAt" IS NULL ' +
+    '    LEFT JOIN platforms AS d on spr."dataSetId" = p.id ' +
     '    LEFT JOIN platforms AS p on spr."platformId" = p.id ' +
     '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
     '    WHERE str."deletedAt" IS NULL AND s.id = ' + submissionId + ';'
@@ -67,13 +69,14 @@ class ResultService extends ModelService {
     '    SELECT t.id FROM methods AS t ' +
     '    JOIN c on c.id = t."methodId" ' +
     ') ' +
-    'SELECT r.*, s.name AS "submissionName", s.id AS "submissionId", COALESCE(p.name, \'\') as "platformName"  FROM "submissionMethodRefs" AS smr ' +
+    'SELECT r.*, s.name AS "submissionName", s.id AS "submissionId", COALESCE(d.name, \'\') as "dataSetName", COALESCE(p.name, \'\') as "platformName"  FROM "submissionMethodRefs" AS smr ' +
     '    RIGHT JOIN c on c.id = smr."methodId" ' +
     '    JOIN results AS r on r."submissionMethodRefId" = smr.id AND r."deletedAt" IS NULL ' +
     '    LEFT JOIN submissions AS s on smr."submissionId" = s.id AND s."deletedAt" IS NULL ' +
     '    LEFT JOIN "submissionTaskRefs" AS str on r."submissionTaskRefId" = str.id AND str."deletedAt" IS NULL ' +
     '    LEFT JOIN methods AS m on smr."methodId" = m.id ' +
     '    LEFT JOIN "submissionPlatformRefs" AS spr on r."submissionPlatformRefId" = spr.id AND spr."deletedAt" IS NULL ' +
+    '    LEFT JOIN platforms AS d on spr."dataSetId" = p.id ' +
     '    LEFT JOIN platforms AS p on spr."platformId" = p.id ' +
     '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
     '    WHERE str."deletedAt" IS NULL AND s.id=' + submissionId + ';'
@@ -86,7 +89,7 @@ class ResultService extends ModelService {
     '    SELECT t.id FROM platforms AS t ' +
     '    JOIN c on c.id = t."platformId" ' +
     ') ' +
-    'SELECT r.*, s.name AS "submissionName", s.id as "submissionId", COALESCE(p.name, \'\') as "platformName"  FROM "submissionPlatformRefs" AS spr ' +
+    'SELECT r.*, s.name AS "submissionName", s.id as "submissionId", COALESCE(d.name, \'\') as "dataSetName", COALESCE(p.name, \'\') as "platformName"  FROM "submissionPlatformRefs" AS spr ' +
     '    RIGHT JOIN c on c.id = spr."platformId" ' +
     '    JOIN results AS r on r."submissionPlatformRefId" = spr.id AND r."deletedAt" IS NULL ' +
     '    LEFT JOIN submissions AS s on spr."submissionId" = s.id AND s."deletedAt" IS NULL ' +
@@ -94,6 +97,7 @@ class ResultService extends ModelService {
     '    LEFT JOIN methods AS m on smr."methodId" = m.id ' +
     '    LEFT JOIN "submissionTaskRefs" AS str on r."submissionTaskRefId" = spr.id AND str."deletedAt" IS NULL ' +
     '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
+    '    LEFT JOIN platforms AS d on spr."dataSetId" = p.id ' +
     '    LEFT JOIN platforms AS p on spr."platformId" = p.id ' +
     '    WHERE str."deletedAt" IS NULL AND s.id = ' + submissionId + ';'
   }
@@ -147,9 +151,24 @@ class ResultService extends ModelService {
 
     // Platform must be not null and valid (present in database) for a valid result object.
     if (reqBody.platform) {
-      result.submissionPlatformRefId = (await submissionPlatformRefService.getByFks(submissionId, parseInt(reqBody.platform))).id
+      const platform = (await submissionPlatformRefService.getByFks(submissionId, parseInt(reqBody.platform)))
+      if (platform.isDataSet) {
+        return { success: false, error: 'Invalid platform reference specified.' }
+      }
+      result.submissionPlatformRefId = platform.id
     } else {
       result.submissionPlatformRefId = null
+    }
+
+    // Data Set must be not null and valid (present in database) for a valid result object.
+    if (reqBody.dataSet) {
+      const dataSet = (await submissionPlatformRefService.getByFks(submissionId, parseInt(reqBody.dataSet)))
+      if (!dataSet.isDataSet) {
+        return { success: false, error: 'Invalid dataSet reference specified.' }
+      }
+      result.submissionDataSetRefId = platform.id
+    } else {
+      result.submissionDataSetRefId = null
     }
 
     result.userId = userId
@@ -205,11 +224,26 @@ class ResultService extends ModelService {
       return { success: false, error: 'Result requires method to be defined.' }
     }
 
-    // If specified, platform must valid (present in database) for a valid result object.
+    // Platform must be not null and valid (present in database) for a valid result object.
     if (reqBody.platform) {
-      result.submissionPlatformRefId = (await submissionPlatformRefService.getByFks(reqBody.submissionId, parseInt(reqBody.platform))).id
+      const platform = (await submissionPlatformRefService.getByFks(submissionId, parseInt(reqBody.platform)))
+      if (platform.isDataSet) {
+        return { success: false, error: 'Invalid platform reference specified.' }
+      }
+      result.submissionPlatformRefId = platform.id
     } else {
       result.submissionPlatformRefId = null
+    }
+
+    // Data Set must be not null and valid (present in database) for a valid result object.
+    if (reqBody.dataSet) {
+      const dataSet = (await submissionPlatformRefService.getByFks(submissionId, parseInt(reqBody.dataSet)))
+      if (!dataSet.isDataSet) {
+        return { success: false, error: 'Invalid dataSet reference specified.' }
+      }
+      result.submissionDataSetRefId = platform.id
+    } else {
+      result.submissionDataSetRefId = null
     }
 
     result.submissionTaskRefId = (await submissionTaskRefService.getByFks(reqBody.submissionId, parseInt(reqBody.task))).id
