@@ -75,6 +75,11 @@ class SubmissionService extends ModelService {
     return { success: true, body: result }
   }
 
+  async getByDataSetId (dataSetId) {
+    const result = (await sequelize.query(submissionSqlService.sqlByDataSet(dataSetId)))[0]
+    return { success: true, body: result }
+  }
+
   async getByPlatformId (platformId) {
     const result = (await sequelize.query(submissionSqlService.sqlByPlatform(platformId)))[0]
     return { success: true, body: result }
@@ -249,7 +254,7 @@ class SubmissionService extends ModelService {
     }
 
     if (reqBody.dataSets) {
-      await this.parseRefList(submission.id, userId, reqBody.platforms, platformService, submissionDataSetRefService, 'Data set in data sets reference list not found.')
+      await this.parseRefList(submission.id, userId, reqBody.dataSets, platformService, submissionDataSetRefService, 'Data set in data sets reference list not found.')
     }
 
     if (reqBody.platforms) {
@@ -355,7 +360,7 @@ class SubmissionService extends ModelService {
 
     if (reqBody.dataSets !== undefined) {
       const refs = await submissionDataSetRefService.deleteBySubmission(submissionId)
-      await this.parseRefList(submissionId, userId, reqBody.platforms, platformService, submissionDataSetRefService, 'Data set in data set reference list not found.', refs)
+      await this.parseRefList(submissionId, userId, reqBody.dataSets, platformService, submissionDataSetRefService, 'Data set in data set reference list not found.', refs)
     }
 
     if (reqBody.platforms !== undefined) {
