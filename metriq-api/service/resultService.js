@@ -14,6 +14,8 @@ const SubmissionTaskRefService = require('./submissionTaskRefService')
 const submissionTaskRefService = new SubmissionTaskRefService()
 const SubmissionMethodRefService = require('./submissionMethodRefService')
 const submissionMethodRefService = new SubmissionMethodRefService()
+const SubmissionDataSetRefService = require('./submissionDataSetRefService')
+const submissionDataSetRefService = new SubmissionDataSetRefService()
 const SubmissionPlatformRefService = require('./submissionPlatformRefService')
 const submissionPlatformRefService = new SubmissionPlatformRefService()
 
@@ -36,6 +38,7 @@ class ResultService extends ModelService {
     '    LEFT JOIN "submissionMethodRefs" AS smr on r."submissionMethodRefId" = smr.id AND smr."deletedAt" IS NULL ' +
     '    LEFT JOIN methods AS m on smr."methodId" = m.id ' +
     '    LEFT JOIN "submissionPlatformRefs" AS spr on r."submissionPlatformRefId" = spr.id AND spr."deletedAt" IS NULL ' +
+    '    LEFT JOIN "submissionPlatformRefs" AS sdr on r."submissionDataSetRefId" = sdr.id AND sdr."deletedAt" IS NULL ' +
     '    LEFT JOIN platforms AS d on spr."dataSetId" = p.id ' +
     '    LEFT JOIN platforms AS p on spr."platformId" = p.id ' +
     '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
@@ -56,6 +59,7 @@ class ResultService extends ModelService {
     '    LEFT JOIN "submissionMethodRefs" AS smr on r."submissionMethodRefId" = smr.id AND smr."deletedAt" IS NULL ' +
     '    LEFT JOIN methods AS m on smr."methodId" = m.id ' +
     '    LEFT JOIN "submissionPlatformRefs" AS spr on r."submissionPlatformRefId" = spr.id AND spr."deletedAt" IS NULL ' +
+    '    LEFT JOIN "submissionPlatformRefs" AS sdr on r."submissionDataSetRefId" = sdr.id AND sdr."deletedAt" IS NULL ' +
     '    LEFT JOIN platforms AS d on spr."dataSetId" = p.id ' +
     '    LEFT JOIN platforms AS p on spr."platformId" = p.id ' +
     '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
@@ -76,6 +80,7 @@ class ResultService extends ModelService {
     '    LEFT JOIN "submissionTaskRefs" AS str on r."submissionTaskRefId" = str.id AND str."deletedAt" IS NULL ' +
     '    LEFT JOIN methods AS m on smr."methodId" = m.id ' +
     '    LEFT JOIN "submissionPlatformRefs" AS spr on r."submissionPlatformRefId" = spr.id AND spr."deletedAt" IS NULL ' +
+    '    LEFT JOIN "submissionPlatformRefs" AS sdr on r."submissionDataSetRefId" = sdr.id AND sdr."deletedAt" IS NULL ' +
     '    LEFT JOIN platforms AS d on spr."dataSetId" = p.id ' +
     '    LEFT JOIN platforms AS p on spr."platformId" = p.id ' +
     '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
@@ -92,6 +97,26 @@ class ResultService extends ModelService {
     'SELECT r.*, s.name AS "submissionName", s.id as "submissionId", COALESCE(d.name, \'\') as "dataSetName", COALESCE(p.name, \'\') as "platformName"  FROM "submissionPlatformRefs" AS spr ' +
     '    RIGHT JOIN c on c.id = spr."platformId" ' +
     '    JOIN results AS r on r."submissionPlatformRefId" = spr.id AND r."deletedAt" IS NULL ' +
+    '    LEFT JOIN submissions AS s on spr."submissionId" = s.id AND s."deletedAt" IS NULL ' +
+    '    LEFT JOIN "submissionMethodRefs" AS smr on r."submissionMethodRefId" = smr.id AND smr."deletedAt" IS NULL ' +
+    '    LEFT JOIN methods AS m on smr."methodId" = m.id ' +
+    '    LEFT JOIN "submissionTaskRefs" AS str on r."submissionTaskRefId" = spr.id AND str."deletedAt" IS NULL ' +
+    '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
+    '    LEFT JOIN platforms AS d on spr."dataSetId" = p.id ' +
+    '    LEFT JOIN platforms AS p on spr."platformId" = p.id ' +
+    '    WHERE str."deletedAt" IS NULL AND s.id = ' + submissionId + ';'
+  }
+
+  sqlByDataSetSubmission (dataSetId, submissionId) {
+    return 'WITH RECURSIVE c AS ( ' +
+    '    SELECT ' + dataSetId + ' as id ' +
+    '    UNION ALL ' +
+    '    SELECT t.id FROM platforms AS t ' +
+    '    JOIN c on c.id = t."dataSetId" ' +
+    ') ' +
+    'SELECT r.*, s.name AS "submissionName", s.id as "submissionId", COALESCE(d.name, \'\') as "dataSetName", COALESCE(p.name, \'\') as "platformName"  FROM "submissionPlatformRefs" AS spr ' +
+    '    RIGHT JOIN c on c.id = spr."dataSetId" ' +
+    '    JOIN results AS r on r."submissionDataSetRefId" = spr.id AND r."deletedAt" IS NULL ' +
     '    LEFT JOIN submissions AS s on spr."submissionId" = s.id AND s."deletedAt" IS NULL ' +
     '    LEFT JOIN "submissionMethodRefs" AS smr on r."submissionMethodRefId" = smr.id AND smr."deletedAt" IS NULL ' +
     '    LEFT JOIN methods AS m on smr."methodId" = m.id ' +
@@ -119,6 +144,11 @@ class ResultService extends ModelService {
 
   async getByPlatformIdSubmissionId (platformId, submissionId) {
     const result = (await sequelize.query(this.sqlByPlatformSubmission(platformId, submissionId)))[0]
+    return { success: true, body: result }
+  }
+
+  async getByDataSetIdSubmissionId (dataSetId, submissionId) {
+    const result = (await sequelize.query(this.sqlByDataSetSubmission(dataSetId, submissionId)))[0]
     return { success: true, body: result }
   }
 
@@ -162,9 +192,9 @@ class ResultService extends ModelService {
 
     // Data Set must be not null and valid (present in database) for a valid result object.
     if (reqBody.dataSet) {
-      const dataSet = (await submissionPlatformRefService.getByFks(submissionId, parseInt(reqBody.dataSet)))
+      const dataSet = (await submissionDataSetRefService.getByFks(submissionId, parseInt(reqBody.dataSet)))
       if (!dataSet.isDataSet) {
-        return { success: false, error: 'Invalid dataSet reference specified.' }
+        return { success: false, error: 'Invalid data set reference specified.' }
       }
       result.submissionDataSetRefId = platform.id
     } else {
