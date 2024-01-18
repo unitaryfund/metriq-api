@@ -184,12 +184,23 @@ class SubmissionSqlService {
     }
     delete toRet.submissionTaskRefs
 
+    toRet.dataSets = []
     toRet.platforms = []
     for (let i = 0; i < toRet.submissionPlatformRefs.length; i++) {
-      toRet.platforms.push(await toRet.submissionPlatformRefs[i].getPlatform())
-      for (let j = 0; j < toRet.results.length; j++) {
-        if (toRet.submissionPlatformRefs[i].id === toRet.results[j].submissionPlatformRefId) {
-          toRet.results[j].platform = toRet.platforms[i]
+      const p = await toRet.submissionPlatformRefs[i].getPlatform()
+      if (p.isDataSet) {
+        toRet.dataSets.push()
+        for (let j = 0; j < toRet.results.length; j++) {
+          if (toRet.submissionPlatformRefs[i].id === toRet.results[j].submissionDataSetRefId) {
+            toRet.results[j].dataSet = toRet.dataSets[i]
+          }
+        }
+      } else {
+        toRet.platforms.push()
+        for (let j = 0; j < toRet.results.length; j++) {
+          if (toRet.submissionPlatformRefs[i].id === toRet.results[j].submissionPlatformRefId) {
+            toRet.results[j].platform = toRet.platforms[i]
+          }
         }
       }
     }
