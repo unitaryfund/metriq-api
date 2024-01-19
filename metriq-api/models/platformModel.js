@@ -26,6 +26,10 @@ module.exports = function (sequelize, DataTypes) {
     isDataSet: {
       type: DataTypes.BOOLEAN,
       allowNull: false
+    },
+    url: {
+      type: DataTypes.TEXT,
+      allowNull: false
     }
   }, {})
   Model.associate = function (db) {

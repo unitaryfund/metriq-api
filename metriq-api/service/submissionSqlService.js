@@ -189,14 +189,14 @@ class SubmissionSqlService {
     for (let i = 0; i < toRet.submissionPlatformRefs.length; i++) {
       const p = await toRet.submissionPlatformRefs[i].getPlatform()
       if (p.isDataSet) {
-        toRet.dataSets.push()
+        toRet.dataSets.push(p)
         for (let j = 0; j < toRet.results.length; j++) {
           if (toRet.submissionPlatformRefs[i].id === toRet.results[j].submissionDataSetRefId) {
             toRet.results[j].dataSet = toRet.dataSets[i]
           }
         }
       } else {
-        toRet.platforms.push()
+        toRet.platforms.push(p)
         for (let j = 0; j < toRet.results.length; j++) {
           if (toRet.submissionPlatformRefs[i].id === toRet.results[j].submissionPlatformRefId) {
             toRet.results[j].platform = toRet.platforms[i]

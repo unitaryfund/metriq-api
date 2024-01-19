@@ -109,19 +109,19 @@ class PlatformService extends ModelService {
 
   async getTopLevelNames (isDataSet) {
     return (await sequelize.query(
-      'SELECT id, name, description FROM platforms WHERE platforms."platformId" is NULL AND platforms."isDataSet" = ' + (isDataSet ? 'TRUE' : ' FALSE')
+      'SELECT id, name, description, url FROM platforms WHERE platforms."platformId" is NULL AND platforms."isDataSet" = ' + (isDataSet ? 'TRUE' : ' FALSE')
     ))[0]
   }
 
   async getTopLevelNamesByArchitecture (architectureId) {
     return (await sequelize.query(
-      'SELECT id, name, description FROM platforms WHERE platforms."platformId" is NULL AND platforms."isDataSet" = FALSE AND platforms."architectureId" = ' + architectureId
+      'SELECT id, name, description, url FROM platforms WHERE platforms."platformId" is NULL AND platforms."isDataSet" = FALSE AND platforms."architectureId" = ' + architectureId
     ))[0]
   }
 
   async getTopLevelNamesByProvider (providerId) {
     return (await sequelize.query(
-      'SELECT id, name, description FROM platforms WHERE platforms."platformId" is NULL AND platforms."isDataSet" = FALSE AND platforms."providerId" = ' + providerId
+      'SELECT id, name, description, url FROM platforms WHERE platforms."platformId" is NULL AND platforms."isDataSet" = FALSE AND platforms."providerId" = ' + providerId
     ))[0]
   }
 
@@ -178,7 +178,7 @@ class PlatformService extends ModelService {
   }
 
   async getAllNames (userId, isDataSet) {
-    const result = await this.SequelizeServiceInstance.findAndProject({ isDataSet }, ['id', 'name'])
+    const result = await this.SequelizeServiceInstance.findAndProject({ isDataSet }, ['id', 'name', 'url'])
     if (userId) {
       for (let i = 0; i < result.length; i++) {
         result[i].dataValues.isSubscribed = !!(await platformSubscriptionService.getByFks(userId, result[i].dataValues.id))
@@ -202,6 +202,7 @@ class PlatformService extends ModelService {
     platform.architectureId = reqBody.architecture
     platform.providerId = reqBody.provider
     platform.isDataSet = reqBody.isDataSet !== null ? reqBody.isDataSet : false
+    platform.url = reqBody.url !== null ? reqBody.url : ''
 
     if (reqBody.parentPlatform) {
       const parentPlatform = await this.getByPk(platform.platformId)
@@ -319,6 +320,9 @@ class PlatformService extends ModelService {
     }
     if (reqBody.architecture !== undefined) {
       platform.architectureId = reqBody.architecture ? parseInt(reqBody.architecture) : null
+    }
+    if (reqBody.url !== undefined) {
+      platform.url = reqBody.url
     }
 
     await platform.save()
