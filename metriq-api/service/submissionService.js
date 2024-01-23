@@ -32,6 +32,8 @@ const SubmissionMethodRefService = require('./submissionMethodRefService')
 const submissionMethodRefService = new SubmissionMethodRefService()
 const PlatformService = require('./platformService')
 const platformService = new PlatformService()
+const SubmissionDataSetRefService = require('./submissionDataSetRefService')
+const submissionDataSetRefService = new SubmissionDataSetRefService()
 const SubmissionPlatformRefService = require('./submissionPlatformRefService')
 const submissionPlatformRefService = new SubmissionPlatformRefService()
 const LikeService = require('./likeService')
@@ -70,6 +72,11 @@ class SubmissionService extends ModelService {
 
   async getByMethodId (methodId) {
     const result = (await sequelize.query(submissionSqlService.sqlByMethod(methodId)))[0]
+    return { success: true, body: result }
+  }
+
+  async getByDataSetId (dataSetId) {
+    const result = (await sequelize.query(submissionSqlService.sqlByDataSet(dataSetId)))[0]
     return { success: true, body: result }
   }
 
@@ -246,6 +253,10 @@ class SubmissionService extends ModelService {
       await this.parseRefList(submission.id, userId, reqBody.methods, methodService, submissionMethodRefService, 'Method in method reference list not found.')
     }
 
+    if (reqBody.dataSets) {
+      await this.parseRefList(submission.id, userId, reqBody.dataSets, platformService, submissionDataSetRefService, 'Data set in data sets reference list not found.')
+    }
+
     if (reqBody.platforms) {
       await this.parseRefList(submission.id, userId, reqBody.platforms, platformService, submissionPlatformRefService, 'Platform in platform reference list not found.')
     }
@@ -344,7 +355,12 @@ class SubmissionService extends ModelService {
 
     if (reqBody.methods !== undefined) {
       const refs = await submissionMethodRefService.getBySubmission(submissionId)
-      await this.parseRefList(submissionId, userId, reqBody.methods, methodService, submissionMethodRefService, 'Method in method reference list not found.', refs)
+      await this.parseRefList(submissionId, userId, reqBody.methods, methodService, submissionMethodRefService, 'Method in task reference list not found.', refs)
+    }
+
+    if (reqBody.dataSets !== undefined) {
+      const refs = await submissionDataSetRefService.deleteBySubmission(submissionId)
+      await this.parseRefList(submissionId, userId, reqBody.dataSets, platformService, submissionDataSetRefService, 'Data set in data set reference list not found.', refs)
     }
 
     if (reqBody.platforms !== undefined) {

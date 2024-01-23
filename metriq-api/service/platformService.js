@@ -13,6 +13,8 @@ const SubmissionSqlService = require('./submissionSqlService')
 const submissionSqlService = new SubmissionSqlService()
 const SubmissionPlatformRefService = require('./submissionPlatformRefService')
 const submissionPlatformRefService = new SubmissionPlatformRefService()
+const SubmissionDataSetRefService = require('./submissionDataSetRefService')
+const submissionDataSetRefService = new SubmissionDataSetRefService()
 const ResultService = require('./resultService')
 const resultService = new ResultService()
 const PlatformSubscriptionService = require('./platformSubscriptionService')
@@ -90,8 +92,8 @@ class PlatformService extends ModelService {
     return { success: true, body: filtered }
   }
 
-  async getTopLevelNamesAndCounts (userId) {
-    const result = await this.getTopLevelNames()
+  async getTopLevelNamesAndCounts (userId, isDataSet) {
+    const result = await this.getTopLevelNames(isDataSet)
     return await this.populate(result, userId)
   }
 
@@ -105,21 +107,21 @@ class PlatformService extends ModelService {
     return await this.populate(result, userId)
   }
 
-  async getTopLevelNames () {
+  async getTopLevelNames (isDataSet) {
     return (await sequelize.query(
-      'SELECT id, name, description FROM platforms WHERE platforms."platformId" is NULL '
+      'SELECT id, name, description, url FROM platforms WHERE platforms."platformId" is NULL AND platforms."isDataSet" = ' + (isDataSet ? 'TRUE' : ' FALSE')
     ))[0]
   }
 
   async getTopLevelNamesByArchitecture (architectureId) {
     return (await sequelize.query(
-      'SELECT id, name, description FROM platforms WHERE platforms."platformId" is NULL AND platforms."architectureId" = ' + architectureId
+      'SELECT id, name, description, url FROM platforms WHERE platforms."platformId" is NULL AND platforms."isDataSet" = FALSE AND platforms."architectureId" = ' + architectureId
     ))[0]
   }
 
   async getTopLevelNamesByProvider (providerId) {
     return (await sequelize.query(
-      'SELECT id, name, description FROM platforms WHERE platforms."platformId" is NULL AND platforms."providerId" = ' + providerId
+      'SELECT id, name, description, url FROM platforms WHERE platforms."platformId" is NULL AND platforms."isDataSet" = FALSE AND platforms."providerId" = ' + providerId
     ))[0]
   }
 
@@ -175,8 +177,8 @@ class PlatformService extends ModelService {
     return await this.SequelizeServiceInstance.findOne({ name: name })
   }
 
-  async getAllNames (userId) {
-    const result = await this.SequelizeServiceInstance.projectAll(['id', 'name'])
+  async getAllNames (userId, isDataSet) {
+    const result = await this.SequelizeServiceInstance.findAndProject({ isDataSet }, ['id', 'name', 'url'])
     if (userId) {
       for (let i = 0; i < result.length; i++) {
         result[i].dataValues.isSubscribed = !!(await platformSubscriptionService.getByFks(userId, result[i].dataValues.id))
@@ -199,6 +201,8 @@ class PlatformService extends ModelService {
     platform.platformId = reqBody.parentPlatform ? reqBody.parentPlatform : null
     platform.architectureId = reqBody.architecture
     platform.providerId = reqBody.provider
+    platform.isDataSet = reqBody.isDataSet !== null ? reqBody.isDataSet : false
+    platform.url = reqBody.url !== null ? reqBody.url : ''
 
     if (reqBody.parentPlatform) {
       const parentPlatform = await this.getByPk(platform.platformId)
@@ -317,13 +321,16 @@ class PlatformService extends ModelService {
     if (reqBody.architecture !== undefined) {
       platform.architectureId = reqBody.architecture ? parseInt(reqBody.architecture) : null
     }
+    if (reqBody.url !== undefined) {
+      platform.url = reqBody.url
+    }
 
     await platform.save()
 
     return await this.getSanitized(platform.id, userId)
   }
 
-  async addOrRemoveSubmission (isAdd, platformId, submissionId, userId) {
+  async addOrRemovePlatformSubmission (isAdd, platformId, submissionId, userId) {
     const platform = await this.getByPk(platformId)
     if (!platform) {
       return { success: false, error: 'Platform not found.' }
@@ -344,6 +351,36 @@ class PlatformService extends ModelService {
           return { success: false, error: 'Cannot delete submission platform reference with result. Change or delete results in the submission that use this platform, first.' }
         }
         await submissionPlatformRefService.deleteByPk(ref.id)
+      }
+    }
+
+    submission = await submissionSqlService.getEagerByPk(submissionId)
+    submission = await submissionSqlService.populate(submission, userId)
+
+    return { success: true, body: submission }
+  }
+
+  async addOrRemoveDataSetSubmission (isAdd, dataSetId, submissionId, userId) {
+    const dataSet = await this.getByPk(dataSetId)
+    if (!dataSet) {
+      return { success: false, error: 'Data set not found.' }
+    }
+
+    let submission = await submissionSqlService.getByPk(submissionId)
+    if (!submission) {
+      return { success: false, error: 'Submission not found.' }
+    }
+
+    if (isAdd) {
+      await submissionDataSetRefService.createOrFetch(submission.id, userId, dataSet.id)
+    } else {
+      const ref = await submissionDataSetRefService.getByFks(submission.id, dataSet.id)
+      if (ref) {
+        const results = (await resultService.getByDataSetIdSubmissionId(dataSet.id, submission.id)).body
+        if (results && results.length) {
+          return { success: false, error: 'Cannot delete submission data set reference with result. Change or delete results in the submission that use this platform, first.' }
+        }
+        await submissionDataSetRefService.deleteByPk(ref.id)
       }
     }
 

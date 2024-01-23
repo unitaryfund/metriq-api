@@ -106,8 +106,7 @@ exports.update_password = async function (req, res) {
     return
   }
 
-  routeWrapper(res,
+  loginWrapper(res,
     async () => await userService.tryPasswordChange(req.auth.id, req.body),
-    'Successfully changed password.',
-    req.auth.id)
+    'Successfully changed password.')
 }

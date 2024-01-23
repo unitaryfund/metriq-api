@@ -93,6 +93,13 @@ class SubmissionSqlService {
             '    WHERE s."deletedAt" IS NULL AND s."publishedAt" IS NOT NULL AND str."deletedAt" IS NULL AND str."methodId" = ' + methodId
   }
 
+  sqlByDataSet (dataSetId) {
+    return 'SELECT s.*, CAST(l."upvoteCount" AS integer) AS "upvoteCount" FROM submissions AS s ' +
+            '    RIGHT JOIN public."submissionPlatformRefs" AS str ON s.id = str."submissionId" ' +
+            '    LEFT JOIN (SELECT "submissionId", COUNT(*) as "upvoteCount" from likes GROUP BY "submissionId") as l on l."submissionId" = s.id ' +
+            '    WHERE s."deletedAt" IS NULL AND s."publishedAt" IS NOT NULL AND str."deletedAt" IS NULL AND str."dataSetId" = ' + dataSetId
+  }
+
   sqlByPlatform (platformId) {
     return 'SELECT s.*, CAST(l."upvoteCount" AS integer) AS "upvoteCount" FROM submissions AS s ' +
             '    RIGHT JOIN public."submissionPlatformRefs" AS str ON s.id = str."submissionId" ' +
@@ -177,12 +184,23 @@ class SubmissionSqlService {
     }
     delete toRet.submissionTaskRefs
 
+    toRet.dataSets = []
     toRet.platforms = []
     for (let i = 0; i < toRet.submissionPlatformRefs.length; i++) {
-      toRet.platforms.push(await toRet.submissionPlatformRefs[i].getPlatform())
-      for (let j = 0; j < toRet.results.length; j++) {
-        if (toRet.submissionPlatformRefs[i].id === toRet.results[j].submissionPlatformRefId) {
-          toRet.results[j].platform = toRet.platforms[i]
+      const p = await toRet.submissionPlatformRefs[i].getPlatform()
+      if (p.isDataSet) {
+        toRet.dataSets.push(p)
+        for (let j = 0; j < toRet.results.length; j++) {
+          if (toRet.submissionPlatformRefs[i].id === toRet.results[j].submissionDataSetRefId) {
+            toRet.results[j].dataSet = toRet.dataSets[i]
+          }
+        }
+      } else {
+        toRet.platforms.push(p)
+        for (let j = 0; j < toRet.results.length; j++) {
+          if (toRet.submissionPlatformRefs[i].id === toRet.results[j].submissionPlatformRefId) {
+            toRet.results[j].platform = toRet.platforms[i]
+          }
         }
       }
     }
