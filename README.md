@@ -53,3 +53,18 @@ After quiting `psql`, you can restore the backup:
 ```
 
 That's it! You likely also want to install an integrated development environment, like Visual Studio Code, to edit and run the software. Open the top-level `metriq-api` repository folder, and start there.
+
+To start the local testing environment, for example, after opening the top-level `metriq-api` folder in VS Code, open two terminals. Run these commands in the `metriq-api` sub-folder:
+```sh
+ $ npm i
+ $ sudo npm i -g nodemon
+ $ nodemon start index.js
+```
+`nodemon start` is the command that actually runs the RESTful API server.
+
+In the other terminal, run the following commands in the `metriq-app` sub-folder:
+```sh
+ $ npm i
+ $ npm start
+```
+`npm start` is the command that actually runs the front-end testing server. You might need to alter `config.js`, depending on your environment, to see the proper behavior from the front-end app.
