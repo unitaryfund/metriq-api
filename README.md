@@ -19,7 +19,7 @@ First, clone the repositories and initialize the submodules:
  $ git submodule update
 ```
  
-Install PostgreSQL and Node.js. (The Ubuntu system packages are fine, or you can install directly from the maintainer's site.)
+Install PostgreSQL and Node.js. (The Ubuntu system packages are fine, or you can install directly from the maintainers' sites.)
 
 ```sh
  $ sudo apt install postgresql postgresql-contrib nodejs npm
@@ -34,12 +34,18 @@ Restore the QA database in `metriq-postgres` as your Metriq development environm
  postgres$ psql
 ```
 
-In `psql`, enter the following SQL commands, to create the Metriq database and user:
+In `psql`, enter the following SQL commands, to create the Metriq database and user. (Pick a strong, private password, instead of 'ExamplePassword'):
 ```sql
 CREATE USER metriq WITH PASSWORD 'ExamplePassword';
 CREATE DATABASE metriq WITH OWNER metriq;
 quit
 ```
+
+You'll need to export this password as an environment variable, so that `metriq-api` can access the PostgreSQL database. See the configuration files in the code, but you can create a shell script `metriq_env_vars.sh` that runs `export` on configuration settings, then add it your shell startup with the line
+```sh
+. ~/metriq_env_vars.sh
+```
+in your (hidden) `.bashrc` profile file.
 
 After quiting `psql`, you can restore the backup:
 ```sh
