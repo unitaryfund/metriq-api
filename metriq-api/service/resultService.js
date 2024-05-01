@@ -31,7 +31,7 @@ class ResultService extends ModelService {
     '    SELECT t.id FROM tasks AS t ' +
     '    JOIN c on c.id = t."taskId" ' +
     ') ' +
-    'SELECT r.*, s.name AS "submissionName", s."contentUrl" AS "submissionUrl", s.id AS "submissionId", CASE WHEN t.id = ' + taskId + ' THEN m.name ELSE m.name || \' | \' || t.name END AS "methodName", COALESCE(d.name, \'\') as "dataSetName", COALESCE(p.name, \'\') as "platformName" FROM "submissionTaskRefs" AS str ' +
+    'SELECT r.*, s.name AS "submissionName", s."contentUrl" AS "submissionUrl", s.id AS "submissionId", CASE WHEN t.id = ' + taskId + ' THEN m.name ELSE m.name || \' | \' || t.name END AS "methodName", COALESCE(d.name, \'\') as "dataSetName", COALESCE(p.name, \'\') as "platformName", prov.name as "providerName" FROM "submissionTaskRefs" AS str ' +
     '    RIGHT JOIN c on c.id = str."taskId" ' +
     '    JOIN results AS r on r."submissionTaskRefId" = str.id AND r."deletedAt" IS NULL ' +
     '    LEFT JOIN submissions AS s on str."submissionId" = s.id AND s."deletedAt" IS NULL ' +
@@ -41,6 +41,7 @@ class ResultService extends ModelService {
     '    LEFT JOIN "submissionPlatformRefs" AS sdr on r."submissionDataSetRefId" = sdr.id AND sdr."deletedAt" IS NULL ' +
     '    LEFT JOIN platforms AS p on spr."platformId" = p.id ' +
     '    LEFT JOIN platforms AS d on sdr."platformId" = d.id ' +
+    '    LEFT JOIN providers AS prov on p."providerId" = prov.id ' +
     '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
     '    WHERE str."deletedAt" IS NULL;'
   }
@@ -52,7 +53,7 @@ class ResultService extends ModelService {
     '    SELECT t.id FROM tasks AS t ' +
     '    JOIN c on c.id = t."taskId" ' +
     ') ' +
-    'SELECT r.*, s.name AS "submissionName", s.id as "submissionId", CASE WHEN t.id = ' + taskId + ' THEN m.name ELSE m.name || \' | \' || t.name END AS "methodName", COALESCE(d.name, \'\') as "dataSetName", COALESCE(p.name, \'\') as "platformName" FROM "submissionTaskRefs" AS str ' +
+    'SELECT r.*, s.name AS "submissionName", s.id as "submissionId", CASE WHEN t.id = ' + taskId + ' THEN m.name ELSE m.name || \' | \' || t.name END AS "methodName", COALESCE(d.name, \'\') as "dataSetName", COALESCE(p.name, \'\') as "platformName", prov.name as "providerName" FROM "submissionTaskRefs" AS str ' +
     '    RIGHT JOIN c on c.id = str."taskId" ' +
     '    JOIN results AS r on r."submissionTaskRefId" = str.id AND r."deletedAt" IS NULL ' +
     '    LEFT JOIN submissions AS s on str."submissionId" = s.id AND s."deletedAt" IS NULL ' +
@@ -62,6 +63,7 @@ class ResultService extends ModelService {
     '    LEFT JOIN "submissionPlatformRefs" AS sdr on r."submissionDataSetRefId" = sdr.id AND sdr."deletedAt" IS NULL ' +
     '    LEFT JOIN platforms AS p on spr."platformId" = p.id ' +
     '    LEFT JOIN platforms AS d on sdr."platformId" = d.id ' +
+    '    LEFT JOIN providers AS prov on p."providerId" = prov.id ' +
     '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
     '    WHERE str."deletedAt" IS NULL AND s.id = ' + submissionId + ';'
   }
@@ -73,7 +75,7 @@ class ResultService extends ModelService {
     '    SELECT t.id FROM methods AS t ' +
     '    JOIN c on c.id = t."methodId" ' +
     ') ' +
-    'SELECT r.*, s.name AS "submissionName", s.id AS "submissionId", COALESCE(d.name, \'\') as "dataSetName", COALESCE(p.name, \'\') as "platformName"  FROM "submissionMethodRefs" AS smr ' +
+    'SELECT r.*, s.name AS "submissionName", s.id AS "submissionId", COALESCE(d.name, \'\') as "dataSetName", COALESCE(p.name, \'\') as "platformName", prov.name as "providerName" FROM "submissionMethodRefs" AS smr ' +
     '    RIGHT JOIN c on c.id = smr."methodId" ' +
     '    JOIN results AS r on r."submissionMethodRefId" = smr.id AND r."deletedAt" IS NULL ' +
     '    LEFT JOIN submissions AS s on smr."submissionId" = s.id AND s."deletedAt" IS NULL ' +
@@ -83,6 +85,7 @@ class ResultService extends ModelService {
     '    LEFT JOIN "submissionPlatformRefs" AS sdr on r."submissionDataSetRefId" = sdr.id AND sdr."deletedAt" IS NULL ' +
     '    LEFT JOIN platforms AS p on spr."platformId" = p.id ' +
     '    LEFT JOIN platforms AS d on sdr."platformId" = d.id ' +
+    '    LEFT JOIN providers AS prov on p."providerId" = prov.id ' +
     '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
     '    WHERE str."deletedAt" IS NULL AND s.id=' + submissionId + ';'
   }
@@ -94,7 +97,7 @@ class ResultService extends ModelService {
     '    SELECT t.id FROM platforms AS t ' +
     '    JOIN c on c.id = t."platformId" ' +
     ') ' +
-    'SELECT r.*, s.name AS "submissionName", s.id as "submissionId", COALESCE(d.name, \'\') as "dataSetName", COALESCE(p.name, \'\') as "platformName"  FROM "submissionPlatformRefs" AS spr ' +
+    'SELECT r.*, s.name AS "submissionName", s.id as "submissionId", COALESCE(d.name, \'\') as "dataSetName", COALESCE(p.name, \'\') as "platformName", prov.name as "providerName" FROM "submissionPlatformRefs" AS spr ' +
     '    RIGHT JOIN c on c.id = spr."platformId" ' +
     '    JOIN results AS r on r."submissionPlatformRefId" = spr.id AND r."deletedAt" IS NULL ' +
     '    LEFT JOIN submissions AS s on spr."submissionId" = s.id AND s."deletedAt" IS NULL ' +
@@ -104,6 +107,7 @@ class ResultService extends ModelService {
     '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
     '    LEFT JOIN platforms AS p on spr."platformId" = p.id ' +
     '    LEFT JOIN platforms AS d on sdr."platformId" = d.id ' +
+    '    LEFT JOIN providers AS prov on p."providerId" = prov.id ' +
     '    WHERE str."deletedAt" IS NULL AND s.id = ' + submissionId + ';'
   }
 
@@ -114,7 +118,7 @@ class ResultService extends ModelService {
     '    SELECT t.id FROM platforms AS t ' +
     '    JOIN c on c.id = t."dataSetId" ' +
     ') ' +
-    'SELECT r.*, s.name AS "submissionName", s.id as "submissionId", COALESCE(d.name, \'\') as "dataSetName", COALESCE(p.name, \'\') as "platformName"  FROM "submissionPlatformRefs" AS spr ' +
+    'SELECT r.*, s.name AS "submissionName", s.id as "submissionId", COALESCE(d.name, \'\') as "dataSetName", COALESCE(p.name, \'\') as "platformName", prov.name as "providerName" FROM "submissionPlatformRefs" AS spr ' +
     '    RIGHT JOIN c on c.id = spr."dataSetId" ' +
     '    JOIN results AS r on r."submissionDataSetRefId" = spr.id AND r."deletedAt" IS NULL ' +
     '    LEFT JOIN submissions AS s on spr."submissionId" = s.id AND s."deletedAt" IS NULL ' +
@@ -124,6 +128,7 @@ class ResultService extends ModelService {
     '    LEFT JOIN tasks AS t on str."taskId" = t.id ' +
     '    LEFT JOIN platforms AS p on spr."platformId" = p.id ' +
     '    LEFT JOIN platforms AS d on sdr."platformId" = d.id ' +
+    '    LEFT JOIN providers AS prov on p."providerId" = prov.id ' +
     '    WHERE str."deletedAt" IS NULL AND s.id = ' + submissionId + ';'
   }
 
