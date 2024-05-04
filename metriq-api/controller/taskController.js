@@ -49,9 +49,3 @@ exports.readNames = async function (req, res) {
     async () => await taskService.getAllNames(req.auth ? req.auth.id : 0),
     'Retrieved all task names.', req.auth ? req.auth.id : 0)
 }
-
-exports.readNetworkGraph = async function (req, res) {
-  routeWrapper(res,
-    async () => await taskService.getNetworkGraph(),
-    'Retrieved task network graph.', req.auth ? req.auth.id : 0)
-}
